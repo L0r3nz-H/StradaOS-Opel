@@ -479,3 +479,7 @@ Se muestran todas las apps	All apps are shown
 Apps ocultas: {}	Hidden apps: {}
 # 2.14: desinstalar desde el cajón
 Desinstalar	Uninstall
+
+Diseño	Design
+Diseño de inicio	Home design
+El diseño Opel usa colores fijos. El estándar conserva tus ajustes.	The Opel design uses fixed colors. Standard keeps your settings.

@@ -464,6 +464,7 @@ public class Main extends Activity {
                 else if ("musica".equals(v)) pickFor("music_app", "Música", null);
                 else if ("asistente".equals(v)) wizard();
                 else if (v.startsWith("idioma:")) setLanguage(v.substring(7));
+                else if (v.startsWith("design:")) setDesign(OpelDesign.ID.equals(v.substring(7)));
                 else if ("fijar-inicio".equals(v)) makeDefaultHome();
                 else if (v.startsWith("sim:")) { prefs.edit().putInt("sim_screen", Integer.parseInt(v.substring(4))).apply(); rebuild(); }
                 else if ("diag-mapa".equals(v)) showMapDiag();
@@ -699,10 +700,15 @@ public class Main extends Activity {
         root.addView(dockBg, 0, dlp);
 
         buildTop();
-        buildCarCard();
+        if (!modernDesign()) buildCarCard();
+        else {
+            speedTv = null; gpsTv = null; gpsDot = null; carTv = null; chipTv = null;
+            oilValTv = null; oilBarBg = null; oilBar = null;
+        }
         buildAaCard();
         buildAudioCard();
         buildDock();
+        if (modernDesign()) buildModernTrim();
 
         drawer = null;
         settingsView = null;
@@ -941,6 +947,7 @@ public class Main extends Activity {
         }
         final float used = Math.max(0, Math.min(1, 1 - left / interval));
         oilBarBg.post(new Runnable() { public void run() {
+            if (oilBar == null || oilBarBg == null) return;
             ViewGroup.LayoutParams lp = oilBar.getLayoutParams();
             lp.width = Math.max((int) (2 * s), (int) (oilBarBg.getWidth() * used));
             oilBar.setLayoutParams(lp);
@@ -1139,8 +1146,9 @@ public class Main extends Activity {
     }
 
     private void buildAaCard() {
+        float mapExtra = modernDesign() ? OpelDesign.MAP_EXTRA + ex : ex;
         FrameLayout card = new FrameLayout(this);
-        place(board, card, 328, 64, 420 + ex, 380);
+        place(board, card, modernDesign() ? 16 : 328, 64, 420 + mapExtra, 380);
         // fondo decorativo mientras no hay GPS; encima, el mapa en vivo
         card.addView(new MapView(this, s, 20 * s), new FrameLayout.LayoutParams(-1, -1));
         if (!prefs.getBoolean("map_live", true)) { liveMap = null; seedLastLocation(); buildAaCardRest(card); return; }
@@ -1162,6 +1170,7 @@ public class Main extends Activity {
     }
 
     private void buildAaCardRest(FrameLayout card) {
+        float mapExtra = modernDesign() ? OpelDesign.MAP_EXTRA + ex : ex;
         LinearLayout tag = new LinearLayout(this);
         tag.setGravity(Gravity.CENTER_VERTICAL);
         tag.setBackground(round((CARD & 0x00FFFFFF) | 0xE0000000, 12));
@@ -1177,10 +1186,10 @@ public class Main extends Activity {
 
         FrameLayout panel = new FrameLayout(this);
         panel.setBackground(round((CARD & 0x00FFFFFF) | 0xEB000000, 16));
-        place(card, panel, 12, 284, 396 + ex, 84);
+        place(card, panel, 12, 284, 396 + mapExtra, 84);
 
         View navBtn = circleIcon("map", 52, 26, (CARD & 0x00FFFFFF) | 0xEB000000);
-        place(card, navBtn, 356 + ex, 220, 52, 52);
+        place(card, navBtn, 356 + mapExtra, 220, 52, 52);
         navBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { openNavApp(); }
         });
@@ -1190,10 +1199,10 @@ public class Main extends Activity {
 
         View aa = projButton("navigation", "Android Auto", RED, true);
         aaBtnTv = (TextView) aa.getTag();
-        place(panel, aa, 10, 10, 184 + ex / 2, 64);
+        place(panel, aa, 10, 10, 184 + mapExtra / 2, 64);
         View cp = projButton("phone_iphone", "CarPlay", BTN, false);
         cpSubTv = (TextView) cp.getTag();
-        place(panel, cp, 202 + ex / 2, 10, 184 + ex / 2, 64);
+        place(panel, cp, 202 + mapExtra / 2, 10, 184 + mapExtra / 2, 64);
         aaSubTv = aaBtnTv;
 
         aa.setOnClickListener(new View.OnClickListener() {
@@ -1338,7 +1347,15 @@ public class Main extends Activity {
     }
 
     private void buildAudioCard() {
-        FrameLayout card = card(760 + ex, 64, 248, 380, CARD);
+        FrameLayout card;
+        if (modernDesign()) {
+            FrameLayout outer = card(652 + ex, 64, 356, 380, CARD);
+            card = new FrameLayout(this);
+            place(outer, card, 54, 0, 248, 380);
+            outer.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) { openMusicApp(); }
+            });
+        } else card = card(760 + ex, 64, 248, 380, CARD);
         placeWrap(card, tv("AUDIO", 11, MUTED, true), 18, 14);
         sourceTv = tv("", 11, RED, true);
         sourceTv.setGravity(Gravity.RIGHT);
@@ -1470,6 +1487,7 @@ public class Main extends Activity {
             LinearLayout b = new LinearLayout(this);
             b.setOrientation(LinearLayout.VERTICAL);
             b.setGravity(Gravity.CENTER_HORIZONTAL);
+            if (modernDesign()) b.setBackground(OpelDesign.panel(CARD, s));
             Drawable appIc = t.startsWith("app:") ? appIcon(t.substring(4)) : null;
             if (appIc != null) {
                 FrameLayout f = new FrameLayout(this);
@@ -1492,7 +1510,8 @@ public class Main extends Activity {
             l.setGravity(Gravity.CENTER_HORIZONTAL);
             l.setPadding(0, (int) (8 * s), 0, 0);
             b.addView(l, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            place(board, b, 38 + (138 + ex / 6) * i, 474, 120, 110);
+            if (modernDesign()) place(board, b, 16 + (142 + ex / 7) * i, 474, 136 + ex / 7, 110);
+            else place(board, b, 38 + (138 + ex / 6) * i, 474, 120, 110);
             b.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) { runDock(idx); }
             });
@@ -1744,7 +1763,7 @@ public class Main extends Activity {
 
     private FrameLayout card(float x, float y, float w, float hh, int color) {
         FrameLayout c = new FrameLayout(this);
-        c.setBackground(round(color, 20));
+        c.setBackground(modernDesign() ? OpelDesign.panel(color, s) : round(color, 20));
         place(board, c, x, y, w, hh);
         return c;
     }
@@ -1841,8 +1860,8 @@ public class Main extends Activity {
     }
 
     private void setGps(boolean ok, float kmh) {
-        if (speedTv == null) return;
         if (!ok) lastFix = 0;
+        if (speedTv == null) { updateMapTag(); return; }
         float v = useMph() ? kmh * 0.621371f : kmh;
         speedTv.setText(ok ? String.valueOf(Math.round(kmh < 2 ? 0 : v)) : "--");
         int gs = ok ? 0 : gpsState();
@@ -2310,7 +2329,7 @@ public class Main extends Activity {
     }
 
     private void applyAccent() {
-        RED = prefs.getInt("accent", 0xFFFE3211);
+        RED = modernDesign() ? OpelDesign.RED : prefs.getInt("accent", 0xFFFE3211);
         int r = (RED >> 16) & 255, g = (RED >> 8) & 255, b = RED & 255;
         int br = (BG >> 16) & 255, bgc = (BG >> 8) & 255, bb = BG & 255, pct = LIGHT ? 16 : 18;
         RED_DARK = 0xFF000000 | ((r * pct / 100 + br * (100 - pct) / 100) << 16) | ((g * pct / 100 + bgc * (100 - pct) / 100) << 8) | (b * pct / 100 + bb * (100 - pct) / 100);
@@ -2717,7 +2736,32 @@ public class Main extends Activity {
 
     static int dlg() { return LIGHT ? AlertDialog.THEME_DEVICE_DEFAULT_LIGHT : AlertDialog.THEME_DEVICE_DEFAULT_DARK; }
 
+    private boolean modernDesign() {
+        return OpelDesign.ID.equals(prefs.getString("design", "stradaos"));
+    }
+
+    private void setDesign(boolean modern) {
+        prefs.edit().putString("design", modern ? OpelDesign.ID : "stradaos").apply();
+        applyTheme();
+        applyAccent();
+        rebuild();
+    }
+
+    /** Solo presentación: los controles siguen usando las acciones y preferencias existentes. */
+    private void buildModernTrim() {
+        View accent = new View(this);
+        accent.setBackgroundColor(RED);
+        place(board, accent, 16, 58, 992 + ex, 2);
+        View silver = new View(this);
+        silver.setBackgroundColor(SOFT);
+        place(board, silver, 16, 456, 992 + ex, 1);
+    }
+
     private void applyTheme() {
+        if (modernDesign()) {
+            OpelDesign.applyPalette();
+            return;
+        }
         String mode = prefs.getString("theme", "dark");
         int hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         LIGHT = "light".equals(mode) || ("auto".equals(mode) && hr >= 6 && hr < 18);
@@ -2996,6 +3040,12 @@ public class Main extends Activity {
                 }})
                 .show();
         }});
+        LinearLayout design = section(body, "Diseño");
+        segmented(design, "Diseño de inicio", "El diseño Opel usa colores fijos. El estándar conserva tus ajustes.",
+            new String[]{"StradaOS", "Opel Navi 900 Modern"}, modernDesign() ? 1 : 0,
+            new IntCb() { public void on(int i) {
+                setDesign(i == 1);
+            }});
         LinearLayout c = section(body, "Tema");
         String t = prefs.getString("theme", "dark");
         segmented(c, "Modo", "Automático: claro de 6 a.m. a 6 p.m.", new String[]{"Oscuro", "Claro", "Automático"},
