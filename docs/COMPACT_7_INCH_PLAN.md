@@ -1,10 +1,38 @@
 # Optionaler 7-Zoll-Kompaktmodus – Analyse und Implementierungsplan
 
-Stand: 10.11.2026. Dies ist ein Implementierungsplan; die App wurde dafür noch
-nicht verändert. Zielgerät: Android-Autoradio mit 1024 × 600 Pixeln, insbesondere
+Stand: 10.11.2026. Der erste Kompaktmodus ist inzwischen implementiert; der
+ursprüngliche Plan und noch offene Punkte sind unten beschrieben.
+Zielgerät: Android-Autoradio mit 1024 × 600 Pixeln, insbesondere
 Android 4.2 / API 17. Referenz: der bereitgestellte Entwurf mit roter Kopfleiste,
 zwei großen Inhaltsflächen und vier unteren Tasten. Die gewünschte Belegung hat
 Vorrang vor den Beschriftungen im Bild: **Radio · CarPlay · Telefon · Alle Apps**.
+
+## Umgesetzter Stand und Validierung
+
+- Einstellungen → Darstellung → Layout: Standard oder 7-Zoll-Kompaktmodus.
+  Fahrzeug/Karte und vier große Schnellzugriffe sind separat wählbar.
+- Zwei große Flächen, große Texte/Medienbuttons und Viererleiste umgesetzt;
+  Opel kombiniert sie mit roter Kopfleiste und der mitgelieferten Aufnahme.
+  Eigene Fahrzeugfotos haben Vorrang. Navigation bleibt über die Taste in
+  der linken Fläche erreichbar. Die App-Liste verwendet vier große Spalten.
+- Das bisherige Layout bleibt der Standard für fehlende/unbekannte Werte.
+  Layoutpräferenzen überschreiben keine bisherigen Dock-Zuordnungen.
+- Derzeit wird ausschließlich verfügbare Wettertemperatur angezeigt und als
+  „Wetter“ gekennzeichnet, mit maximal einer Stunde Datenalter; andernfalls „—“.
+  Der unten geplante Fahrzeug-Leseadapter ist **noch nicht implementiert**;
+  eine tatsächliche Schnittstelle des Zielradios muss erst ermittelt werden.
+- `assembleDebug` und `lintDebug` erfolgreich ausgeführt. Der Lint-Bericht
+  enthält weiterhin 60 Errors, 1 Fatal und 60 Warnings. Keine Errors/Fatals auf
+  neuen/geänderten Java-Zeilen; dort zwei Warnungen zu `Gravity.RIGHT` (RTL).
+  Ein erfolgreicher Lint-Task ist wegen `abortOnError false` kein sauberer Befund.
+- Laufzeitansichten auf Android 11 / API 30, 1024 × 600, 160 dpi kontrolliert:
+  Kompakt/Fahrzeug, Kompakt/Karte, Rückwechsel zum bisherigen Opel-Layout,
+  Zahnrad/Einstellungen und App-Liste mit vier Spalten. API 17 sowie echte
+  Radio-, CarPlay-, Bluetooth- und Fahrzeugtemperaturdaten sind noch zu prüfen.
+- Echte Aufnahmen: [Kompaktansicht](screenshots/compact/01-opel-compact-1024x600.png)
+  und [App-Liste](screenshots/compact/02-apps-1024x600.png).
+- Debug-Hooks: `--es prueba layout:compact_7`, `layout:standard`,
+  `compact-panel:vehicle` und `compact-panel:map`.
 
 ## Mitgelieferte Bildvorlagen
 
@@ -255,5 +283,5 @@ Adapter und dessen Android-kompatibler App abhängig.
 - Keine neuen Firmware-, MCU-, CAN-Bus-, Root- oder Auflösungsänderungen;
   keine Erhöhung von `minSdk`, keine neuen Berechtigungen oder UI-Abhängigkeiten.
 
-Für diese Planungsphase wurden Quellen und vorhandene Dokumentation gelesen;
-es wurden keine neuen Builds oder Gerätetests durchgeführt.
+Die ursprüngliche Planungsphase erfolgte ohne neue Builds oder Gerätetests.
+Die spätere Validierung des ersten implementierten Stands ist oben dokumentiert.

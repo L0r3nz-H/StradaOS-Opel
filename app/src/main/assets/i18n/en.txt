@@ -483,3 +483,18 @@ Desinstalar	Uninstall
 Diseño	Design
 Diseño de inicio	Home design
 El diseño Opel usa colores fijos. El estándar conserva tus ajustes.	The Opel design uses fixed colors. Standard keeps your settings.
+
+# Optional compact layout
+Distribución	Layout
+Estándar	Standard
+Compacto de 7 pulgadas	7-inch compact
+Panel principal	Main panel
+Vehículo	Vehicle
+Teléfono	Phone
+Todas las apps	All apps
+Cuatro accesos grandes	Four large shortcuts
+Radio · CarPlay · Teléfono · Todas las apps	Radio · CarPlay · Phone · All apps
+Temperatura exterior del vehículo	Vehicle outside temperature
+Sin interfaz del vehículo detectada; se usa el clima si está disponible.	Vehicle connection not yet available. Weather data is used when available.
+Anterior	Previous
+Reproducir / pausa	Play / pause

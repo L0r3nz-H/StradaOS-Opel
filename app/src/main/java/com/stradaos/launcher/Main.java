@@ -112,6 +112,8 @@ public class Main extends Activity {
     private double wLat = Double.NaN, wLon = Double.NaN;
     private long weatherAt;
     private Weather.Now weatherNow;
+    private long weatherReceivedAt;
+    private TextView compactTemperatureTv;
     private FrameLayout settingsView;
     private int settingsCat = -1;
     private TextView timeTv, dateTv, greetTv, speedTv, gpsTv, aaBtnTv, aaSubTv, trackTv, artistTv, carTv, chipTv;
@@ -465,6 +467,12 @@ public class Main extends Activity {
                 else if ("asistente".equals(v)) wizard();
                 else if (v.startsWith("idioma:")) setLanguage(v.substring(7));
                 else if (v.startsWith("design:")) setDesign(OpelDesign.ID.equals(v.substring(7)));
+                else if (v.startsWith("layout:")) {
+                    prefs.edit().putString("home_layout", v.substring(7)).apply(); rebuild();
+                }
+                else if (v.startsWith("compact-panel:")) {
+                    prefs.edit().putString("compact_main_panel", v.substring(14)).apply(); rebuild();
+                }
                 else if ("fijar-inicio".equals(v)) makeDefaultHome();
                 else if (v.startsWith("sim:")) { prefs.edit().putInt("sim_screen", Integer.parseInt(v.substring(4))).apply(); rebuild(); }
                 else if ("diag-mapa".equals(v)) showMapDiag();
@@ -664,6 +672,8 @@ public class Main extends Activity {
     // ───────────────────────── construcción de la UI ─────────────────────────
 
     private void build(int W, int H) {
+        applyTheme();
+        applyAccent();
         root.removeAllViews();
         // versión de prueba: simular otra pantalla (p. ej. una ancha de 1920x720 en una tablet)
         int sim = getPackageName().endsWith(".debug") ? prefs.getInt("sim_screen", 0) : 0;
@@ -691,24 +701,36 @@ public class Main extends Activity {
         blp.gravity = Gravity.CENTER;
         root.addView(board, blp);
 
-        // franja del dock a todo el ancho (aunque la pantalla no sea 1024x600)
-        View dockBg = new View(this);
-        dockBg.setBackgroundColor(DOCK);
-        FrameLayout.LayoutParams dlp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                (int) (H - ((H - 600 * s) / 2 + 456 * s)) + 1);
-        dlp.gravity = Gravity.BOTTOM;
-        root.addView(dockBg, 0, dlp);
+        compactTemperatureTv = null;
+        if (compactLayout()) {
+            // No conservar widgets de una vista anterior en los callbacks de audio/GPS.
+            timeTv = dateTv = greetTv = speedTv = gpsTv = carTv = chipTv = null;
+            trackTv = artistTv = sourceTv = timePosTv = mapTagTv = null;
+            aaBtnTv = aaSubTv = cpSubTv = null;
+            weatherBox = null; weatherTv = weatherCityTv = null; weatherIc = null;
+            gpsDot = null; oilValTv = null; oilBarBg = oilBar = null;
+            liveMap = null; playerArt = null; playIc = null;
+            buildCompactHome();
+        } else {
+            // franja del dock a todo el ancho (aunque la pantalla no sea 1024x600)
+            View dockBg = new View(this);
+            dockBg.setBackgroundColor(DOCK);
+            FrameLayout.LayoutParams dlp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    (int) (H - ((H - 600 * s) / 2 + 456 * s)) + 1);
+            dlp.gravity = Gravity.BOTTOM;
+            root.addView(dockBg, 0, dlp);
 
-        buildTop();
-        if (!modernDesign()) buildCarCard();
-        else {
-            speedTv = null; gpsTv = null; gpsDot = null; carTv = null; chipTv = null;
-            oilValTv = null; oilBarBg = null; oilBar = null;
+            buildTop();
+            if (!modernDesign()) buildCarCard();
+            else {
+                speedTv = null; gpsTv = null; gpsDot = null; carTv = null; chipTv = null;
+                oilValTv = null; oilBarBg = null; oilBar = null;
+            }
+            buildAaCard();
+            buildAudioCard();
+            buildDock();
+            if (modernDesign()) buildModernTrim();
         }
-        buildAaCard();
-        buildAudioCard();
-        buildDock();
-        if (modernDesign()) buildModernTrim();
 
         drawer = null;
         settingsView = null;
@@ -758,6 +780,125 @@ public class Main extends Activity {
         greetTv.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { openSettings(); }
         });
+    }
+
+    private boolean compactLayout() {
+        return CompactLayout.ID.equals(prefs.getString("home_layout", "standard"));
+    }
+
+    /** Dos paneles grandes; no cambia las preferencias del diseño estándar. */
+    private void buildCompactHome() {
+        FrameLayout header = new FrameLayout(this);
+        header.setBackground(round(modernDesign() ? 0xFFA81922 : RED, 12));
+        place(board, header, 16, 16, 992 + ex, 64);
+        TextView brand = tv(modernDesign() ? "OPEL · STRADAOS" : "STRADAOS", 24, Color.WHITE, false);
+        brand.setGravity(Gravity.CENTER_VERTICAL);
+        place(header, brand, 16, 0, 400 + ex, 64);
+        timeTv = tv("", 24, Color.WHITE, false);
+        timeTv.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        place(header, timeTv, 444 + ex, 0, 142, 64);
+        compactTemperatureTv = tv("", 22, Color.WHITE, false);
+        compactTemperatureTv.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        place(header, compactTemperatureTv, 598 + ex, 0, 306, 64);
+        View gear = circleIcon("settings", 64, 28, 0x00000000);
+        gear.setContentDescription(I18n.t("Ajustes"));
+        place(header, gear, 920 + ex, 0, 64, 64);
+        gear.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { openSettings(); }
+        });
+
+        float width = 488 + ex / 2;
+        FrameLayout left = card(16, 96, width, CompactLayout.CARD_HEIGHT, CARD);
+        if ("map".equals(prefs.getString("compact_main_panel", "vehicle"))) {
+            left.addView(new MapView(this, s, 20 * s), new FrameLayout.LayoutParams(-1, -1));
+            if (prefs.getBoolean("map_live", true)) {
+                liveMap = new LiveMapView(this, s, 20 * s);
+                left.addView(liveMap, new FrameLayout.LayoutParams(-1, -1));
+                final LiveMapView map = liveMap;
+                map.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) { map.cycleZoom(); }
+                });
+            }
+            seedLastLocation();
+        } else {
+            Bitmap photo = CarPhoto.load(this);
+            if (photo == null && modernDesign()) photo = asset("opel_astra_j.jpg");
+            ImageView car = new ImageView(this);
+            car.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            if (photo != null) car.setImageBitmap(photo);
+            else car.setImageBitmap(asset("ic/directions_car.png"));
+            place(left, car, 24, 12, width - 48, 208);
+            car.setOnLongClickListener(new View.OnLongClickListener() {
+                public boolean onLongClick(View v) { photoMenu(); return true; }
+            });
+            carTv = tv(prefs.getString("car_name", modernDesign() ? "Astra J" : "Mi vehículo"), 30, TEXT, true);
+            carTv.setGravity(Gravity.CENTER);
+            place(left, carTv, 24, 224, width - 48, 42);
+            TextView vehicle = tv("Vehículo", 24, SOFT, false);
+            vehicle.setGravity(Gravity.CENTER);
+            place(left, vehicle, 88, 276, width - 176, 40);
+        }
+        View nav = circleIcon("navigation", 64, 28, BTN);
+        nav.setContentDescription(I18n.t("Navegación"));
+        place(left, nav, width - 80, 260, 64, 64);
+        nav.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { openNavApp(); }
+        });
+        nav.setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View v) { pickFor("nav_app", "Navegación"); return true; }
+        });
+
+        FrameLayout audio = card(520 + ex / 2, 96, width, CompactLayout.CARD_HEIGHT, CARD);
+        sourceTv = tv("AUDIO", 24, SOFT, false);
+        place(audio, sourceTv, 24, 24, width - 48, 36);
+        trackTv = tv("", 36, TEXT, true);
+        place(audio, trackTv, 24, 86, width - 48, 52);
+        artistTv = tv("", 24, SOFT, false);
+        place(audio, artistTv, 24, 148, width - 48, 38);
+        View prev = circleIcon("skip_previous", 72, 32, BTN);
+        View play = circleIcon("play_arrow", 80, 36, RED);
+        View next = circleIcon("skip_next", 72, 32, BTN);
+        playIc = (ImageView) ((FrameLayout) play).getChildAt(0);
+        place(audio, prev, 24, 244, 72, 72);
+        place(audio, play, (width - 80) / 2, 240, 80, 80);
+        place(audio, next, width - 96, 244, 72, 72);
+        prev.setContentDescription(I18n.t("Anterior"));
+        play.setContentDescription(I18n.t("Reproducir / pausa"));
+        next.setContentDescription(I18n.t("Siguiente"));
+        prev.setOnClickListener(mediaClick(KeyEvent.KEYCODE_MEDIA_PREVIOUS));
+        play.setOnClickListener(mediaClick(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
+        next.setOnClickListener(mediaClick(KeyEvent.KEYCODE_MEDIA_NEXT));
+        audio.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { openMusicApp(); }
+        });
+        audio.setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View v) { showPlayerDiag(); return true; }
+        });
+        renderTrack();
+        if (!prefs.getBoolean("compact_four_shortcuts", true)) { buildDock(); return; }
+        for (int i = 0; i < CompactLayout.ACTIONS.length; i++) {
+            final int index = i;
+            LinearLayout button = new LinearLayout(this);
+            button.setOrientation(LinearLayout.VERTICAL);
+            button.setGravity(Gravity.CENTER);
+            button.setBackground(round(BTN, 16));
+            ImageView ic = icon(CompactLayout.ICONS[i], 32);
+            ic.setColorFilter(RED);
+            button.addView(ic, new LinearLayout.LayoutParams((int) (32 * s), (int) (32 * s)));
+            TextView label = tv(CompactLayout.LABELS[i], 24, TEXT, false);
+            label.setGravity(Gravity.CENTER);
+            label.setPadding(0, (int) (10 * s), 0, 0);
+            button.addView(label);
+            place(board, button, 16 + i * (252 + ex / 4), 452, 236 + ex / 4, 132);
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) { runFn(CompactLayout.ACTIONS[index]); }
+            });
+            if (i < 3) button.setOnLongClickListener(new View.OnLongClickListener() {
+                public boolean onLongClick(View v) {
+                    pickFor(CompactLayout.ACTIONS[index], CompactLayout.LABELS[index]); return true;
+                }
+            });
+        }
     }
 
     private void buildCarCard() {
@@ -1763,7 +1904,7 @@ public class Main extends Activity {
 
     private FrameLayout card(float x, float y, float w, float hh, int color) {
         FrameLayout c = new FrameLayout(this);
-        c.setBackground(modernDesign() ? OpelDesign.panel(color, s) : round(color, 20));
+        c.setBackground(modernDesign() && !compactLayout() ? OpelDesign.panel(color, s) : round(color, 20));
         place(board, c, x, y, w, hh);
         return c;
     }
@@ -1816,6 +1957,7 @@ public class Main extends Activity {
         String fmt = prefs.getString("clock", "auto");
         boolean h24 = "24".equals(fmt) || ("auto".equals(fmt) && android.text.format.DateFormat.is24HourFormat(this));
         timeTv.setText(new SimpleDateFormat(h24 ? "HH:mm" : "h:mm a", I18n.loc).format(now));
+        if (compactLayout()) { showCompactTemperature(); return; }
         String d = new SimpleDateFormat(I18n.datePattern(), I18n.loc).format(now);
         dateTv.setText(d.substring(0, 1).toUpperCase(I18n.loc) + d.substring(1));
         int hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
@@ -2191,17 +2333,19 @@ public class Main extends Activity {
         if (curTitle == null && curArtist == null) {
             trackTv.setText(I18n.t("Nada sonando"));
             artistTv.setText(I18n.t("Radio, Bluetooth o USB"));
-            sourceTv.setText("");
-            timePosTv.setText("");
-            playerArt.setArt(null);
-            playerArt.setProgress(-1);
+            sourceTv.setText(compactLayout() ? "AUDIO" : "");
+            if (timePosTv != null) timePosTv.setText("");
+            if (playerArt != null) {
+                playerArt.setArt(null);
+                playerArt.setProgress(-1);
+            }
         } else {
             boolean aaOff = curSource != null && curSource.toLowerCase(ES).contains("headunit")
                     && ("Conectado".equalsIgnoreCase(curArtist) || "Connected".equalsIgnoreCase(curArtist));
             trackTv.setText(curTitle != null ? curTitle : (curSource != null ? I18n.t(curSource) : ""));
             artistTv.setText(aaOff ? I18n.t("Activa «Pista actual de AA» en Open Headunit") : (curArtist != null ? curArtist : ""));
             sourceTv.setText(curSource != null ? I18n.t(curSource).toUpperCase(I18n.loc) : "");
-            playerArt.setArt(curArt);
+            if (playerArt != null) playerArt.setArt(curArt);
             updateProgress();
         }
         if (playIc != null) {
@@ -2760,6 +2904,10 @@ public class Main extends Activity {
     private void applyTheme() {
         if (modernDesign()) {
             OpelDesign.applyPalette();
+            if (compactLayout()) {
+                BG = 0xFF17191D; CARD = 0xFF282B30; BTN = 0xFF32363B;
+                SOFT = 0xFFC5C8CE; MUTED = 0xFFB4B8C0;
+            }
             return;
         }
         String mode = prefs.getString("theme", "dark");
@@ -2783,7 +2931,8 @@ public class Main extends Activity {
         Weather.fetch(this, wLat, wLon, new Weather.Listener() {
             public void onWeather(final Weather.Now n, String err) {
                 h.post(new Runnable() { public void run() {
-                    if (n != null) weatherNow = n; else weatherAt = SystemClock.elapsedRealtime() - 25 * 60 * 1000L; // reintenta en 5 min
+                    if (n != null) { weatherNow = n; weatherReceivedAt = SystemClock.elapsedRealtime(); }
+                    else weatherAt = SystemClock.elapsedRealtime() - 25 * 60 * 1000L; // reintenta en 5 min
                     showWeather();
                 }});
             }
@@ -2793,12 +2942,23 @@ public class Main extends Activity {
     private void refreshWeatherNow() { weatherAt = 0; weatherNow = null; maybeWeather(); }
 
     private void showWeather() {
+        showCompactTemperature();
         if (weatherBox == null) return;
         if (!prefs.getBoolean("weather_on", true) || weatherNow == null) { weatherBox.setVisibility(View.GONE); return; }
         weatherBox.setVisibility(View.VISIBLE);
         weatherIc.setImageBitmap(asset("ic/" + Weather.icon(weatherNow.code, weatherNow.day) + ".png"));
         weatherTv.setText(Math.round(weatherNow.temp) + "°" + weatherNow.unit);
         weatherCityTv.setText(weatherNow.city != null ? weatherNow.city : I18n.t(Weather.describe(weatherNow.code)));
+    }
+
+    private void showCompactTemperature() {
+        if (compactTemperatureTv == null) return;
+        // No hay una interfaz de temperatura del vehículo verificada en este equipo.
+        // No presentar la temperatura de internet como medición del automóvil.
+        boolean fresh = weatherNow != null && weatherReceivedAt > 0
+                && SystemClock.elapsedRealtime() - weatherReceivedAt < 60 * 60 * 1000L;
+        compactTemperatureTv.setText(prefs.getBoolean("weather_on", true) && fresh
+                ? I18n.t("Clima") + " " + Math.round(weatherNow.temp) + " °" + weatherNow.unit : "—");
     }
 
     // ───────────────────────── panel de ajustes ─────────────────────────
@@ -2922,13 +3082,14 @@ public class Main extends Activity {
         LinearLayout r = new LinearLayout(this);
         r.setGravity(Gravity.CENTER_VERTICAL);
         r.setPadding(0, (int) (12 * s), 0, (int) (12 * s));
+        if (compactLayout()) r.setMinimumHeight((int) (64 * s));
         LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
-        TextView t = tv(title, 15, TEXT, true);
+        TextView t = tv(title, compactLayout() ? 20 : 15, TEXT, true);
         t.setSingleLine(false);
         col.addView(t);
         if (sub != null && sub.length() > 0) {
-            TextView st = tv(sub, 12, MUTED, false);
+            TextView st = tv(sub, compactLayout() ? 16 : 12, MUTED, false);
             st.setSingleLine(false);
             st.setPadding(0, (int) (3 * s), 0, 0);
             col.addView(st);
@@ -2941,7 +3102,7 @@ public class Main extends Activity {
     private void row(LinearLayout card, String title, String sub, String value, final Runnable onClick) {
         LinearLayout r = rowBase(card, title, sub);
         if (value != null) {
-            TextView v = tv(value, 14, MUTED, false);
+            TextView v = tv(value, compactLayout() ? 18 : 14, MUTED, false);
             v.setGravity(Gravity.RIGHT);
             v.setPadding((int) (12 * s), 0, (int) (4 * s), 0);
             r.addView(v, new LinearLayout.LayoutParams((int) (220 * s), -2));
@@ -2962,7 +3123,8 @@ public class Main extends Activity {
         g.setPadding(p, p, p, p);
         for (int i = 0; i < opts.length; i++) {
             final int idx = i;
-            TextView o = tv(opts[i], 13, i == sel ? Color.WHITE : SOFT, i == sel);
+            TextView o = tv(opts[i], compactLayout() ? 16 : 13, i == sel ? Color.WHITE : SOFT, i == sel);
+            if (compactLayout()) o.setMinimumHeight((int) (48 * s));
             o.setGravity(Gravity.CENTER);
             o.setPadding((int) (14 * s), (int) (7 * s), (int) (14 * s), (int) (7 * s));
             if (i == sel) o.setBackground(round(RED, 15));
@@ -3046,6 +3208,22 @@ public class Main extends Activity {
             new IntCb() { public void on(int i) {
                 setDesign(i == 1);
             }});
+        segmented(design, "Distribución", null, new String[]{"Estándar", "Compacto de 7 pulgadas"},
+            compactLayout() ? 1 : 0, new IntCb() { public void on(int i) {
+                prefs.edit().putString("home_layout", i == 1 ? CompactLayout.ID : "standard").apply(); rebuild();
+            }});
+        if (compactLayout()) {
+            segmented(design, "Panel principal", null, new String[]{"Vehículo", "Mapa"},
+                "map".equals(prefs.getString("compact_main_panel", "vehicle")) ? 1 : 0,
+                new IntCb() { public void on(int i) {
+                    prefs.edit().putString("compact_main_panel", i == 1 ? "map" : "vehicle").apply(); rebuild();
+                }});
+            toggle(design, "Cuatro accesos grandes", "Radio · CarPlay · Teléfono · Todas las apps",
+                prefs.getBoolean("compact_four_shortcuts", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("compact_four_shortcuts", i == 1).apply(); rebuild();
+                }});
+            row(design, "Temperatura exterior del vehículo", "Sin interfaz del vehículo detectada; se usa el clima si está disponible.", null, null);
+        }
         LinearLayout c = section(body, "Tema");
         String t = prefs.getString("theme", "dark");
         segmented(c, "Modo", "Automático: claro de 6 a.m. a 6 p.m.", new String[]{"Oscuro", "Claro", "Automático"},
@@ -3610,7 +3788,7 @@ public class Main extends Activity {
     }
 
     private void refreshStates() {
-        if (aaBtnTv == null) return;
+        if (aaBtnTv == null) { updatePlayIcon(); return; }
         String nat = nativeProjectionApp();
         String aaSaved = prefs.getString("aa", null);
         String chosen = prefs.getString("conn_app", null);
@@ -4112,7 +4290,7 @@ public class Main extends Activity {
 
         final PackageManager pm = getPackageManager();
         GridView grid = new GridView(this);
-        grid.setNumColumns(6);
+        grid.setNumColumns(compactLayout() ? 4 : 6);
         grid.setVerticalSpacing((int) (18 * s));
         grid.setSelector(new ColorDrawable(Color.TRANSPARENT));
         grid.setAdapter(new BaseAdapter() {
@@ -4128,9 +4306,11 @@ public class Main extends Activity {
                     cell.setOrientation(LinearLayout.VERTICAL);
                     cell.setGravity(Gravity.CENTER_HORIZONTAL);
                     cell.setPadding(0, (int) (6 * s), 0, (int) (6 * s));
+                    if (compactLayout()) cell.setMinimumHeight((int) (160 * s));
                     im = new ImageView(Main.this);
-                    cell.addView(im, new LinearLayout.LayoutParams((int) (56 * s), (int) (56 * s)));
-                    lb = tv("", 13, SOFT, false);
+                    int iconSize = compactLayout() ? 72 : 56;
+                    cell.addView(im, new LinearLayout.LayoutParams((int) (iconSize * s), (int) (iconSize * s)));
+                    lb = tv("", compactLayout() ? 22 : 13, SOFT, false);
                     lb.setGravity(Gravity.CENTER);
                     lb.setPadding((int) (4 * s), (int) (8 * s), (int) (4 * s), 0);
                     cell.addView(lb, new LinearLayout.LayoutParams(-1, -2));

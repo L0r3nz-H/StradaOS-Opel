@@ -483,3 +483,18 @@ Desinstalar	Deinstallieren
 Diseño	Design
 Diseño de inicio	Startbildschirm-Design
 El diseño Opel usa colores fijos. El estándar conserva tus ajustes.	Das Opel-Design nutzt feste Farben. Der Standard behält deine Einstellungen.
+
+# Optional compact layout
+Distribución	Layout
+Estándar	Standard
+Compacto de 7 pulgadas	7-Zoll-Kompaktmodus
+Panel principal	Hauptansicht
+Vehículo	Fahrzeug
+Teléfono	Telefon
+Todas las apps	Alle Apps
+Cuatro accesos grandes	Vier große Schnellzugriffe
+Radio · CarPlay · Teléfono · Todas las apps	Radio · CarPlay · Telefon · Alle Apps
+Temperatura exterior del vehículo	Fahrzeug-Außentemperatur
+Sin interfaz del vehículo detectada; se usa el clima si está disponible.	Fahrzeuganbindung noch nicht verfügbar. Wetterdaten werden verwendet, sofern verfügbar.
+Anterior	Zurück
+Reproducir / pausa	Wiedergabe / Pause
