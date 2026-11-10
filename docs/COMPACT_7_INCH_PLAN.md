@@ -52,10 +52,12 @@ Opel-Kompaktansicht verwendet werden, wenn kein eigenes Fahrzeugfoto hinterlegt
 ist. Ein über `CarPhoto` ausgewähltes Nutzerfoto hat Vorrang; andere Designs und
 das bisherige Standardlayout erhalten dadurch kein neues Standardfahrzeug.
 Das ganze Fahrzeug proportional mit `FIT_CENTER` darstellen, ohne Beschnitt
-oder Verzerrung. Die JPEG-Datei hat einen schwarzen Hintergrund und keine
-Transparenz; eine Freistellung ist mit dieser Aufnahme nicht bereits erfolgt.
-Die spätere App-Ressource wird für die tatsächliche Darstellungsgröße geladen,
-um den Speicherbedarf auf älteren Geräten gering zu halten.
+oder Verzerrung. Die Original-JPEG-Datei bleibt als Referenz erhalten. Die App
+verwendet die freigestellte Variante `app/src/main/assets/opel_astra_j.png` mit
+echtem Alphakanal, damit der Kachelhintergrund um das Fahrzeug sichtbar bleibt.
+Beim Laden wird sie mit `inSampleSize=2` dekodiert, um den Speicherbedarf auf
+älteren Geräten gering zu halten. Transparente Nutzerfotos werden weiterhin
+über `CarPhoto.load()` unverändert bevorzugt.
 
 ## Befund im Repository
 

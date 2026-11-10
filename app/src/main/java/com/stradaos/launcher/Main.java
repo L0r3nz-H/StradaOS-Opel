@@ -822,7 +822,7 @@ public class Main extends Activity {
             seedLastLocation();
         } else {
             Bitmap photo = CarPhoto.load(this);
-            if (photo == null && modernDesign()) photo = asset("opel_astra_j.jpg");
+            if (photo == null && modernDesign()) photo = asset("opel_astra_j.png");
             ImageView car = new ImageView(this);
             car.setScaleType(ImageView.ScaleType.FIT_CENTER);
             if (photo != null) car.setImageBitmap(photo);
@@ -1936,7 +1936,10 @@ public class Main extends Activity {
         if (b != null) return b;
         try {
             InputStream in = getAssets().open(path);
-            b = BitmapFactory.decodeStream(in);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            // El recorte de vehículo tiene resolución doble; conservar alpha sin gastar 6 MB.
+            if ("opel_astra_j.png".equals(path)) options.inSampleSize = 2;
+            b = BitmapFactory.decodeStream(in, null, options);
             in.close();
             iconCache.put(path, b);
         } catch (Exception e) {
