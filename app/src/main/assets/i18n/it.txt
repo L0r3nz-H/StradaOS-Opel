@@ -488,3 +488,5 @@ Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel m
 Mostrar velocidad GPS	Mostra velocità GPS
 En la vista compacta del vehículo o del mapa	Nella vista compatta del veicolo o della mappa
 Velocidad GPS	Velocità GPS
+
+Las actualizaciones de esta edición se instalan mediante un APK Opel firmado con la misma clave.	Gli aggiornamenti di questa edizione si installano con un APK Opel firmato con la stessa chiave.

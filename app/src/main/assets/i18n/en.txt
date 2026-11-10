@@ -503,3 +503,5 @@ Reproducir / pausa	Play / pause
 Mostrar velocidad GPS	Show GPS speed
 En la vista compacta del vehículo o del mapa	In the compact vehicle or map view
 Velocidad GPS	GPS speed
+
+Las actualizaciones de esta edición se instalan mediante un APK Opel firmado con la misma clave.	Updates for this edition are installed using an Opel APK signed with the same key.

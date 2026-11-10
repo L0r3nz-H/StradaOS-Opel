@@ -153,6 +153,13 @@ public class Main extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setBackgroundDrawable(new ColorDrawable(BG));
         prefs = getSharedPreferences("launcher", MODE_PRIVATE);
+        if (opelEdition() && !prefs.getBoolean("opel_defaults_applied", false)) {
+            SharedPreferences.Editor defaults = prefs.edit();
+            if (!prefs.contains("design")) defaults.putString("design", OpelDesign.ID);
+            if (!prefs.contains("home_layout")) defaults.putString("home_layout", CompactLayout.ID);
+            if (!prefs.contains("car_name")) defaults.putString("car_name", "Astra J");
+            defaults.putBoolean("opel_defaults_applied", true).apply();
+        }
         I18n.init(this, prefs);
         LiveMapView.headingUp = prefs.getBoolean("map_heading", false);
         lm = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -2917,6 +2924,10 @@ public class Main extends Activity {
         return OpelDesign.ID.equals(prefs.getString("design", "stradaos"));
     }
 
+    private boolean opelEdition() {
+        return getPackageName().endsWith(".opel");
+    }
+
     private void setDesign(boolean modern) {
         prefs.edit().putString("design", modern ? OpelDesign.ID : "stradaos").apply();
         applyTheme();
@@ -3543,6 +3554,9 @@ public class Main extends Activity {
             new Runnable() { public void run() { showGuardLog(); } });
 
         LinearLayout u = section(body, "Actualizaciones");
+        if (opelEdition()) {
+            row(u, "StradaOS Opel", "Las actualizaciones de esta edición se instalan mediante un APK Opel firmado con la misma clave.", null, null);
+        } else {
         final boolean fd = Updates.fromFdroid(this);
         if (fd) row(u, "Instalado desde " + Updates.storeName(this), "Las actualizaciones llegan por esa app", null, null);
         toggle(u, fd ? "Avisar también de versiones en GitHub" : "Comprobar actualizaciones automáticamente",
@@ -3564,6 +3578,7 @@ public class Main extends Activity {
         row(u, "Buscar actualizaciones", last == 0 ? "Aún no se ha comprobado"
                 : "Última comprobación: " + new SimpleDateFormat("yyyy-MM-dd HH:mm", ES).format(new Date(last)), null,
             new Runnable() { public void run() { checkUpdates(true); } });
+        }
 
         LinearLayout k = section(body, "Comunidad");
         row(k, "Dar una estrella en GitHub", "Ayuda a que más personas encuentren StradaOS", "★",
@@ -3596,7 +3611,7 @@ public class Main extends Activity {
         if (oilAlert()) return;
         long now = System.currentTimeMillis();
         boolean auto = prefs.getBoolean("auto_update", !Updates.fromFdroid(this));
-        if (getPackageName().endsWith(".debug")) auto = false;   // la versión de prueba no ofrece actualizar a la normal
+        if (getPackageName().endsWith(".debug") || opelEdition()) auto = false;
         if (auto && now - prefs.getLong("upd_last", 0) > 20L * 3600 * 1000) { checkUpdates(false); return; }
         // recuadro tipo SimpMusic: tras 5 días de uso y 15 aperturas, y luego cada 45 días si eligió «Más tarde»
         int opens = prefs.getInt("opens", 0) + 1;
@@ -3612,6 +3627,7 @@ public class Main extends Activity {
     }
 
     private void checkUpdates(final boolean manual) {
+        if (opelEdition()) return;
         if (updBusy) return;
         updBusy = true;
         if (manual) toast("Buscando actualizaciones…");

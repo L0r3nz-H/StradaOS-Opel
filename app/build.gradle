@@ -47,6 +47,14 @@ android {
             manifestPlaceholders = [appLabel: 'StradaOS Prueba']
             if (ksPath) signingConfig signingConfigs.release
         }
+        // Edición Opel instalable junto a StradaOS. Se firma por separado al distribuir.
+        opel {
+            initWith release
+            applicationIdSuffix '.opel'
+            versionNameSuffix '-opel'
+            manifestPlaceholders = [appLabel: 'StradaOS Opel']
+            signingConfig = null
+        }
     }
 
     compileOptions {

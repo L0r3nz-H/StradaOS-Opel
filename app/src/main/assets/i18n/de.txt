@@ -503,3 +503,5 @@ Reproducir / pausa	Wiedergabe / Pause
 Mostrar velocidad GPS	GPS-Geschwindigkeit anzeigen
 En la vista compacta del vehículo o del mapa	In der kompakten Fahrzeug- oder Kartenansicht
 Velocidad GPS	GPS-Geschwindigkeit
+
+Las actualizaciones de esta edición se instalan mediante un APK Opel firmado con la misma clave.	Updates dieser Edition werden über eine mit demselben Schlüssel signierte Opel-APK installiert.
