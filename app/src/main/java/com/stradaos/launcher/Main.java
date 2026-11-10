@@ -114,6 +114,9 @@ public class Main extends Activity {
     private Weather.Now weatherNow;
     private long weatherReceivedAt;
     private TextView compactTemperatureTv;
+    private TextView compactSpeedTv;
+    private float gpsSpeedKmh;
+    private boolean gpsSpeedKnown;
     private FrameLayout settingsView;
     private int settingsCat = -1;
     private TextView timeTv, dateTv, greetTv, speedTv, gpsTv, aaBtnTv, aaSubTv, trackTv, artistTv, carTv, chipTv;
@@ -702,6 +705,7 @@ public class Main extends Activity {
         root.addView(board, blp);
 
         compactTemperatureTv = null;
+        compactSpeedTv = null;
         if (compactLayout()) {
             // No conservar widgets de una vista anterior en los callbacks de audio/GPS.
             timeTv = dateTv = greetTv = speedTv = gpsTv = carTv = chipTv = null;
@@ -827,17 +831,15 @@ public class Main extends Activity {
             car.setScaleType(ImageView.ScaleType.FIT_CENTER);
             if (photo != null) car.setImageBitmap(photo);
             else car.setImageBitmap(asset("ic/directions_car.png"));
-            place(left, car, 24, 12, width - 48, 208);
+            place(left, car, 24, 64, width - 48, 200);
             car.setOnLongClickListener(new View.OnLongClickListener() {
                 public boolean onLongClick(View v) { photoMenu(); return true; }
             });
             carTv = tv(prefs.getString("car_name", modernDesign() ? "Astra J" : "Mi vehículo"), 30, TEXT, true);
             carTv.setGravity(Gravity.CENTER);
-            place(left, carTv, 24, 224, width - 48, 42);
-            TextView vehicle = tv("Vehículo", 24, SOFT, false);
-            vehicle.setGravity(Gravity.CENTER);
-            place(left, vehicle, 88, 276, width - 176, 40);
+            place(left, carTv, 24, 16, width - 48, 42);
         }
+        if (prefs.getBoolean("compact_show_speed", false)) buildCompactSpeed(left, width);
         View nav = circleIcon("navigation", 64, 28, BTN);
         nav.setContentDescription(I18n.t("Navegación"));
         place(left, nav, width - 80, 260, 64, 64);
@@ -899,6 +901,34 @@ public class Main extends Activity {
                 }
             });
         }
+    }
+
+    private void buildCompactSpeed(FrameLayout panel, float width) {
+        LinearLayout badge = new LinearLayout(this);
+        badge.setGravity(Gravity.CENTER);
+        badge.setBackground(round(CARD, 12));
+        compactSpeedTv = tv("—", 40, TEXT, true);
+        badge.addView(compactSpeedTv);
+        TextView unit = tv(useMph() ? "mph" : "km/h", 22, SOFT, false);
+        unit.setPadding((int) (10 * s), 0, 0, 0);
+        badge.addView(unit);
+        place(panel, badge, 16, 272, width - 112, 64);
+        badge.setContentDescription(I18n.t("Velocidad GPS"));
+        badge.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { fixGps(); }
+        });
+        updateCompactSpeed();
+    }
+
+    private void updateCompactSpeed() {
+        if (compactSpeedTv == null) return;
+        boolean fresh = lastFix > 0 && SystemClock.elapsedRealtime() - lastFix <= 6000;
+        float value = useMph() ? gpsSpeedKmh * 0.621371f : gpsSpeedKmh;
+        String text = fresh && gpsSpeedKnown
+                ? String.valueOf(Math.round(gpsSpeedKmh < 2 ? 0 : value)) : "—";
+        compactSpeedTv.setText(text);
+        compactSpeedTv.setContentDescription(I18n.t("Velocidad GPS") + ": " + text
+                + " " + (useMph() ? "mph" : "km/h"));
     }
 
     private void buildCarCard() {
@@ -1973,6 +2003,9 @@ public class Main extends Activity {
         public void onLocationChanged(Location l) {
             lastFix = SystemClock.elapsedRealtime();
             lastFixAny = lastFix;
+            gpsSpeedKmh = l.hasSpeed() ? l.getSpeed() * 3.6f : 0;
+            gpsSpeedKnown = l.hasSpeed() && !Float.isNaN(gpsSpeedKmh)
+                    && !Float.isInfinite(gpsSpeedKmh) && gpsSpeedKmh >= 0;
             setGps(true, l.hasSpeed() ? l.getSpeed() * 3.6f : 0);
             feedMap(l);
         }
@@ -2006,6 +2039,7 @@ public class Main extends Activity {
 
     private void setGps(boolean ok, float kmh) {
         if (!ok) lastFix = 0;
+        updateCompactSpeed();
         if (speedTv == null) { updateMapTag(); return; }
         float v = useMph() ? kmh * 0.621371f : kmh;
         speedTv.setText(ok ? String.valueOf(Math.round(kmh < 2 ? 0 : v)) : "--");
@@ -3224,6 +3258,10 @@ public class Main extends Activity {
             toggle(design, "Cuatro accesos grandes", "Radio · CarPlay · Teléfono · Todas las apps",
                 prefs.getBoolean("compact_four_shortcuts", true), new IntCb() { public void on(int i) {
                     prefs.edit().putBoolean("compact_four_shortcuts", i == 1).apply(); rebuild();
+                }});
+            toggle(design, "Mostrar velocidad GPS", "En la vista compacta del vehículo o del mapa",
+                prefs.getBoolean("compact_show_speed", false), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("compact_show_speed", i == 1).apply(); rebuild();
                 }});
             row(design, "Temperatura exterior del vehículo", "Sin interfaz del vehículo detectada; se usa el clima si está disponible.", null, null);
         }

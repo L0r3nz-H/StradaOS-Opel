@@ -15,6 +15,15 @@ Vorrang vor den Beschriftungen im Bild: **Radio · CarPlay · Telefon · Alle Ap
   Opel kombiniert sie mit roter Kopfleiste und der mitgelieferten Aufnahme.
   Eigene Fahrzeugfotos haben Vorrang. Navigation bleibt über die Taste in
   der linken Fläche erreichbar. Die App-Liste verwendet vier große Spalten.
+- Der Fahrzeugname steht über dem Foto. Eine zusätzliche Beschriftung
+  „Fahrzeug“ wird in der Kompaktansicht nicht angezeigt.
+- Optional unter Darstellung: „GPS-Geschwindigkeit anzeigen“, standardmäßig
+  ausgeschaltet (`compact_show_speed=false`). Im Fahrzeugmodus erscheint sie
+  unter dem Foto; im Kartenmodus erscheint sie unten
+  als Fläche neben der Navigationstaste. Sie verwendet dieselben GPS-Updates
+  und die vorhandene km/h-/mph-/Auto-Einstellung wie die Standardansicht.
+  Ohne gemeldete Geschwindigkeit oder bei über sechs Sekunden alten GPS-Daten
+  erscheint „—“. Antippen öffnet die vorhandene GPS-Hilfe/Berechtigungsabfrage.
 - Das bisherige Layout bleibt der Standard für fehlende/unbekannte Werte.
   Layoutpräferenzen überschreiben keine bisherigen Dock-Zuordnungen.
 - Derzeit wird ausschließlich verfügbare Wettertemperatur angezeigt und als
@@ -31,6 +40,10 @@ Vorrang vor den Beschriftungen im Bild: **Radio · CarPlay · Telefon · Alle Ap
   Radio-, CarPlay-, Bluetooth- und Fahrzeugtemperaturdaten sind noch zu prüfen.
 - Echte Aufnahmen: [Kompaktansicht](screenshots/compact/01-opel-compact-1024x600.png)
   und [App-Liste](screenshots/compact/02-apps-1024x600.png).
+- Optionale Geschwindigkeit auf API 30 mit Emulator-GPS geprüft: 72 km/h
+  (38,8769 Knoten), gerundet 45 mph bei automatischer US-Einheit, Stillstand
+  sowie „—“ nach deaktiviertem Standort. Fahrzeug- und Kartenansicht bleiben
+  bedienbar. [Aufnahme mit simulierten 72 km/h](screenshots/compact/03-gps-speed-simulated-1024x600.png).
 - Debug-Hooks: `--es prueba layout:compact_7`, `layout:standard`,
   `compact-panel:vehicle` und `compact-panel:map`.
 
@@ -105,6 +118,7 @@ Layoutdichte und Design werden unabhängig gewählt:
 | `design` (bestehend) | StradaOS / Opel Navi 900 Modern | Palette und visuelle Gestaltung bleiben auswählbar |
 | `compact_main_panel` (neu) | `vehicle` / `map`; Vorgabe `vehicle` | Linke große Inhaltsfläche im Kompaktmodus |
 | `compact_four_shortcuts` (neu) | boolean; Vorgabe `true` | Vier feste Funktionen oder vorhandene Siebenerleiste |
+| `compact_show_speed` (neu) | boolean; Vorgabe `false` | Optionale GPS-Geschwindigkeit in Fahrzeug- und Kartenansicht |
 
 Fehlende oder unbekannte Layoutwerte führen zum bisherigen Layout. Es gibt
 keine automatische Aktivierung anhand der Pixelzahl: Daraus lässt sich die
@@ -139,10 +153,11 @@ Alle Maße sind virtuelle Basispixel; sie werden weiterhin mit `s` skaliert.
 - Kleine Bedienelemente erhalten im Kompaktmodus mindestens 64 × 64 virtuelle
   Pixel; die tatsächliche dp-Größe wird zusätzlich anhand der Gerätedichte
   kontrolliert (mindestens 48 dp für Touchziele). Die ganze untere Kachel reagiert.
-- Keine zusätzliche Fahrzeug-/Geschwindigkeits-/Öl-/Projektions-Kachel neben
+- Keine zusätzliche Fahrzeug-/Öl-/Projektions-Kachel neben
   diesen zwei Hauptflächen. Vorhandene Fahrzeug- und Wartungseinstellungen
   bleiben erreichbar; GPS-/Kilometerfunktionen werden nicht allein wegen der
-  reduzierten Anzeige deaktiviert.
+  reduzierten Anzeige deaktiviert. Die optionale Geschwindigkeit ist in die
+  linke Hauptfläche integriert.
 - Im Fahrzeugmodus wird keine `LiveMapView` oder dekorative `MapView` erzeugt.
   Eine große Aktion in der Fahrzeugfläche öffnet weiterhin die Navigations-App;
   deren Zuordnung ist auch in den Einstellungen erreichbar.

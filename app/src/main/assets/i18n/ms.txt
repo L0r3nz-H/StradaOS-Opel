@@ -483,3 +483,8 @@ Desinstalar	Nyahpasang
 Diseño	Reka bentuk
 Diseño de inicio	Reka bentuk skrin utama
 El diseño Opel usa colores fijos. El estándar conserva tus ajustes.	Reka bentuk Opel menggunakan warna tetap. Standard mengekalkan tetapan anda.
+
+# Compact GPS speed
+Mostrar velocidad GPS	Tunjukkan kelajuan GPS
+En la vista compacta del vehículo o del mapa	Dalam paparan kompak kenderaan atau peta
+Velocidad GPS	Kelajuan GPS

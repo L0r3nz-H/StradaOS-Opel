@@ -498,3 +498,8 @@ Temperatura exterior del vehículo	Fahrzeug-Außentemperatur
 Sin interfaz del vehículo detectada; se usa el clima si está disponible.	Fahrzeuganbindung noch nicht verfügbar. Wetterdaten werden verwendet, sofern verfügbar.
 Anterior	Zurück
 Reproducir / pausa	Wiedergabe / Pause
+
+# Compact GPS speed
+Mostrar velocidad GPS	GPS-Geschwindigkeit anzeigen
+En la vista compacta del vehículo o del mapa	In der kompakten Fahrzeug- oder Kartenansicht
+Velocidad GPS	GPS-Geschwindigkeit

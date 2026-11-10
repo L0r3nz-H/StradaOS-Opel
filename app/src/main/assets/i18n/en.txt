@@ -498,3 +498,8 @@ Temperatura exterior del vehículo	Vehicle outside temperature
 Sin interfaz del vehículo detectada; se usa el clima si está disponible.	Vehicle connection not yet available. Weather data is used when available.
 Anterior	Previous
 Reproducir / pausa	Play / pause
+
+# Compact GPS speed
+Mostrar velocidad GPS	Show GPS speed
+En la vista compacta del vehículo o del mapa	In the compact vehicle or map view
+Velocidad GPS	GPS speed

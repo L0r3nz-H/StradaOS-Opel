@@ -483,3 +483,8 @@ Desinstalar	Desinstalar
 Diseño	Design
 Diseño de inicio	Design do início
 El diseño Opel usa colores fijos. El estándar conserva tus ajustes.	O design Opel usa cores fixas. O padrão mantém suas configurações.
+
+# Compact GPS speed
+Mostrar velocidad GPS	Mostrar velocidade GPS
+En la vista compacta del vehículo o del mapa	Na vista compacta do veículo ou do mapa
+Velocidad GPS	Velocidade GPS
