@@ -507,7 +507,7 @@ public class Main extends Activity {
                     renderTrack();
                 }
                 else if ("tema:claro".equals(v) || "tema:oscuro".equals(v)) {
-                    prefs.edit().putString("theme", "tema:claro".equals(v) ? "light" : "dark").apply();
+                    prefs.edit().putString(modernDesign() ? "opel_theme" : "theme", "tema:claro".equals(v) ? "light" : "dark").apply();
                     applyTheme(); applyAccent(); rebuild();
                 }
                 else if (v.startsWith("diseno:")) {
@@ -797,14 +797,14 @@ public class Main extends Activity {
             buildCompactHome();
         } else {
             if (!sideDock) {
-            // franja del dock a todo el ancho (aunque la pantalla no sea 1024x600)
-            View dockBg = new View(this);
-            dockBg.setBackgroundColor(DOCK);
-            FrameLayout.LayoutParams dlp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    (int) (H - ((H - dh * s) / 2 + dockTop * s)) + 1);
-            dlp.gravity = Gravity.BOTTOM;
-            root.addView(dockBg, 0, dlp);
-        }
+                // franja del dock a todo el ancho (aunque la pantalla no sea 1024x600)
+                View dockBg = new View(this);
+                dockBg.setBackgroundColor(DOCK);
+                FrameLayout.LayoutParams dlp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        (int) (H - ((H - dh * s) / 2 + dockTop * s)) + 1);
+                dlp.gravity = Gravity.BOTTOM;
+                root.addView(dockBg, 0, dlp);
+            }
 
             buildTop();
             if (!modernDesign()) buildCarCard();
@@ -823,6 +823,7 @@ public class Main extends Activity {
         updateClock();
         refreshStates();
         showWeather();
+        if (topOilTv != null) updateOilBadge();
         if (settingsCat >= 0) showSettings(settingsCat);
     }
 
@@ -835,7 +836,7 @@ public class Main extends Activity {
             showCar = false;
             audW = 356;
             mapW = 624 + ex;
-            mapX = ox + (playerLeft ? 388 : 16);
+            mapX = ox + (playerLeft ? 384 : 16);
             audX = ox + (playerLeft ? 16 : 652 + ex);
             return;
         }
@@ -3534,7 +3535,7 @@ public class Main extends Activity {
             playerLeft ? 1 : 0, new IntCb() { public void on(int i) {
                 prefs.edit().putString("player_side", i == 1 ? "left" : "right").apply(); rebuild();
             }});
-        toggle(lay, "Tarjeta del vehículo", "Si la ocultas, la velocidad pasa arriba y el mapa y el reproductor ganan espacio", showCar, new IntCb() { public void on(int i) {
+        if (!modernDesign()) toggle(lay, "Tarjeta del vehículo", "Si la ocultas, la velocidad pasa arriba y el mapa y el reproductor ganan espacio", showCar, new IntCb() { public void on(int i) {
             prefs.edit().putBoolean("show_car", i == 1).apply(); rebuild();
         }});
         segmented(lay, "Barra de botones", "Lateral: los botones van al costado y todo se ve más grande en pantallas bajas como 1280×480", new String[]{"Normal", "Compacta", "Lateral"},
