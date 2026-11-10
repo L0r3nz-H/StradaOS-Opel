@@ -482,7 +482,7 @@ Desinstalar	Uninstall
 
 Diseño	Design
 Diseño de inicio	Home design
-El diseño Opel usa colores fijos. El estándar conserva tus ajustes.	The Opel design uses fixed colors. Standard keeps your settings.
+Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel keeps its red accent. Each design saves its light or dark mode separately.
 
 # Optional compact layout
 Distribución	Layout

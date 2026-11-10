@@ -26,8 +26,12 @@ Umsetzung:
    werden durch den Designwechsel nicht überschrieben.
 5. Debug-Build und Lint prüfen; abschließend Gerätetest durchführen.
 
-Opel verwendet eine feste dunkle Palette mit roten Akzenten und silbernen Icons.
-Hell-/Dunkelmodus und Akzentfarbe bleiben für den Standard gespeichert. Die
+Opel unterstützt eine helle und eine dunkle Palette mit festen roten Akzenten.
+Unter Einstellungen → Darstellung → Modus kann zwischen Dunkel, Hell und
+Automatisch gewählt werden. Automatisch ist wie bei StradaOS von 6 bis 18 Uhr
+hell. Die Auswahl liegt separat in `opel_theme`, Vorgabe ist `dark`; die
+StradaOS-Einstellung `theme` und dessen Akzentfarbe bleiben erhalten. Das gilt
+für das bisherige Opel-Layout und den optionalen Kompaktmodus. Die
 vorhandene Kartenanzeige bleibt eine GPS-Karte; die Navigationstaste öffnet die
 zugeordnete Navigations-App. Es wird keine externe App in das Dashboard eingebettet.
 
@@ -37,8 +41,9 @@ zugeordnete Navigations-App. Es wird keine externe App in das Dashboard eingebet
   Zeit, Zahnrad und sieben Menütasten müssen sichtbar und bedienbar sein.
 - App beenden/neustarten: Opel bleibt ausgewählt. Über das Zahnrad zurück auf
   StradaOS wechseln; ursprünglichen Modus, Akzent und App-Zuordnungen prüfen.
-- Mit dunklem, hellem und automatischem Standardmodus wechseln. Opel bleibt
-  dunkel, auch beim automatischen Tageszeitwechsel.
+- Dunkel, Hell und Automatisch im Opel-Design prüfen; Auswahl bleibt nach
+  Neustart erhalten. Tageszeitwechsel beachten. Zwischen StradaOS und Opel
+  wechseln und die jeweils separat gespeicherte Modusauswahl kontrollieren.
 - Ohne GPS-Berechtigung, bei ausgeschaltetem GPS und mit Fix den Kartenstatus
   prüfen; Status antippen öffnet die bestehende Abhilfe/Diagnose.
 - Radio und Bluetooth über Menüleiste öffnen; Medieninformationen und
@@ -57,6 +62,22 @@ adb shell am start -n com.stradaos.launcher.debug/com.stradaos.launcher.Main --e
 ```
 
 Keine Firmware-, Root-, MCU- oder CAN-Bus-Änderungen.
+
+## Hellmodus – lokale Validierung (2026-11-10)
+
+- `assembleDebug` und `lintDebug` erfolgreich. Lint enthält weiterhin
+  60 Errors, 1 Fatal und 59 Warnings; keine Befunde auf den für den Hellmodus
+  geänderten Java-Zeilen. `abortOnError false` bleibt zu berücksichtigen.
+- Android-11-Emulator, 1024 × 600, 160 dpi: Hell über die Darstellungseinstellungen
+  aktiviert; Kompaktansicht und bisheriges Opel-Layout visuell kontrolliert.
+  Opel-Hell bleibt nach App-Neustart erhalten. Wechsel zu StradaOS stellt dessen
+  gespeicherten Dunkelmodus wieder her; zurück zu Opel erscheint erneut Hell.
+- Rote Kopfleiste mit weißem Zahnrad, rote Play-Taste mit weißem Icon und
+  dunkle Schrift/Icons auf hellen Flächen kontrolliert. Kein Crash-Eintrag.
+- Echte Aufnahmen: [Kompakt/Hell](screenshots/compact/04-opel-light-1024x600.png)
+  und [bisheriges Opel-Layout/Hell](screenshots/compact/05-opel-standard-light-1024x600.png).
+- Automatischer Tageszeitwechsel und Laufzeit auf API 17 wurden für diese
+  Änderung nicht separat getestet. `minSdk 16` bleibt unverändert.
 
 ## Lokale Validierung (2026-11-09)
 

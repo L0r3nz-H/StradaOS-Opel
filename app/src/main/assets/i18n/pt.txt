@@ -482,7 +482,7 @@ Desinstalar	Desinstalar
 
 Diseño	Design
 Diseño de inicio	Design do início
-El diseño Opel usa colores fijos. El estándar conserva tus ajustes.	O design Opel usa cores fixas. O padrão mantém suas configurações.
+Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel mantém o destaque vermelho. Cada design salva seu modo claro ou escuro separadamente.
 
 # Compact GPS speed
 Mostrar velocidad GPS	Mostrar velocidade GPS

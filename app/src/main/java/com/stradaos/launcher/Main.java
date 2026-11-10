@@ -805,6 +805,7 @@ public class Main extends Activity {
         compactTemperatureTv.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         place(header, compactTemperatureTv, 598 + ex, 0, 306, 64);
         View gear = circleIcon("settings", 64, 28, 0x00000000);
+        ((ImageView) ((FrameLayout) gear).getChildAt(0)).setColorFilter(Color.WHITE);
         gear.setContentDescription(I18n.t("Ajustes"));
         place(header, gear, 920 + ex, 0, 64, 64);
         gear.setOnClickListener(new View.OnClickListener() {
@@ -2934,17 +2935,17 @@ public class Main extends Activity {
     }
 
     private void applyTheme() {
+        String mode = prefs.getString(modernDesign() ? "opel_theme" : "theme", "dark");
+        int hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        LIGHT = "light".equals(mode) || ("auto".equals(mode) && hr >= 6 && hr < 18);
         if (modernDesign()) {
-            OpelDesign.applyPalette();
-            if (compactLayout()) {
+            OpelDesign.applyPalette(LIGHT);
+            if (compactLayout() && !LIGHT) {
                 BG = 0xFF17191D; CARD = 0xFF282B30; BTN = 0xFF32363B;
                 SOFT = 0xFFC5C8CE; MUTED = 0xFFB4B8C0;
             }
             return;
         }
-        String mode = prefs.getString("theme", "dark");
-        int hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-        LIGHT = "light".equals(mode) || ("auto".equals(mode) && hr >= 6 && hr < 18);
         if (LIGHT) {
             BG = 0xFFE9ECF1; CARD = 0xFFFFFFFF; INNER = 0xFFF1F3F7; BTN = 0xFFE2E6EC; DOCK = 0xFFDDE1E8;
             TEXT = 0xFF14161B; MUTED = 0xFF6B7280; SOFT = 0xFF3A404C; CIRCLE = 0xFFFFFFFF; ICON = 0xFF2B303A;
@@ -3238,7 +3239,7 @@ public class Main extends Activity {
                 .show();
         }});
         LinearLayout design = section(body, "Diseño");
-        segmented(design, "Diseño de inicio", "El diseño Opel usa colores fijos. El estándar conserva tus ajustes.",
+        segmented(design, "Diseño de inicio", "Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.",
             new String[]{"StradaOS", "Opel Navi 900 Modern"}, modernDesign() ? 1 : 0,
             new IntCb() { public void on(int i) {
                 setDesign(i == 1);
@@ -3264,10 +3265,11 @@ public class Main extends Activity {
             row(design, "Temperatura exterior del vehículo", "Sin interfaz del vehículo detectada; se usa el clima si está disponible.", null, null);
         }
         LinearLayout c = section(body, "Tema");
-        String t = prefs.getString("theme", "dark");
+        final String themeKey = modernDesign() ? "opel_theme" : "theme";
+        String t = prefs.getString(themeKey, "dark");
         segmented(c, "Modo", "Automático: claro de 6 a.m. a 6 p.m.", new String[]{"Oscuro", "Claro", "Automático"},
             "light".equals(t) ? 1 : "auto".equals(t) ? 2 : 0, new IntCb() { public void on(int i) {
-                prefs.edit().putString("theme", i == 1 ? "light" : i == 2 ? "auto" : "dark").apply();
+                prefs.edit().putString(themeKey, i == 1 ? "light" : i == 2 ? "auto" : "dark").apply();
                 applyTheme(); applyAccent(); rebuild();
             }});
         LinearLayout a = section(body, "Color de acento");

@@ -482,7 +482,7 @@ Desinstalar	Deinstallieren
 
 Diseño	Design
 Diseño de inicio	Startbildschirm-Design
-El diseño Opel usa colores fijos. El estándar conserva tus ajustes.	Das Opel-Design nutzt feste Farben. Der Standard behält deine Einstellungen.
+Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel behält den roten Akzent. Jedes Design speichert seinen Hell-/Dunkelmodus separat.
 
 # Optional compact layout
 Distribución	Layout

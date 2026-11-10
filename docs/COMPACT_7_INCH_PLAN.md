@@ -17,6 +17,8 @@ Vorrang vor den Beschriftungen im Bild: **Radio · CarPlay · Telefon · Alle Ap
   Navigationstaste. Die App-Liste verwendet vier große Spalten.
 - Der Fahrzeugname steht über dem Foto. Eine zusätzliche Beschriftung
   „Fahrzeug“ wird in der Kompaktansicht nicht angezeigt.
+  Ohne Geschwindigkeit werden Name und Foto als gemeinsamer Block vertikal
+  zentriert; es bleibt keine leere Geschwindigkeitszeile reserviert.
 - Optional unter Darstellung: „GPS-Geschwindigkeit anzeigen“, standardmäßig
   ausgeschaltet (`compact_show_speed=false`). Im Fahrzeugmodus erscheint sie
   unter dem Foto; im Kartenmodus erscheint sie unten
@@ -27,8 +29,14 @@ Vorrang vor den Beschriftungen im Bild: **Radio · CarPlay · Telefon · Alle Ap
   erscheint „—“. Antippen öffnet die vorhandene GPS-Hilfe/Berechtigungsabfrage.
 - Das bisherige Layout bleibt der Standard für fehlende/unbekannte Werte.
   Layoutpräferenzen überschreiben keine bisherigen Dock-Zuordnungen.
+- Auch Opel unterstützt jetzt Dunkel, Hell und Automatisch unter Darstellung →
+  Modus. `opel_theme` speichert diese Auswahl separat vom StradaOS-Modus `theme`;
+  ohne Auswahl bleibt Opel dunkel. Die rote Kopfleiste und roten Akzente bleiben
+  im Hellmodus erhalten, Flächen und Schrift wechseln auf helle/dunkle Kontraste.
 - Derzeit wird ausschließlich verfügbare Wettertemperatur angezeigt und als
-  „Wetter“ gekennzeichnet, mit maximal einer Stunde Datenalter; andernfalls „—“.
+  „Wetter“ gekennzeichnet, mit maximal einer Stunde Datenalter. Ohne gültige
+  aktuelle Daten oder bei ausgeschaltetem Wetter bleibt die Temperatur unsichtbar;
+  die Uhrzeit bleibt dabei in der Mitte der Kopfleiste.
   Der unten geplante Fahrzeug-Leseadapter ist **noch nicht implementiert**;
   eine tatsächliche Schnittstelle des Zielradios muss erst ermittelt werden.
 - `assembleDebug` und `lintDebug` erfolgreich ausgeführt. Der Lint-Bericht
@@ -117,6 +125,7 @@ Layoutdichte und Design werden unabhängig gewählt:
 | --- | --- | --- |
 | `home_layout` (neu) | `standard` / `compact_7`; Vorgabe `standard` | Bestehender Layoutpfad oder neues Kompaktlayout |
 | `design` (bestehend) | StradaOS / Opel Navi 900 Modern | Palette und visuelle Gestaltung bleiben auswählbar |
+| `opel_theme` (neu) | `dark` / `light` / `auto`; Vorgabe `dark` | Separater Opel-Hell-/Dunkelmodus für beide Layouts |
 | `compact_main_panel` (neu) | `vehicle` / `map`; Vorgabe `vehicle` | Linke große Inhaltsfläche im Kompaktmodus |
 | `compact_four_shortcuts` (neu) | boolean; Vorgabe `true` | Vier feste Funktionen oder vorhandene Siebenerleiste |
 | `compact_show_speed` (neu) | boolean; Vorgabe `false` | Optionale GPS-Geschwindigkeit in Fahrzeug- und Kartenansicht |
@@ -134,8 +143,9 @@ bisherigen Darstellung oder Dienste ist dafür erforderlich.
 
 Die Kombination **Kompaktmodus + Opel Navi 900 Modern + Fahrzeugansicht + vier
 Tasten** wird die Grundlage für den gezeigten Opel-Entwurf. Opel verwendet dabei
-seine bestehende dunkle Palette mit roter Kopfleiste, roten Aktionsicons und
-heller Schrift. Die bisherigen Opel-Geometrien bleiben im Standardlayout aktiv.
+eine rote Kopfleiste und rote Aktionsicons. Die dunkle Palette hat helle Schrift,
+die helle Palette dunkle Schrift und helle Kacheln. Die bisherigen Opel-Geometrien
+bleiben im Standardlayout aktiv.
 
 ## Geplante Oberfläche bei 1024 × 600
 
@@ -193,7 +203,8 @@ sind dafür kein Ersatz.
 3. **Quelle auswählen:** Ein gültiger, aktueller Fahrzeugwert hat Vorrang.
    Fehlt er oder ist er veraltet, wird bei aktivierter Wetterfunktion auf
    verfügbare, aktuelle Wetterdaten zurückgegriffen. Ohne beides erscheint
-   „—“; kein zuletzt bekannter Fahrzeugwert bleibt unbegrenzt als aktuell stehen.
+   keine Temperaturanzeige; kein zuletzt bekannter Fahrzeugwert bleibt
+   unbegrenzt als aktuell stehen.
    Aktualitätsgrenzen, ungültige Sentinelwerte und Wertebereiche werden passend
    zur nachgewiesenen Schnittstelle definiert und getestet. Auch 0 °C und
    negative Temperaturen sind gültige Messwerte.
@@ -293,7 +304,8 @@ Adapter und dessen Android-kompatibler App abhängig.
   Nutzerfoto erscheint die mitgelieferte Aufnahme nur in der Opel-Kompaktansicht.
 - Temperatur prüfen: Fahrzeugwert ohne Internet, 0 °C, negative Werte,
   °C/°F-Umrechnung, verzögerte/ungültige Daten, Dienstverlust und Wiederverbindung.
-  Wetterersatz muss sichtbar als solcher gekennzeichnet sein; ohne Daten „—“.
+  Wetterersatz muss sichtbar als solcher gekennzeichnet sein; ohne gültige Daten
+  bleibt die Temperatur ausgeblendet. 0 °C bleibt ein gültiger Wert.
   Auf einem Gerät ohne Fahrzeugschnittstelle dürfen weder Abstürze noch
   wiederholte störende Fehlermeldungen entstehen.
 - `assembleDebug`, `lintDebug` und `git diff --check` ausführen. Lint-Befunde
