@@ -6,6 +6,29 @@ Android 4.2 / API 17. Referenz: der bereitgestellte Entwurf mit roter Kopfleiste
 zwei großen Inhaltsflächen und vier unteren Tasten. Die gewünschte Belegung hat
 Vorrang vor den Beschriftungen im Bild: **Radio · CarPlay · Telefon · Alle Apps**.
 
+## Mitgelieferte Bildvorlagen
+
+Die beiden Originaldateien sind unverändert im Repository abgelegt und damit
+auch unabhängig von den Chat-Anhängen verfügbar.
+
+Layoutreferenz (die unteren Tasten werden wie oben gewünscht angepasst):
+
+![Layoutreferenz mit zwei großen Flächen und vier unteren Tasten](design/compact-7/dashboard-reference.png)
+
+Fahrzeugbild für die linke Fläche des Opel-Kompaktmodus:
+
+![Mitgeliefertes Fahrzeugfoto des Opel Astra J](design/compact-7/opel-astra-j-reference.jpg)
+
+Bei der Umsetzung soll dieses Foto als mitgeliefertes Ersatzbild für die
+Opel-Kompaktansicht verwendet werden, wenn kein eigenes Fahrzeugfoto hinterlegt
+ist. Ein über `CarPhoto` ausgewähltes Nutzerfoto hat Vorrang; andere Designs und
+das bisherige Standardlayout erhalten dadurch kein neues Standardfahrzeug.
+Das ganze Fahrzeug proportional mit `FIT_CENTER` darstellen, ohne Beschnitt
+oder Verzerrung. Die JPEG-Datei hat einen schwarzen Hintergrund und keine
+Transparenz; eine Freistellung ist mit dieser Aufnahme nicht bereits erfolgt.
+Die spätere App-Ressource wird für die tatsächliche Darstellungsgröße geladen,
+um den Speicherbedarf auf älteren Geräten gering zu halten.
+
 ## Befund im Repository
 
 - `app/src/main/java/com/stradaos/launcher/Main.java` enthält die Activity,
@@ -37,6 +60,10 @@ Vorrang vor den Beschriftungen im Bild: **Radio · CarPlay · Telefon · Alle Ap
   ersetzt keinen Laufzeittest auf Android 4.2.
 - Übersetzungen kommen über `I18n` aus `assets/i18n/*.txt` mit spanischen
   Quelltexten und unter anderem deutschen Übersetzungen.
+- Eine Anbindung an Fahrzeug-Außentemperatur ist im untersuchten Java-Code
+  noch nicht vorhanden. `Weather.java` liefert bisher eine Wettertemperatur
+  aus dem Internet. Welche Fahrzeugschnittstelle das Zielradio zugänglich
+  macht, ist noch nicht nachgewiesen.
 
 ## Architekturentscheidung
 
@@ -71,7 +98,7 @@ Alle Maße sind virtuelle Basispixel; sie werden weiterhin mit `s` skaliert.
 
 | Bereich | Position und Größe | Inhalt |
 | --- | --- | --- |
-| Kopfleiste | x=16, y=16, 992 × 64 | Design-/Markenname, Uhrzeit, optional vorhandene Wettertemperatur, gut erreichbare Einstellungen |
+| Kopfleiste | x=16, y=16, 992 × 64 | Design-/Markenname, Uhrzeit, bevorzugt Fahrzeug-Außentemperatur mit Quellenkennung, gut erreichbare Einstellungen |
 | Linke Fläche | x=16, y=96, 488 × 340 | Fahrzeugfoto oder Fahrzeugsymbol und Fahrzeugname; alternativ Karte mit großer Navigationstaste |
 | Rechte Fläche | x=520, y=96, 488 × 340 | Quelle, Titel/übermittelter Sender, optionale zweite Textzeile und große Mediensteuerung |
 | Viererleiste | y=452, Höhe=132 | Vier vollständige Touchflächen, jeweils 236 breit, x=16/268/520/772 |
@@ -93,11 +120,47 @@ Alle Maße sind virtuelle Basispixel; sie werden weiterhin mit `s` skaliert.
   Lange Texte werden begrenzt und mit Auslassungszeichen angezeigt.
 - Keine erfundene UKW-Frequenz wie „98.5“: Es werden nur vorhandene Metadaten
   angezeigt. Ohne Metadaten erscheint ein übersetzter Leerzustand mit Aktion
-  zum Öffnen der Audio-App. Wetter ist die vorhandene Wetterinformation,
-  keine vorgetäuschte Fahrzeug-Außentemperatur.
+  zum Öffnen der Audio-App. Für die Temperatur gilt die unten beschriebene
+  Quellenpriorität; Wetterwerte werden nicht als Fahrzeugmessung ausgegeben.
 - Bei zusätzlicher Bildschirmbreite wachsen die beiden Hauptflächen und die
   Viererleiste mit. Die Siebeneroption verwendet die vorhandenen sieben
   Zuordnungen; große Vierertasten sind die empfohlene Kompaktvoreinstellung.
+
+## Temperatur: Fahrzeug vor Wetter
+
+Ziel ist die **Außentemperatur des Autos**, sofern das Radio sie über eine
+lesbare Schnittstelle bereitstellt. Innenraum-, CPU- und Batterietemperaturen
+sind dafür kein Ersatz.
+
+1. **Verfügbare Schnittstelle ermitteln:** Vorhandene Diagnosemöglichkeiten
+   nutzen, um Radiomodell, Herstellerdienste und gegebenenfalls dokumentierte
+   Broadcasts, SDKs oder lesbare Provider zu identifizieren. Erst nach Nachweis
+   werden konkrete Dienstnamen, Actions, Extras, Einheiten und Berechtigungen
+   implementiert; keine geratenen CAN-/MCU-Kommandos oder aktiven Busabfragen.
+2. **Optionalen Leseadapter vorsehen:** Ein kleiner `VehicleTemperatureSource`
+   liefert Messwert, Einheit, Quelle, Empfangszeit und Verfügbarkeitsstatus.
+   Der Adapter muss auf API 17 ohne zusätzliche Hardwarebibliothek startbar
+   sein und bei fehlendem Dienst oder fehlenden Zugriffsrechten sauber
+   „nicht verfügbar“ melden. Herstellerspezifische Bindungen isolieren,
+   Receiver/Verbindungen beim Beenden freigeben und Werte nur lesend beziehen.
+3. **Quelle auswählen:** Ein gültiger, aktueller Fahrzeugwert hat Vorrang.
+   Fehlt er oder ist er veraltet, wird bei aktivierter Wetterfunktion auf
+   verfügbare, aktuelle Wetterdaten zurückgegriffen. Ohne beides erscheint
+   „—“; kein zuletzt bekannter Fahrzeugwert bleibt unbegrenzt als aktuell stehen.
+   Aktualitätsgrenzen, ungültige Sentinelwerte und Wertebereiche werden passend
+   zur nachgewiesenen Schnittstelle definiert und getestet. Auch 0 °C und
+   negative Temperaturen sind gültige Messwerte.
+4. **Herkunft kenntlich machen:** In der Kopfleiste kompakt „Außen … °C“ für
+   Fahrzeugwerte beziehungsweise „Wetter … °C“ für den Wetterersatz anzeigen.
+   Vorhandene °C/°F-Einstellung weiterverwenden; Einheiten vor Umrechnung prüfen.
+   Einstellungen/Diagnose zeigen Quelle, Alter und Verfügbarkeitsgrund.
+
+Der Fahrzeugwert soll auch ohne Internet und unabhängig vom Schalter für
+Online-Wetter funktionieren. Diese Erweiterung ist zunächst auf die neue
+Kompakt-Kopfleiste begrenzt, damit die bestehenden Layouts unverändert bleiben.
+Kann die Temperatur nur mit Firmwareänderung, Root oder nicht zugänglichen
+Systemrechten gelesen werden, bleibt der Adapter nicht verfügbar; solche
+Änderungen gehören nicht zu diesem Vorhaben.
 
 ## Vorhandene Funktionen wiederverwenden
 
@@ -137,7 +200,8 @@ Adapter und dessen Android-kompatibler App abhängig.
    sämtliche Kompaktupdates wegen fehlender AA-Unterzeile überspringen.
    `setGps()`/`updateMapTag()` sowie ausstehende Medien-/Wettercallbacks prüfen.
 4. **Kompaktflächen und Aktionen bauen:** Fahrzeug/Karte wahlweise erzeugen,
-   Audioaktionen und Viererleiste anbinden. Beim Kartenwechsel prüfen, dass
+   das mitgelieferte Opel-Foto als Ersatzbild einbinden, Audioaktionen und
+   Viererleiste anbinden. Beim Kartenwechsel prüfen, dass
    eine entfernte Karte nicht weiter unnötig aktualisiert wird. `map_live`
    bleibt eine unabhängige bestehende Einstellung und wird nicht überschrieben.
 5. **App-Liste und Einstellungen anpassen:** Im Kompaktmodus vier statt sechs
@@ -146,7 +210,12 @@ Adapter und dessen Android-kompatibler App abhängig.
    Einstellungszeilen, Zurück-/Schließen-Tasten und App-Auswahldialoge auf
    ausreichend große Touchflächen prüfen und bei Bedarf nur hier vergrößern.
    Neue Texte in die bestehenden Sprachdateien aufnehmen.
-6. **Prüfen und dokumentieren:** Debug-Build, Lint-Auswertung und Laufzeittests;
+6. **Temperatur anbinden:** Die tatsächlich exponierte Fahrzeugschnittstelle
+   untersuchen und bei Verfügbarkeit den optionalen Leseadapter samt
+   Quellenpriorität, Aktualitätsprüfung und Wetterersatz umsetzen. Ohne
+   nachgewiesene Schnittstelle bleibt der Fahrzeugadapter nicht verfügbar;
+   die übrige Kompaktansicht ist davon unabhängig umsetzbar.
+7. **Prüfen und dokumentieren:** Debug-Build, Lint-Auswertung und Laufzeittests;
    vorhandene Debug-Hooks und Smoke-Prüfungen um Layout- und Panelwechsel
    erweitern. `docs/OPEL_NAVI_900_MODERN.md` um die neue Kombination ergänzen,
    ohne die bisherige Designbeschreibung durch den Kompaktmodus zu ersetzen.
@@ -173,6 +242,13 @@ Adapter und dessen Android-kompatibler App abhängig.
 - Radio, Telefon/Bluetooth und CarPlay abschließend am Zielradio testen;
   Emulatoren belegen keine Funktionsfähigkeit herstellerspezifischer Apps.
   Medienbuttons versprechen keine neue herstellerspezifische UKW-Sendersteuerung.
+- Fahrzeugfoto vollständig sichtbar; eigenes Nutzerfoto hat Vorrang; ohne
+  Nutzerfoto erscheint die mitgelieferte Aufnahme nur in der Opel-Kompaktansicht.
+- Temperatur prüfen: Fahrzeugwert ohne Internet, 0 °C, negative Werte,
+  °C/°F-Umrechnung, verzögerte/ungültige Daten, Dienstverlust und Wiederverbindung.
+  Wetterersatz muss sichtbar als solcher gekennzeichnet sein; ohne Daten „—“.
+  Auf einem Gerät ohne Fahrzeugschnittstelle dürfen weder Abstürze noch
+  wiederholte störende Fehlermeldungen entstehen.
 - `assembleDebug`, `lintDebug` und `git diff --check` ausführen. Lint-Befunde
   fachlich auswerten: `abortOnError false` bedeutet, dass ein erfolgreicher Task
   allein keine fehlerfreie API-Kompatibilität belegt.
