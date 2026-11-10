@@ -66,6 +66,22 @@ back
 # simulación de pantalla ancha (versión de prueba) y pantalla real ancha 1920x720
 go sim:3 6;        shot 23-sim-1920x720
 go sim:4 6;        shot 24-sim-2000x1200
+# diseño del inicio (Bloque 2)
+go sim:0 4
+go diseno:izq 6;      shot 43-diseno-reproductor-izquierda
+go diseno:sinauto 6;  shot 44-diseno-sin-vehiculo
+go diseno:compacta 6; shot 45-diseno-compacta
+go diseno:plegar 6;   shot 46-diseno-aa-plegado
+go diseno:lateral 6;  shot 47-diseno-lateral
+go pista-demo 3;     shot 53-lateral-pista
+go ajustes:2 5;      shot 51-lateral-ajustes
+back
+go cajon 6;          shot 52-lateral-cajon
+back
+go sim:5 6;           shot 48-sim-1280x480-lateral
+go diseno:base 6;     shot 49-sim-1280x480-normal
+go diseno:lateral 6;  shot 50-sim-1280x480-lateral-completa
+go diseno:base 4
 go sim:0 4
 if [ "$API" -ge 18 ]; then adb shell wm size 1920x720; adb shell wm density 240; else adb shell am display-size 1920x720; adb shell am display-density 240; fi
 sleep 5
