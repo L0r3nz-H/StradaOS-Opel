@@ -13,14 +13,15 @@ Vorrang vor den Beschriftungen im Bild: **Radio · CarPlay · Telefon · Alle Ap
   Fahrzeug/Karte und vier große Schnellzugriffe sind separat wählbar.
 - Zwei große Flächen, große Texte/Medienbuttons und Viererleiste umgesetzt;
   Opel kombiniert sie mit roter Kopfleiste und der mitgelieferten Aufnahme.
-  Eigene Fahrzeugfotos haben Vorrang. Navigation bleibt über die Taste in
-  der linken Fläche erreichbar. Die App-Liste verwendet vier große Spalten.
+  Eigene Fahrzeugfotos haben Vorrang. Die Kompaktansicht hat keine direkte
+  Navigationstaste. Die App-Liste verwendet vier große Spalten.
 - Der Fahrzeugname steht über dem Foto. Eine zusätzliche Beschriftung
   „Fahrzeug“ wird in der Kompaktansicht nicht angezeigt.
 - Optional unter Darstellung: „GPS-Geschwindigkeit anzeigen“, standardmäßig
   ausgeschaltet (`compact_show_speed=false`). Im Fahrzeugmodus erscheint sie
   unter dem Foto; im Kartenmodus erscheint sie unten
-  als Fläche neben der Navigationstaste. Sie verwendet dieselben GPS-Updates
+  als horizontal zentrierte Fläche. Auch unter dem Foto sind Wert und Einheit
+  gemeinsam zentriert. Sie verwendet dieselben GPS-Updates
   und die vorhandene km/h-/mph-/Auto-Einstellung wie die Standardansicht.
   Ohne gemeldete Geschwindigkeit oder bei über sechs Sekunden alten GPS-Daten
   erscheint „—“. Antippen öffnet die vorhandene GPS-Hilfe/Berechtigungsabfrage.
@@ -143,7 +144,7 @@ Alle Maße sind virtuelle Basispixel; sie werden weiterhin mit `s` skaliert.
 | Bereich | Position und Größe | Inhalt |
 | --- | --- | --- |
 | Kopfleiste | x=16, y=16, 992 × 64 | Design-/Markenname, Uhrzeit, bevorzugt Fahrzeug-Außentemperatur mit Quellenkennung, gut erreichbare Einstellungen |
-| Linke Fläche | x=16, y=96, 488 × 340 | Fahrzeugfoto oder Fahrzeugsymbol und Fahrzeugname; alternativ Karte mit großer Navigationstaste |
+| Linke Fläche | x=16, y=96, 488 × 340 | Fahrzeugname über Fahrzeugfoto oder Fahrzeugsymbol; alternativ Karte; unten optionale zentrierte Geschwindigkeit |
 | Rechte Fläche | x=520, y=96, 488 × 340 | Quelle, Titel/übermittelter Sender, optionale zweite Textzeile und große Mediensteuerung |
 | Viererleiste | y=452, Höhe=132 | Vier vollständige Touchflächen, jeweils 236 breit, x=16/268/520/772 |
 
@@ -159,8 +160,9 @@ Alle Maße sind virtuelle Basispixel; sie werden weiterhin mit `s` skaliert.
   reduzierten Anzeige deaktiviert. Die optionale Geschwindigkeit ist in die
   linke Hauptfläche integriert.
 - Im Fahrzeugmodus wird keine `LiveMapView` oder dekorative `MapView` erzeugt.
-  Eine große Aktion in der Fahrzeugfläche öffnet weiterhin die Navigations-App;
-  deren Zuordnung ist auch in den Einstellungen erreichbar.
+  Die direkte Navigationsverlinkung entfällt in der Kompaktansicht auf Wunsch.
+  Navigations-Apps bleiben über „Alle Apps“ erreichbar; die vorhandene
+  Navigationszuordnung in den Einstellungen und im Standardlayout bleibt erhalten.
 - Kein großes Albumcover und kein Fortschrittsring im Kompakt-Audiobereich.
   Lange Texte werden begrenzt und mit Auslassungszeichen angezeigt.
 - Keine erfundene UKW-Frequenz wie „98.5“: Es werden nur vorhandene Metadaten

@@ -797,10 +797,10 @@ public class Main extends Activity {
         place(board, header, 16, 16, 992 + ex, 64);
         TextView brand = tv(modernDesign() ? "OPEL · STRADAOS" : "STRADAOS", 24, Color.WHITE, false);
         brand.setGravity(Gravity.CENTER_VERTICAL);
-        place(header, brand, 16, 0, 400 + ex, 64);
+        place(header, brand, 16, 0, 384 + ex / 2, 64);
         timeTv = tv("", 24, Color.WHITE, false);
-        timeTv.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
-        place(header, timeTv, 444 + ex, 0, 142, 64);
+        timeTv.setGravity(Gravity.CENTER);
+        place(header, timeTv, (992 + ex - 142) / 2, 0, 142, 64);
         compactTemperatureTv = tv("", 22, Color.WHITE, false);
         compactTemperatureTv.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         place(header, compactTemperatureTv, 598 + ex, 0, 306, 64);
@@ -812,6 +812,7 @@ public class Main extends Activity {
         });
 
         float width = 488 + ex / 2;
+        boolean showSpeed = prefs.getBoolean("compact_show_speed", false);
         FrameLayout left = card(16, 96, width, CompactLayout.CARD_HEIGHT, CARD);
         if ("map".equals(prefs.getString("compact_main_panel", "vehicle"))) {
             left.addView(new MapView(this, s, 20 * s), new FrameLayout.LayoutParams(-1, -1));
@@ -831,24 +832,18 @@ public class Main extends Activity {
             car.setScaleType(ImageView.ScaleType.FIT_CENTER);
             if (photo != null) car.setImageBitmap(photo);
             else car.setImageBitmap(asset("ic/directions_car.png"));
-            place(left, car, 24, 64, width - 48, 200);
+            // Centrar el bloque nombre (42) + separación (6) + foto (200)
+            // cuando no hay velocímetro; no reservar una fila vacía debajo.
+            float vehicleTop = showSpeed ? 16 : (CompactLayout.CARD_HEIGHT - 248) / 2f;
+            place(left, car, 24, vehicleTop + 48, width - 48, 200);
             car.setOnLongClickListener(new View.OnLongClickListener() {
                 public boolean onLongClick(View v) { photoMenu(); return true; }
             });
             carTv = tv(prefs.getString("car_name", modernDesign() ? "Astra J" : "Mi vehículo"), 30, TEXT, true);
             carTv.setGravity(Gravity.CENTER);
-            place(left, carTv, 24, 16, width - 48, 42);
+            place(left, carTv, 24, vehicleTop, width - 48, 42);
         }
-        if (prefs.getBoolean("compact_show_speed", false)) buildCompactSpeed(left, width);
-        View nav = circleIcon("navigation", 64, 28, BTN);
-        nav.setContentDescription(I18n.t("Navegación"));
-        place(left, nav, width - 80, 260, 64, 64);
-        nav.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) { openNavApp(); }
-        });
-        nav.setOnLongClickListener(new View.OnLongClickListener() {
-            public boolean onLongClick(View v) { pickFor("nav_app", "Navegación"); return true; }
-        });
+        if (showSpeed) buildCompactSpeed(left, width);
 
         FrameLayout audio = card(520 + ex / 2, 96, width, CompactLayout.CARD_HEIGHT, CARD);
         sourceTv = tv("AUDIO", 24, SOFT, false);
@@ -912,7 +907,7 @@ public class Main extends Activity {
         TextView unit = tv(useMph() ? "mph" : "km/h", 22, SOFT, false);
         unit.setPadding((int) (10 * s), 0, 0, 0);
         badge.addView(unit);
-        place(panel, badge, 16, 272, width - 112, 64);
+        place(panel, badge, 16, 272, width - 32, 64);
         badge.setContentDescription(I18n.t("Velocidad GPS"));
         badge.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { fixGps(); }
@@ -2992,10 +2987,13 @@ public class Main extends Activity {
         if (compactTemperatureTv == null) return;
         // No hay una interfaz de temperatura del vehículo verificada en este equipo.
         // No presentar la temperatura de internet como medición del automóvil.
-        boolean fresh = weatherNow != null && weatherReceivedAt > 0
+        boolean fresh = weatherNow != null && !Double.isNaN(weatherNow.temp)
+                && !Double.isInfinite(weatherNow.temp) && weatherReceivedAt > 0
                 && SystemClock.elapsedRealtime() - weatherReceivedAt < 60 * 60 * 1000L;
-        compactTemperatureTv.setText(prefs.getBoolean("weather_on", true) && fresh
-                ? I18n.t("Clima") + " " + Math.round(weatherNow.temp) + " °" + weatherNow.unit : "—");
+        boolean visible = prefs.getBoolean("weather_on", true) && fresh;
+        compactTemperatureTv.setText(visible
+                ? I18n.t("Clima") + " " + Math.round(weatherNow.temp) + " °" + weatherNow.unit : "");
+        compactTemperatureTv.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     // ───────────────────────── panel de ajustes ─────────────────────────
