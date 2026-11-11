@@ -206,6 +206,11 @@ public class Main extends Activity {
         } catch (Throwable ignored) { }
         loadApps();
         startOdo();
+        // mapa sin conexión: aviso al terminar la descarga y, si quedó a medias (se apagó el carro), continuarla
+        MapDownload.onFinish = new Runnable() { public void run() { onMapDownloadFinished(); } };
+        if (MapDownload.paused(this) && !prefs.getBoolean("map_dl_user_paused", false)) {
+            h.postDelayed(new Runnable() { public void run() { if (!isFinishing()) MapDownload.resume(Main.this); } }, 20000);
+        }
 
         IntentFilter f = new IntentFilter();
         f.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -432,6 +437,15 @@ public class Main extends Activity {
 
     /** Android 6+: respuesta a la solicitud de permisos. */
     public void onRequestPermissionsResult(int req, String[] perms, int[] res) {
+        if (req == REQ_STORAGE_W) {   // con o sin permiso se sigue (sin él, el mapa se guarda en la carpeta de la app)
+            h.post(new Runnable() { public void run() { chooseMapToDownload(""); } });
+            return;
+        }
+        if (req == REQ_STORAGE) {
+            if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) pickMapFile();
+            else toast("Sin permiso de almacenamiento no se pueden buscar mapas");
+            return;
+        }
         if (req != 77 && req != 78) return;
         try { lm.removeUpdates(odoListener); } catch (Throwable ignored) { }
         odoRunning = false;
@@ -567,6 +581,30 @@ public class Main extends Activity {
                         l.setLatitude(4.6533); l.setLongitude(-74.0836); l.setBearing(45); l.setSpeed(12); l.setTime(System.currentTimeMillis());
                         feedMap(l);
                     }}, 1500);
+                }
+                else if (v.startsWith("mapa-archivo:")) {
+                    prefs.edit().putString("map_file", v.substring(13)).apply();
+                    LiveMapView.loadFile(Main.this); rebuild();
+                }
+                else if (v.startsWith("mapa-zoom:")) { if (liveMap != null) liveMap.setZoom(Integer.parseInt(v.substring(10))); }
+                else if ("mapa-buscar".equals(v)) pickMapFile();
+                else if ("mapa-diag".equals(v)) showMapDiag();
+                else if (v.startsWith("mapa-lista")) chooseMapToDownload(v.length() > 11 ? v.substring(11) : "");
+                else if (v.startsWith("mapa-descargar:")) { String pth = v.substring(15); MapDownload.start(Main.this, pth, pth.substring(pth.lastIndexOf('/') + 1)); }
+                else if ("mapa-pausar".equals(v)) MapDownload.stop(false);
+                else if ("mapa-continuar".equals(v)) MapDownload.resume(Main.this);
+                else if ("mapa-mover".equals(v)) {
+                    // 20 posiciones, una por segundo, a ~43 km/h hacia el noreste (para ver el movimiento suave)
+                    final double la0 = !Double.isNaN(wLat) ? wLat : 6.2442, lo0 = !Double.isNaN(wLon) ? wLon : -75.5680;
+                    for (int i = 0; i < 20; i++) {
+                        final int n = i;
+                        h.postDelayed(new Runnable() { public void run() {
+                            Location l = new Location(LocationManager.GPS_PROVIDER);
+                            l.setLatitude(la0 + n * 0.000085); l.setLongitude(lo0 + n * 0.000085);
+                            l.setBearing(45); l.setSpeed(12); l.setTime(System.currentTimeMillis());
+                            feedMap(l);
+                        }}, i * 1000L);
+                    }
                 }
                 else if (v.startsWith("unidad:")) { prefs.edit().putString("speed_unit", v.substring(7)).apply(); rebuild(); }
                 else if ("odo-sim".equals(v)) {
@@ -1707,8 +1745,9 @@ public class Main extends Activity {
         else if (!live && st == 2) mapTagTv.setText(I18n.t("Ubicación apagada · toca aquí"));
         else if (liveMap == null || !liveMap.hasFix())
             mapTagTv.setText(I18n.t(gpsStartAt > 0 && SystemClock.elapsedRealtime() - gpsStartAt > 180000 ? "Sin señal GPS · toca aquí" : "Buscando GPS…"));
-        else if (liveMap.offline()) mapTagTv.setText(I18n.t(live ? "En vivo · sin internet" : "Última posición · sin internet"));
-        else mapTagTv.setText(I18n.t(live ? "Mapa en vivo" : "Última posición conocida"));
+        else if (liveMap.usingFile()) mapTagTv.setText(I18n.t(live ? "Mapa sin conexión" : "Sin señal GPS · mapa sin conexión"));
+        else if (liveMap.offline()) mapTagTv.setText(I18n.t(live ? "En vivo · sin internet" : "Sin señal GPS ni internet"));
+        else mapTagTv.setText(I18n.t(live ? "Mapa en vivo" : "Sin señal GPS · última posición"));
     }
 
     private void buildAudioCard() {
@@ -3254,8 +3293,13 @@ public class Main extends Activity {
     static final String[] CAT_NAMES = {"Volver al inicio", "Tu vehículo", "Apariencia", "Conexión", "Accesos y apps", "Mapa y clima", "Música", "Sistema", "Acerca de"};
     static final String[] CAT_ICONS = {"arrow_back", "directions_car", "palette", "usb", "apps", "map", "music_note", "tune", "info"};
 
+    private android.widget.ScrollView settingsScroll;
+    private int settingsScrollCat = -1;
+    private int settingsPendingY = -1;   // posición por restaurar en una página que aún no se ha acomodado
+
     private void closeSettings() {
         settingsCat = -1;
+        settingsScroll = null; settingsScrollCat = -1; settingsPendingY = -1;
         if (settingsView != null) { root.removeView(settingsView); settingsView = null; }
     }
 
@@ -3267,6 +3311,12 @@ public class Main extends Activity {
 
     private void showSettings0(int cat) {
         if (cat == 0) { closeSettings(); return; }
+        // al cambiar un ajuste se redibuja la página: que se quede donde estaba, no que vuelva arriba
+        // (algunos ajustes redibujan dos veces seguidas: la segunda vez la página anterior aún no se acomodó y su
+        // posición sigue pendiente; se usa esa y no un 0)
+        final int keepY = settingsScroll == null || settingsScrollCat != cat ? 0
+                : settingsPendingY >= 0 ? settingsPendingY : settingsScroll.getScrollY();
+        settingsPendingY = keepY > 0 ? keepY : -1;
         settingsCat = cat;
         if (settingsView != null) root.removeView(settingsView);
         settingsView = new FrameLayout(this);
@@ -3326,9 +3376,22 @@ public class Main extends Activity {
         }
 
         // contenido
-        android.widget.ScrollView sc = new android.widget.ScrollView(this);
+        // La posición anterior se pone durante el acomodo (onLayout), antes del primer dibujo: si se pusiera después
+        // (con post), se vería un cuadro con la página arriba y luego el salto a su sitio (un parpadeo).
+        final android.widget.ScrollView sc = new android.widget.ScrollView(this) {
+            private boolean restored = keepY <= 0;
+            @Override protected void onLayout(boolean changed, int l, int t, int r, int b) {
+                super.onLayout(changed, l, t, r, b);
+                if (!restored && getChildCount() > 0 && getChildAt(0).getHeight() > 0) {
+                    restored = true;
+                    scrollTo(0, keepY);   // ScrollView lo limita solo si la página quedó más corta
+                    if (settingsScroll == this) settingsPendingY = -1;
+                }
+            }
+        };
         sc.setVerticalScrollBarEnabled(false);
         place(panel, sc, 272, 16, 736, 568);
+        settingsScroll = sc; settingsScrollCat = cat;
         LinearLayout body = new LinearLayout(this);
         body.setOrientation(LinearLayout.VERTICAL);
         body.setPadding((int) (8 * s), (int) (6 * s), (int) (8 * s), (int) (24 * s));
@@ -3664,6 +3727,272 @@ public class Main extends Activity {
         }});
         row(m, "Fuente del mapa (avanzado)", "URL propia con {z}/{x}/{y}", prefs.getString("map_url", "").length() > 0 ? "Personalizada" : "Automática",
             edit("map_url", "URL de teselas {z}/{x}/{y} (vacío = automático)", ""));
+        LinearLayout off = section(body, "Mapa sin conexión");
+        LiveMapView.loadFile(this);
+        String mf = prefs.getString("map_file", "");
+        row(off, "Archivo del mapa", "Un archivo .map (p. ej. colombia.map) en la memoria de la pantalla o en una USB: el mapa se ve sin internet",
+            mf.length() == 0 ? "Ninguno" : LiveMapView.fileMap != null ? new File(mf).getName() : "Error",
+            new Runnable() { public void run() { pickMapFile(); } });
+        if (mf.length() > 0) {
+            row(off, LiveMapView.fileMap != null ? LiveMapView.fileMap.describe() : I18n.t("No se pudo abrir: " + LiveMapView.fileErr),
+                "Toca para dejar de usarlo o borrarlo", null, new Runnable() { public void run() { mapFileOptions(); } });
+        }
+        row(off, "Descargar un mapa", "Elige tu país: se descarga gratis de OpenStreetMap (mapsforge) y se usa sin internet", null,
+            new Runnable() { public void run() {
+                if (MapDownload.running || MapDownload.paused(Main.this)) downloadOptions(); else chooseMapToDownload("");
+            }});
+        dlStatusTv = tv("", 13, RED, true);
+        dlStatusTv.setPadding((int) (18 * s), (int) (4 * s), (int) (18 * s), (int) (12 * s));
+        off.addView(dlStatusTv);
+        refreshDownloadStatus();
+        row(off, "¿Dónde consigo el mapa?", "Mapas gratis de OpenStreetMap por país", null, new Runnable() { public void run() { mapHowTo(); } });
+    }
+
+    private TextView dlStatusTv;
+    private final Runnable dlTicker = new Runnable() { public void run() { refreshDownloadStatus(); } };
+
+    /** Muestra el avance de la descarga debajo de «Descargar un mapa» (se actualiza cada segundo). */
+    private void refreshDownloadStatus() {
+        h.removeCallbacks(dlTicker);
+        if (dlStatusTv == null || settingsView == null || dlStatusTv.getParent() == null) return;
+        String st = MapDownload.status(this);
+        dlStatusTv.setText(st == null ? "" : st);
+        dlStatusTv.setVisibility(st == null ? View.GONE : View.VISIBLE);
+        if (MapDownload.running) h.postDelayed(dlTicker, 1000);
+    }
+
+    /** Lista de continentes / países del servidor de mapas. */
+    private boolean askedWrite;
+
+    private void chooseMapToDownload(final String folder) {
+        // Android 6–9: permiso para guardar en Download/StradaOS (se pide una sola vez). Android 10+ no lo tiene para
+        // StradaOS: el mapa va a la carpeta propia de la app, sin pedir nada.
+        if (folder.length() == 0 && SDK >= 23 && SDK <= 28 && !askedWrite
+                && checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            askedWrite = true;
+            requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQ_STORAGE_W);
+            return;
+        }
+        toast("Cargando la lista de mapas…");
+        new Thread(new Runnable() { public void run() {
+            Net.init(Main.this);
+            java.util.List<MapDownload.Entry> list = null;
+            String err = null;
+            try { list = MapDownload.list(folder); } catch (Throwable e) { err = e instanceof java.net.UnknownHostException ? I18n.t("sin internet") : String.valueOf(e.getMessage()); }
+            final java.util.List<MapDownload.Entry> fl = list;
+            final String fe = err;
+            h.post(new Runnable() { public void run() {
+                if (isFinishing()) return;
+                if (fl == null) {
+                    new TB(Main.this, dlg()).setTitle("No se pudo cargar la lista de mapas")
+                        .setMessage(fe + "\n\n" + I18n.t("Revisa la conexión a internet e inténtalo de nuevo."))
+                        .setPositiveButton("OK", null).show();
+                    return;
+                }
+                showMapList(folder, fl);
+            }});
+        }}).start();
+    }
+
+    private void showMapList(final String folder, final java.util.List<MapDownload.Entry> list) {
+        String[] items = new String[list.size()];
+        java.text.DateFormat df = java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT, I18n.loc);
+        for (int i = 0; i < items.length; i++) {
+            MapDownload.Entry e = list.get(i);
+            if (e.dir) items[i] = e.name + (folder.length() > 0 ? "  ·  " + I18n.t("por regiones") : "") + "  ›";
+            else {
+                String date = e.date;
+                try { date = df.format(new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(e.date)); } catch (Throwable ignored) { }
+                items[i] = e.name + "  ·  " + MapDownload.mb(e.size) + "  ·  " + date;
+            }
+        }
+        android.app.AlertDialog.Builder b = new TB(this, dlg()).setTitle(folder.length() == 0 ? "Elige el continente" : "Elige el mapa")
+            .setItems(items, new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+                MapDownload.Entry e = list.get(w);
+                if (e.dir) chooseMapToDownload(e.path); else confirmDownload(e);
+            }});
+        b.setNegativeButton("Cancelar", null);
+        b.show();
+    }
+
+    private void confirmDownload(final MapDownload.Entry e) {
+        File dir = MapDownload.folder(this);
+        long free = MapDownload.free(dir.getParentFile() != null && !dir.exists() ? dir.getParentFile() : dir);
+        String where = dir.getAbsolutePath().replace(android.os.Environment.getExternalStorageDirectory().getAbsolutePath(), I18n.t("memoria"));
+        String msg = I18n.t("Tamaño") + ": " + MapDownload.mb(e.size) + "\n" + I18n.t("Se guarda en") + ": " + where
+            + (free >= 0 ? "\n" + I18n.t("Espacio libre") + ": " + MapDownload.mb(free) : "")
+            + "\n\n" + I18n.t("Usa datos: mejor con WiFi o un plan amplio. Puedes seguir usando la pantalla; si se corta la señal o la apagas, la descarga continúa después.");
+        boolean noRoom = free >= 0 && free < e.size + 20L * 1024 * 1024;
+        android.app.AlertDialog.Builder b = new TB(this, dlg()).setTitle(I18n.t("Descargar") + " " + e.name).setMessage(noRoom ? msg + "\n\n⚠ " + I18n.t("No hay espacio suficiente en la memoria.") : msg)
+            .setNegativeButton("Cancelar", null);
+        if (!noRoom) b.setPositiveButton("Descargar", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+            prefs.edit().putBoolean("map_dl_user_paused", false).apply();
+            MapDownload.start(Main.this, e.path, e.name);
+            toast("Descargando el mapa… puedes seguir usando la pantalla");
+            refreshDownloadStatus();
+        }});
+        b.show();
+    }
+
+    /** Descarga en curso o en pausa: pausar, continuar o cancelar. */
+    private void downloadOptions() {
+        final boolean run = MapDownload.running;
+        android.app.AlertDialog.Builder b = new TB(this, dlg()).setTitle(run ? "Descarga en curso" : "Descarga en pausa").setMessage(MapDownload.status(this));
+        if (run) b.setPositiveButton("Pausar", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+            prefs.edit().putBoolean("map_dl_user_paused", true).apply();
+            MapDownload.stop(false);
+        }});
+        else b.setPositiveButton("Continuar", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+            prefs.edit().putBoolean("map_dl_user_paused", false).apply();
+            MapDownload.resume(Main.this);
+            refreshDownloadStatus();
+        }});
+        b.setNeutralButton("Cancelar descarga", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+            if (MapDownload.running) MapDownload.stop(true);
+            else {
+                String dest = prefs.getString("map_dl_dest", "");
+                if (dest.length() > 0) new File(dest + ".part").delete();
+                prefs.edit().remove("map_dl_path").remove("map_dl_name").remove("map_dl_dest").remove("map_dl_etag").remove("map_dl_total").apply();
+                MapDownload.error = null;
+            }
+            toast("Descarga cancelada");
+            if (settingsView != null) { rebuild(); showSettings(5); }
+        }});
+        b.setNegativeButton("Cerrar", null);
+        b.show();
+    }
+
+    /** Mapa en uso: dejar de usarlo o, si lo descargó StradaOS, borrarlo. */
+    private void mapFileOptions() {
+        final File f = new File(prefs.getString("map_file", ""));
+        File dir = MapDownload.folder(this);
+        boolean ours = f.getParentFile() != null && f.getParentFile().equals(dir);
+        android.app.AlertDialog.Builder b = new TB(this, dlg()).setTitle(f.getName())
+            .setMessage(ours ? "Este mapa lo descargó StradaOS. Puedes dejar de usarlo o borrarlo para liberar espacio." : "Puedes dejar de usar este mapa (el archivo no se borra).")
+            .setPositiveButton("Dejar de usarlo", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+                prefs.edit().remove("map_file").apply();
+                LiveMapView.loadFile(Main.this);
+                toast("Mapa sin conexión quitado");
+                rebuild(); showSettings(5);
+            }})
+            .setNegativeButton("Cancelar", null);
+        if (ours) b.setNeutralButton("Borrar el archivo", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+            prefs.edit().remove("map_file").apply();
+            LiveMapView.loadFile(Main.this);
+            f.delete();
+            toast("Mapa borrado");
+            rebuild(); showSettings(5);
+        }});
+        b.show();
+    }
+
+    /** Fin de una descarga (correcta o con error). */
+    private void onMapDownloadFinished() {
+        if (MapDownload.error != null) {
+            toast(I18n.t("Descarga en pausa") + ": " + MapDownload.error);
+        } else if (MapDownload.finishedOk && LiveMapView.fileMap != null) {
+            MapDownload.finishedOk = false;
+            toast("Mapa descargado y listo: " + LiveMapView.fileMap.file.getName());
+            rebuild();
+            if (settingsView != null) showSettings(5);
+            return;
+        }
+        refreshDownloadStatus();
+    }
+
+    /** Ayuda: de dónde bajar un mapa .map y dónde ponerlo. */
+    private void mapHowTo() {
+        new TB(this, dlg()).setTitle("Mapa sin conexión")
+            .setMessage("1. En un computador o celular, descarga el mapa de tu país (formato mapsforge, gratis):\ndownload.mapsforge.org/maps/v5\n\nColombia:\ndownload.mapsforge.org/maps/v5/south-america/colombia.map\n\n2. Cópialo a una memoria USB o a la carpeta Download de la pantalla.\n\n3. En Ajustes → Mapa y clima → Mapa sin conexión, toca «Archivo del mapa» y elígelo.\n\nEl mapa se usa en el inicio incluso con internet. Para actualizarlo, descarga uno nuevo y reemplaza el archivo.")
+            .setPositiveButton("OK", null).show();
+    }
+
+    private static final int REQ_STORAGE = 79, REQ_STORAGE_W = 80;
+
+    /** Busca archivos .map en la memoria y en las USB, y deja elegir uno. */
+    private void pickMapFile() {
+        if (SDK >= 23 && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQ_STORAGE);
+            return;
+        }
+        toast("Buscando mapas…");
+        new Thread(new Runnable() { public void run() {
+            final java.util.List<File> found = findMapFiles();
+            h.post(new Runnable() { public void run() { showMapFiles(found); } });
+        }}).start();
+    }
+
+    private void showMapFiles(final java.util.List<File> found) {
+        if (isFinishing()) return;
+        if (found.isEmpty()) {
+            new TB(this, dlg()).setTitle("No se encontró ningún mapa")
+                .setMessage("No hay archivos .map en la memoria de la pantalla ni en las USB conectadas. Toca «Cómo conseguirlo» para ver de dónde bajarlo.")
+                .setPositiveButton("Cómo conseguirlo", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) { mapHowTo(); } })
+                .setNegativeButton("Cerrar", null).show();
+            return;
+        }
+        String[] items = new String[found.size()];
+        for (int i = 0; i < items.length; i++) {
+            File f = found.get(i);
+            items[i] = f.getName() + "  ·  " + (f.length() / (1024 * 1024)) + " MB\n" + f.getParent();
+        }
+        new TB(this, dlg()).setTitle("Elige el mapa")
+            .setItems(items, new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+                File f = found.get(w);
+                prefs.edit().putString("map_file", f.getAbsolutePath()).apply();
+                LiveMapView.loadFile(Main.this);
+                if (LiveMapView.fileMap == null) {
+                    prefs.edit().remove("map_file").apply();
+                    new TB(Main.this, dlg()).setTitle("No se pudo usar este archivo")
+                        .setMessage(LiveMapView.fileErr + "\n\n" + I18n.t("Debe ser un mapa de mapsforge (.map) copiado completo."))
+                        .setPositiveButton("OK", null).show();
+                    return;
+                }
+                toast("Mapa sin conexión listo: " + f.getName());
+                rebuild();
+                if (settingsView != null) showSettings(5);
+            }})
+            .setNegativeButton("Cancelar", null).show();
+    }
+
+    /** Archivos .map de más de 1 MB en la memoria interna, tarjetas y USB (hasta 4 carpetas de profundidad). */
+    private java.util.List<File> findMapFiles() {
+        java.util.LinkedHashSet<String> roots = new java.util.LinkedHashSet<String>();
+        roots.add(android.os.Environment.getExternalStorageDirectory().getAbsolutePath());
+        String sec = System.getenv("SECONDARY_STORAGE");
+        if (sec != null) for (String r : sec.split(":")) if (r.length() > 0) roots.add(r);
+        roots.add("/storage");
+        roots.add("/mnt");
+        java.util.ArrayList<File> out = new java.util.ArrayList<File>();
+        java.util.HashSet<String> seen = new java.util.HashSet<String>();
+        int[] budget = {4000};
+        for (String r : roots) scanMaps(new File(r), 0, out, seen, budget);
+        java.util.Collections.sort(out, new java.util.Comparator<File>() {
+            public int compare(File a, File b) { return a.getName().compareToIgnoreCase(b.getName()); }
+        });
+        return out;
+    }
+
+    private void scanMaps(File d, int depth, java.util.List<File> out, java.util.Set<String> seen, int[] budget) {
+        if (depth > 4 || budget[0]-- <= 0) return;
+        String canon;
+        try { canon = d.getCanonicalPath(); } catch (Throwable e) { return; }
+        if (!seen.add(canon)) return;
+        File[] fs;
+        try { fs = d.listFiles(); } catch (Throwable e) { return; }
+        if (fs == null) return;
+        for (File f : fs) {
+            String n = f.getName();
+            if (n.startsWith(".")) continue;
+            if (f.isDirectory()) {
+                if (n.equals("Android") || n.equals("obb") || n.equals("asec") || n.equals("secure") || n.equals("runtime")) continue;
+                scanMaps(f, depth + 1, out, seen, budget);
+            } else if (n.toLowerCase(java.util.Locale.US).endsWith(".map") && f.length() > 1024 * 1024) {
+                String c;
+                try { c = f.getCanonicalPath(); } catch (Throwable e) { c = f.getAbsolutePath(); }
+                if (seen.add(c)) out.add(f);
+            }
+        }
     }
 
     private void catMusic(LinearLayout body) {
