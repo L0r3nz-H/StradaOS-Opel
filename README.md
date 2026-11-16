@@ -21,8 +21,9 @@ See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/
 
 ## Current Opel edition
 
-The current branch, `feature/opel-latest-2.21.2`, is based on upstream **2.21.2**
-(commit `b2f327d`, 2026-11-15). The local installable build is **2.21.2-opel**,
+The current Opel code is maintained on **`main`**, based on upstream **2.21.2**
+(commit `b2f327d`, 2026-11-15). The port was prepared on
+`feature/opel-latest-2.21.2`, which remains available. The local installable build is **2.21.2-opel**,
 versionCode **54**, with package `com.stradaos.launcher.opel` and app name
 **StradaOS Opel**. The previous Opel branch remains available. Upstream badges
 and release links above describe the original project, not an Opel APK release.
