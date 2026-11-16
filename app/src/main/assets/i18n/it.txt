@@ -948,3 +948,7 @@ Gris suave	Grigio tenue
 Ver ahora	Vedi ora
 Toca la pantalla para volver	Tocca lo schermo per tornare
 Foto predeterminada	Foto predefinita
+Proyección en el inicio Opel	Proiezione nella home Opel
+Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Scegli il collegamento nella home Opel. Puoi cambiarlo in Connessioni.
+Elige el acceso de los cuatro botones grandes del inicio.	Scegli il collegamento di proiezione nei quattro pulsanti grandi.
+Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Telefono · Tutte le app

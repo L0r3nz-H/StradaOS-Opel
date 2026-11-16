@@ -957,3 +957,7 @@ Distribución	布局
 Diseño de inicio	主屏幕设计
 Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel 保留红色强调色。每种设计分别保存浅色或深色模式。
 Foto predeterminada	默认照片
+Proyección en el inicio Opel	Opel 主屏幕投屏
+Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	选择 Opel 主屏幕上的快捷方式。之后可在连接设置中更改。
+Elige el acceso de los cuatro botones grandes del inicio.	选择四个大按钮中的投屏快捷方式。
+Radio · Android Auto · Teléfono · Todas las apps	收音机 · Android Auto · 电话 · 所有应用

@@ -963,3 +963,7 @@ Gris suave	Sanftes Grau
 Ver ahora	Jetzt ansehen
 Toca la pantalla para volver	Tippe auf den Bildschirm, um zurückzukehren
 Foto predeterminada	Standardfoto
+Proyección en el inicio Opel	Projektion auf dem Opel-Startbildschirm
+Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Wähle den Schnellzugriff auf dem Opel-Startbildschirm. Du kannst ihn später unter Verbindungen ändern.
+Elige el acceso de los cuatro botones grandes del inicio.	Wähle den Projektionszugriff in den vier großen Startbildschirm-Tasten.
+Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Telefon · Alle Apps

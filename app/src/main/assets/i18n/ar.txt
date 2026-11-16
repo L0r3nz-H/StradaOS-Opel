@@ -937,3 +937,7 @@ Gris suave	رمادي هادئ
 Ver ahora	عرض الآن
 Toca la pantalla para volver	المس الشاشة للعودة
 Foto predeterminada	الصورة الافتراضية
+Proyección en el inicio Opel	العرض على شاشة أوبل الرئيسية
+Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	اختر الاختصار في شاشة أوبل الرئيسية. يمكنك تغييره لاحقًا في الاتصالات.
+Elige el acceso de los cuatro botones grandes del inicio.	اختر اختصار العرض ضمن الأزرار الأربعة الكبيرة.
+Radio · Android Auto · Teléfono · Todas las apps	الراديو · Android Auto · الهاتف · كل التطبيقات

@@ -948,3 +948,7 @@ Gris suave	Cinza suave
 Ver ahora	Ver agora
 Toca la pantalla para volver	Toque na tela para voltar
 Foto predeterminada	Foto padrão
+Proyección en el inicio Opel	Projeção no início Opel
+Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Escolha o atalho no início Opel. Pode alterá-lo depois em Conexões.
+Elige el acceso de los cuatro botones grandes del inicio.	Escolha o atalho de projeção nos quatro botões grandes.
+Radio · Android Auto · Teléfono · Todas las apps	Rádio · Android Auto · Telefone · Todas as apps

@@ -15,7 +15,7 @@
 
 **StradaOS** is a **free, ad-free, open-source launcher** for Android car head units. Install it like any other app, **without flashing firmware or replacing Android**. Uninstall it to return to the previous setup. It was created for older radios advertised as Android 6 or newer that actually run Android 4.x, and also supports modern devices.
 
-This fork of [lordnordic-debug/StradaOS](https://github.com/lordnordic-debug/StradaOS) adds **Opel Style**, a compact dashboard for 7-inch 1024 × 600 displays. It includes a transparent Astra J photo, two large content areas, centered clock, optional GPS speed, and four large shortcuts: **Radio, CarPlay, Phone, All apps**. Select it under **Settings → Appearance → Home screen design**. The other choice is the standard **StradaOS** layout; there is no separate compact-layout selector. Opel Style uses a fixed red accent, so accent-color controls are hidden there. Dark, Light, Auto, and System modes remain available.
+This fork of [lordnordic-debug/StradaOS](https://github.com/lordnordic-debug/StradaOS) adds **Opel Style**, a compact dashboard for 7-inch 1024 × 600 displays. It includes a transparent Astra J photo, two large content areas, centered clock, optional GPS speed, and four large shortcuts: **Radio, CarPlay or Android Auto, Phone, All apps**. Select it under **Settings → Appearance → Home screen design**. The other choice is the standard **StradaOS** layout; there is no separate compact-layout selector. Opel Style uses a fixed red accent, so accent-color controls are hidden there. Dark, Light, Auto, and System modes remain available.
 
 See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/COMPACT_7_INCH_PLAN.md), and [Opel design history](docs/OPEL_NAVI_900_MODERN.md). The separate app is named **StradaOS Opel** and uses `com.stradaos.launcher.opel`.
 
@@ -34,11 +34,18 @@ and release links above describe the original project, not an Opel APK release.
 | Accent | Ten selectable colors | Fixed red; accent controls are hidden |
 | Theme | Dark, Light, Auto, System | The same modes, stored independently |
 | Main content | Vehicle, map/projection, and media options | Vehicle photo or map, plus large media controls |
-| Shortcuts | Existing configurable dock | Radio · CarPlay · Phone · All apps, or the existing dock |
+| Shortcuts | Existing configurable dock | Radio · CarPlay or Android Auto · Phone · All apps, or the existing dock |
 
 Switching styles preserves standard colors, theme modes, photos, and app
 assignments. Older separate Opel/compact selections migrate to Opel Style.
 The Opel edition starts in Opel Style on first installation.
+
+Choose **CarPlay** or **Android Auto** for the second large shortcut during
+Opel setup (after language selection), or later under **Settings → Connections
+→ Opel home projection**. This selector is visible only in Opel Style. The
+choice updates the label, icon, and launch action, and survives restarts/style
+changes. CarPlay remains the default for existing installations. The normal
+configurable StradaOS dock and its app assignments are retained.
 
 The vehicle panel shows **Astra J** above the transparent bundled photo; a user
 photo takes priority in both compact and standard views of the Opel edition.

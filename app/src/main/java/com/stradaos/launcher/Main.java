@@ -1581,25 +1581,27 @@ public class Main extends Activity {
         renderTrack();
         if (!prefs.getBoolean("compact_four_shortcuts", true)) { buildDock(); return; }
         for (int i = 0; i < CompactLayout.ACTIONS.length; i++) {
-            final int index = i;
+            final String action = i == 1 ? opelProjectionAction() : CompactLayout.ACTIONS[i];
+            final String name = i == 1 ? opelProjectionLabel() : CompactLayout.LABELS[i];
+            String glyph = i == 1 && "aa".equals(action) ? "navigation" : CompactLayout.ICONS[i];
             LinearLayout button = new LinearLayout(this);
             button.setOrientation(LinearLayout.VERTICAL);
             button.setGravity(Gravity.CENTER);
             button.setBackground(round(BTN, 16));
-            ImageView ic = icon(CompactLayout.ICONS[i], 32);
+            ImageView ic = icon(glyph, 32);
             ic.setColorFilter(RED);
             button.addView(ic, new LinearLayout.LayoutParams((int) (32 * s), (int) (32 * s)));
-            TextView label = tv(CompactLayout.LABELS[i], 24, TEXT, false);
+            TextView label = tv(name, 24, TEXT, false);
             label.setGravity(Gravity.CENTER);
             label.setPadding(0, (int) (10 * s), 0, 0);
             button.addView(label);
             place(board, button, 16 + i * (252 + ex / 4), 452, 236 + ex / 4, 132);
             button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) { runFn(CompactLayout.ACTIONS[index]); }
+                public void onClick(View v) { runFn(action); }
             });
             if (i < 3) button.setOnLongClickListener(new View.OnLongClickListener() {
                 public boolean onLongClick(View v) {
-                    pickFor(CompactLayout.ACTIONS[index], CompactLayout.LABELS[index]); return true;
+                    pickFor(action, name); return true;
                 }
             });
         }
@@ -4394,13 +4396,41 @@ public class Main extends Activity {
                 public void onClick(DialogInterface d, int w) {
                     d.dismiss();
                     setLanguage(I18n.CODES[w]);
-                    wizardWelcome();
+                    chooseOpelProjection(new Runnable() { public void run() { wizardWelcome(); } });
                 }
             })
             .setCancelable(false)
             .show();
     }
     private android.app.Dialog wizardDlg;
+
+    private String opelProjectionAction() {
+        return modernDesign() && "aa".equals(prefs.getString("opel_projection", "carplay")) ? "aa" : "carplay";
+    }
+
+    private String opelProjectionLabel() {
+        return "aa".equals(opelProjectionAction()) ? "Android Auto" : "CarPlay";
+    }
+
+    private void setOpelProjection(int index) {
+        prefs.edit().putString("opel_projection", index == 1 ? "aa" : "carplay").apply();
+        rebuild();
+    }
+
+    /** Solo Opel: elegir el acceso visible, sin cambiar las apps asignadas ni la conexión USB. */
+    private void chooseOpelProjection(final Runnable next) {
+        if (!modernDesign()) { if (next != null) next.run(); return; }
+        new TB(this, dlg())
+            .setTitle("Proyección en el inicio Opel")
+            .setMessage("Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.")
+            .setSingleChoiceItems(new String[]{"CarPlay", "Android Auto"}, "aa".equals(opelProjectionAction()) ? 1 : 0,
+                new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int which) {
+                    d.dismiss(); setOpelProjection(which);
+                    if (next != null) next.run();
+                }})
+            .setCancelable(false)
+            .show();
+    }
 
     private void wizardWelcome() {
         new TB(this, dlg())
@@ -4440,6 +4470,10 @@ public class Main extends Activity {
         String c = prefs.getString(key, null);
         if (c != null) return labelOf(c);
         if ("btaudio".equals(key)) { ComponentName cn = btMusicApp(); return cn != null ? "Automático · " + labelOf(cn.flattenToString()) : "No encontrada"; }
+        if ("carplay".equals(key)) {
+            String cn = carPlayApp();
+            return cn != null ? "Automático · " + labelOf(cn) : "No encontrada";
+        }
         if ("aa".equals(key)) {
             String p = prefs.getString("conn_app", null);
             if (p != null) return labelOf(p);
@@ -4456,12 +4490,14 @@ public class Main extends Activity {
     /** Lista de botones con su app; tocar uno deja elegir otra. Funciona igual en cualquier versión de Android. */
     private void reviewShortcuts(final Runnable next) {
         final String[] items = new String[REVIEW.length];
-        for (int i = 0; i < REVIEW.length; i++) items[i] = REVIEW[i][1] + "\n    → " + shortcutLabel(REVIEW[i][0]);
+        final String[][] entries = REVIEW.clone();
+        if (modernDesign()) entries[entries.length - 1] = new String[]{opelProjectionAction(), opelProjectionLabel()};
+        for (int i = 0; i < entries.length; i++) items[i] = entries[i][1] + "\n    → " + shortcutLabel(entries[i][0]);
         new TB(this, dlg())
             .setTitle("¿Qué app abre cada botón?")
             .setItems(items, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, final int w) {
-                    pickFor(REVIEW[w][0], REVIEW[w][1], new Runnable() { public void run() { reviewShortcuts(next); } });
+                    pickFor(entries[w][0], entries[w][1], new Runnable() { public void run() { reviewShortcuts(next); } });
                 }
             })
             .setCancelable(false)
@@ -5501,7 +5537,7 @@ public class Main extends Activity {
                 new IntCb() { public void on(int i) {
                     prefs.edit().putString("compact_main_panel", i == 1 ? "map" : "vehicle").apply(); rebuild();
                 }});
-            toggle(design, "Cuatro accesos grandes", "Radio · CarPlay · Teléfono · Todas las apps",
+            toggle(design, "Cuatro accesos grandes", "aa".equals(opelProjectionAction()) ? "Radio · Android Auto · Teléfono · Todas las apps" : "Radio · CarPlay · Teléfono · Todas las apps",
                 prefs.getBoolean("compact_four_shortcuts", true), new IntCb() { public void on(int i) {
                     prefs.edit().putBoolean("compact_four_shortcuts", i == 1).apply(); rebuild();
                 }});
@@ -5727,6 +5763,12 @@ public class Main extends Activity {
     }
 
     private void catConnection(LinearLayout body) {
+        if (modernDesign()) {
+            LinearLayout opel = section(body, "Opel Style");
+            segmented(opel, "Proyección en el inicio Opel", "Elige el acceso de los cuatro botones grandes del inicio.",
+                new String[]{"CarPlay", "Android Auto"}, "aa".equals(opelProjectionAction()) ? 1 : 0,
+                new IntCb() { public void on(int i) { setOpelProjection(i); } });
+        }
         LinearLayout c = section(body, "Celular");
         String chosen = prefs.getString("conn_app", null);
         row(c, "Cómo conectar el celular", "La app que se abre al conectar por USB", chosen != null ? labelOf(chosen) : "Preguntar",

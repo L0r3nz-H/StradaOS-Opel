@@ -948,3 +948,7 @@ Gris suave	Kelabu lembut
 Ver ahora	Lihat sekarang
 Toca la pantalla para volver	Ketik skrin untuk kembali
 Foto predeterminada	Foto lalai
+Proyección en el inicio Opel	Unjuran pada laman utama Opel
+Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Pilih pintasan pada laman utama Opel. Anda boleh menukarnya dalam Sambungan.
+Elige el acceso de los cuatro botones grandes del inicio.	Pilih pintasan unjuran dalam empat butang utama yang besar.
+Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Telefon · Semua aplikasi

@@ -963,3 +963,7 @@ Gris suave	Soft gray
 Ver ahora	Preview now
 Toca la pantalla para volver	Tap the screen to go back
 Foto predeterminada	Default photo
+Proyección en el inicio Opel	Opel home projection
+Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Choose the shortcut shown on the Opel home screen. You can change it later in Connections.
+Elige el acceso de los cuatro botones grandes del inicio.	Choose the projection shortcut in the four large home buttons.
+Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Phone · All apps

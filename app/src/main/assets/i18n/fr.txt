@@ -937,3 +937,7 @@ Gris suave	Gris doux
 Ver ahora	Voir maintenant
 Toca la pantalla para volver	Touchez l'écran pour revenir
 Foto predeterminada	Photo par défaut
+Proyección en el inicio Opel	Projection sur l’accueil Opel
+Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Choisissez le raccourci de l’accueil Opel. Vous pourrez le modifier dans Connexions.
+Elige el acceso de los cuatro botones grandes del inicio.	Choisissez le raccourci de projection parmi les quatre grands boutons.
+Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Téléphone · Toutes les apps

@@ -937,3 +937,7 @@ Gris suave	Yumuşak gri
 Ver ahora	Şimdi göster
 Toca la pantalla para volver	Geri dönmek için ekrana dokunun
 Foto predeterminada	Varsayılan fotoğraf
+Proyección en el inicio Opel	Opel ana ekran yansıtması
+Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Opel ana ekranındaki kısayolu seçin. Daha sonra Bağlantılar bölümünden değiştirebilirsiniz.
+Elige el acceso de los cuatro botones grandes del inicio.	Dört büyük ana ekran düğmesindeki yansıtma kısayolunu seçin.
+Radio · Android Auto · Teléfono · Todas las apps	Radyo · Android Auto · Telefon · Tüm uygulamalar

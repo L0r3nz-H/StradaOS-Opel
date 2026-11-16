@@ -15,7 +15,7 @@ themes, and GPS speed correction are reused.
 ## Implemented behavior
 
 - Two large panels, readable text, large media controls, and an optional four-item
-  dock: **Radio · CarPlay · Phone · All apps**. This requested order takes
+  dock: **Radio · CarPlay or Android Auto · Phone · All apps**. This requested order takes
   precedence over labels in the supplied reference image.
 - Opel Style uses a fixed red header/accent. The accent selector is hidden in
   Appearance and skipped in setup. The standard accent remains stored.
@@ -99,6 +99,7 @@ photo menu on tap or long-press.
 | `opel_theme` | `dark` / `light` / `auto` / `system`; default `dark` | Independent Opel theme mode |
 | `compact_main_panel` | `vehicle` / `map`; default `vehicle` | Main compact panel |
 | `compact_four_shortcuts` | boolean; default `true` | Four fixed functions or existing configurable dock |
+| `opel_projection` | `carplay` / `aa`; default `carplay` | Projection shortcut label/icon/action; selected during Opel setup or Connections, hidden in standard style |
 | `compact_show_speed` | boolean; default `false` | Optional centered GPS speed |
 
 The original plan selected density and design independently. Since 2026-11-16,
@@ -173,7 +174,8 @@ permissions, leave the adapter unavailable; those changes are outside scope.
 | Compact action | Existing implementation |
 | --- | --- |
 | Radio | `runFn("radio")` → `openSlot(0)` |
-| CarPlay | `runFn("carplay")` → `openCarPlay()`; assignment through `pickFor("carplay", …)` |
+| CarPlay (selected) | `runFn("carplay")` → `openCarPlay()`; assignment through `pickFor("carplay", …)` |
+| Android Auto (selected) | `runFn("aa")` → `openAndroidAuto()`; existing AA app/connection selection |
 | Phone | `runFn("bt")` → `openSlot(1)`; existing Bluetooth/phone assignment |
 | All apps | `runFn("apps")` → `openDrawer()` |
 | Navigation outside compact dashboard | `openNavApp()` and `nav_app` |
@@ -182,7 +184,7 @@ permissions, leave the adapter unavailable; those changes are outside scope.
 | Settings | `openSettings()` through the always-visible gear |
 
 The four functional positions neither read nor overwrite `dock_0…dock_6`.
-Their order/labels remain fixed while the underlying radio, CarPlay, and phone
+Their order stays fixed; the second position follows `opel_projection`. The underlying radio, projection, and phone
 apps remain assignable. Existing missing-app pickers/help still apply. CarPlay
 requires compatible hardware/an adapter and its Android app.
 
