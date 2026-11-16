@@ -1,36 +1,45 @@
-# Cómo probar StradaOS sin el carro
+# Testing StradaOS without a car
 
-Hay tres niveles de prueba, del más rápido al más real.
+There are three levels of testing, from fastest to closest to real hardware.
 
-## 1. Pruebas automáticas en emuladores (en cada cambio)
+## 1. Automated emulator tests
 
-Cada push a `main` que toca `app/` corre el workflow **«Pruebas en emuladores»** (`.github/workflows/pruebas.yml`):
+In the upstream repository, each push to `main` that changes `app/` runs **Emulator tests** (`.github/workflows/pruebas.yml`):
 
-- Instala la versión de prueba en emuladores de **Android 4.1 (API 16), 4.4 (19), 5.0 (21), 7.0 (24), 9 (28), 11 (30) y 14 (34)**, con pantalla de carro de **1024x600**.
-- Abre cada pantalla (asistente, inicio, menú de un botón, lista de apps, Ajustes → Accesos, Música, Mapa, Acerca de, lista de música, todas las apps, barra cambiada) y toma una captura.
-- **Falla si StradaOS se cierra o se traba** en cualquiera de esas versiones (`CIERRES.txt`).
-- Las capturas, el logcat y el registro de fallos quedan en la rama **[`pruebas`](https://github.com/lordnordic-debug/StradaOS/tree/pruebas)**, una carpeta por versión de Android, con un resumen en su `README.md`.
+- Installs the test build on Android **4.1 / API 16, 4.4 / 19, 5.0 / 21, 7.0 / 24, 9 / 28, 11 / 30, and 14 / 34**, with a **1024 × 600** head-unit display.
+- Opens the setup wizard, dashboard, shortcut menu, app list, shortcut/music/map/about settings, music selection, all apps, and modified dock, taking screenshots.
+- **Fails if StradaOS crashes or hangs**, recording results in `CIERRES.txt`.
+- Saves screenshots, logcat, and crash reports in the upstream [`pruebas` branch](https://github.com/lordnordic-debug/StradaOS/tree/pruebas), grouped by Android version with a README summary.
 
-El script es `.github/scripts/smoke.sh`. La versión de prueba acepta `--es prueba VALOR` para abrir cada pantalla sin tocar coordenadas (ver `testHook` en `Main.java`; solo funciona en el paquete `.debug`).
+The script is `.github/scripts/smoke.sh`. The `.debug` package accepts `--es prueba VALUE` to open screens without coordinate-based taps; see `Main.testHook()`.
 
-## 2. Versión de prueba en el celular (minutos)
+Fork workflows may need separate configuration. Do not treat historical upstream CI results as tests of a modified Opel build.
 
-Cada push a `main` publica **«StradaOS Prueba»** en el Release [`prueba`](https://github.com/lordnordic-debug/StradaOS/releases/tag/prueba):
+## 2. Test build on a phone
 
-- Enlace fijo: https://github.com/lordnordic-debug/StradaOS/releases/download/prueba/StradaOS-prueba.apk
-- Se instala **junto a la normal** (paquete `com.stradaos.launcher.debug`), con el nombre «StradaOS Prueba». No reemplaza ni toca la versión instalada.
-- Está firmada con la misma llave, así que cada prueba nueva **se instala encima** de la anterior sin desinstalar.
-- No avisa actualizaciones: para la siguiente prueba se vuelve a abrir el enlace.
-- No es una versión oficial: no aparece como «última versión» ni en la página ni en el aviso de la app.
+Upstream pushes to `main` publish **StradaOS Prueba** in the [`prueba` prerelease](https://github.com/lordnordic-debug/StradaOS/releases/tag/prueba):
 
-**En el celular:** descargar el APK, instalar (permitir «Instalar apps desconocidas» para el navegador), abrir «StradaOS Prueba» y **girar el celular en horizontal** (activar la rotación automática). Si Android pregunta qué launcher usar al tocar Inicio, elegir el de siempre con «Siempre»: StradaOS Prueba se abre desde su ícono.
+- Fixed APK link: https://github.com/lordnordic-debug/StradaOS/releases/download/prueba/StradaOS-prueba.apk
+- Installs alongside the regular version as `com.stradaos.launcher.debug`, with the application name “StradaOS Prueba”. It does not replace the regular installation.
+- Uses a consistent signing key, so subsequent test APKs update it without uninstalling.
+- Does not offer regular-release updates; download the next test APK from the same link.
+- Does not appear as the latest official release on the website or in the standard app updater.
 
-Sirve para todo lo que no depende del carro: barra inferior, apps preferidas (Spotify, Waze, Maps del celular), ajustes, asistente, mapa y clima. No sirve para radio, cámara de reversa, Bluetooth de la pantalla ni Android Auto por USB.
+Download and install the APK, allowing installation from that source if needed. Open it and rotate the phone to landscape, enabling auto-rotation. If Android asks which home app to use, keep the phone's usual launcher as the default and open StradaOS Prueba using its app icon.
 
-## 3. En la pantalla del carro (lo que depende del equipo)
+This tests the dock, preferred music/navigation apps, settings, setup, maps, and weather. It does not verify factory radio, reverse camera, head-unit Bluetooth, or Android Auto over USB.
 
-Lo que toca radio, cámara, Bluetooth de fábrica o Android Auto se prueba en la pantalla. Se puede instalar «StradaOS Prueba» también ahí (convive con la normal) o esperar la versión oficial.
+## 3. Tests on the head unit
 
-## Publicar una versión oficial
+Radio, reverse camera, factory Bluetooth, and USB projection must be checked on the actual device. The separate test build can coexist with the regular version, or you can wait for an official release.
 
-Cuando la prueba quede bien: subir `versionCode`/`versionName`, agregar los changelogs y hacer push (ver la skill de StradaOS). `release.yml` publica el Release `vX.Y.Z` firmado y la app avisa la actualización.
+## Opel Style checks
+
+- Select *Settings → Appearance → Home screen design → Opel Style*. It must activate the compact Opel layout directly, without a second layout selector.
+- Check that the accent-color section is absent. Switch back to StradaOS: the regular layout and saved custom accent must return.
+- Verify Dark, Light, Auto, and System modes; vehicle/map choice; optional speed; four large shortcuts; restart persistence; and migration from older separate design/layout settings.
+- Check Android 4.2 / API 17 on the target head unit. Android-11 screenshots are not a substitute for that test.
+
+## Publishing an official release
+
+After validation, increment the version, add release notes, and push the release changes. Upstream `release.yml` publishes a signed `vX.Y.Z` release and enables in-app update notifications for the standard edition. The Opel edition uses separately signed APKs.

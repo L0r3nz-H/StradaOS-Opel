@@ -895,3 +895,5 @@ Ocultar la barra del sistema	إخفاء شريط النظام
 Esconde también la barra de navegación de tu pantalla (abajo o al costado). Desliza desde el borde para verla un momento	يخفي أيضًا شريط التنقل في شاشتك (في الأسفل أو على الجانب). اسحب من الحافة لرؤيته للحظة
 Corrección del velocímetro	تصحيح عداد السرعة
 Suma o resta a la velocidad del GPS para que coincida con el tablero de tu carro	يضيف إلى سرعة GPS أو يطرح منها لتطابق لوحة عدادات سيارتك
+
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: تخطيط مدمج بلمسة حمراء ثابتة.

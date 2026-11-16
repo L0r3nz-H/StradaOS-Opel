@@ -1,47 +1,105 @@
-# Historial de cambios
+# Changelog
 
-Las notas detalladas de cada versión están en [`changelogs/`](changelogs) y en [Releases](../../releases).
+Detailed notes are in [`changelogs/`](changelogs) and [upstream releases](https://github.com/lordnordic-debug/StradaOS/releases).
 
-## 2.9.4 — Lista para tiendas F-Droid
-- Instalada desde F-Droid/IzzyOnDroid: se actualiza por la tienda; los avisos de GitHub son opcionales y explicados.
+## Opel Style menu refinement
 
-## 2.9.3 — El inicio vuelve a ser lo primero que ves
-- «Audio Bluetooth» ya no se abre solo al arrancar.
-- Cambio automático a Bluetooth: en prueba y apagado por defecto; ▶ en el inicio pasa el sonido a Bluetooth.
-- Revisar qué app abre cada botón (asistente y Accesos y apps).
+- One home-screen design choice: StradaOS or Opel Style. Opel Style directly activates the 7-inch compact dashboard.
+- Fixed Opel red accent; the custom-accent section and setup step are hidden in Opel Style.
+- Standard Dark, Light, Auto, and System theme modes remain available.
+- Existing Opel/compact configurations migrate without discarding saved standard colors, themes, or shortcut assignments.
+- Repository Markdown documentation is maintained in English.
 
-## 2.9.2 — Actualizaciones confiables y compatibilidad
-- Consulta todas las fuentes de actualización y usa la más nueva; muestra el resultado de cada una.
-- Audio Bluetooth automático también al venir de la radio.
-- Tabla de compatibilidad por versión de Android y marca (Ajustes → Sistema).
+## Current Opel build — 2.21.2-opel
 
-## 2.9.1 — Arreglo del audio Bluetooth
-- Play después de pausar funciona de nuevo con el audio automático.
-- Si el sonido no es Bluetooth cuando el celular empieza a sonar, abre «Audio Bluetooth» un instante y vuelve a donde estabas.
+The local signed Opel build uses versionCode 54 and package
+`com.stradaos.launcher.opel`, based on upstream `b2f327d` dated 2026-11-15.
+It retains the transparent Astra J photo, centered clock/optional speed,
+vehicle-or-map panel, and four large shortcuts. Valid weather is explicitly
+labeled; missing temperature is hidden. Vehicle-temperature integration remains
+pending a confirmed head-unit interface.
 
-## 2.9.0 — Audio Bluetooth sin abrir la app de fábrica
-- La música del celular suena al darle play, sin abrir la app «Audio Bluetooth» (automático en Clinkway/Autochips).
-- Otras marcas: opción para abrir la app de música Bluetooth un momento al conectar el celular.
-- El botón ▶ del inicio activa el audio Bluetooth. Diagnóstico Bluetooth.
+See [Opel release notes](changelogs/2.21.2-opel.md) and
+[APK installation/validation](docs/OPEL_APK.md). This describes the local build;
+it does not assert that an Opel GitHub release has been published.
 
-## 2.8.0 — Primera versión pública
-- Proyecto abierto en GitHub (GPL-3.0).
-- Avisos de actualización desde GitHub, con descarga directa o código QR.
-- *Acerca de*: buscar actualizaciones, estrella en GitHub, donar y reportar problemas.
+## Recent upstream history
+
+| Version | Main changes |
+| --- | --- |
+| [2.21.2](changelogs/2.21.2.md) | Cable-only Android Auto metadata; no repeated Clinkway service binding when absent |
+| [2.21.1](changelogs/2.21.1.md) | Hide system navigation bar; displayed-speed correction |
+| [2.21.0](changelogs/2.21.0.md) | Portrait layout, backups, themed dialogs, French, startup app |
+| [2.20.1](changelogs/2.20.1.md) | Gauge layout refinements, day/week maintenance units, Turkish |
+| [2.20.0](changelogs/2.20.0.md) | Analog/mixed gauges, custom maintenance, reorganized settings |
+| [2.19.0](changelogs/2.19.0.md) | Configurable dock count/icons, icon packs, text sizes |
+| [2.18.0](changelogs/2.18.0.md) | Weather details, panel visibility, photo handling |
+| [2.17.0](changelogs/2.17.0.md) | Scheduled/system themes, Wi-Fi/BT status, Arabic |
+| [2.16.0](changelogs/2.16.0.md) | Offline maps and in-app downloads |
+| [2.15.0](changelogs/2.15.0.md) | Player side, hidden car card, collapsible projection panel, dock layouts |
+| [2.14.0](changelogs/2.14.0.md) | Player gestures/source tracking, cached maps, exit controls, Malay |
+| [2.13.0](changelogs/2.13.0.md) | Hidden apps, oil-change correction, readable light-mode inputs |
+| [2.12.0](changelogs/2.12.0.md) | Oil reminders, heading-up map, Italian/German, verified updates |
+| [2.11.1](changelogs/2.11.1.md) | Android 9 TLS/map fix |
+| [2.11.0](changelogs/2.11.0.md) | Wide displays, GPS status, speed units |
+| [2.10.1](changelogs/2.10.1.md) | Default-home setup, boot launch, optional live map |
+| [2.10.0](changelogs/2.10.0.md) | Configurable shortcuts, preferred apps, Spanish/English/Portuguese |
+
+Earlier Opel ports are documented in [2.15.0-opel](changelogs/2.15.0-opel.md)
+and [2.16.0-opel](changelogs/2.16.0-opel.md).
+
+## Early upstream history
+
+## 2.9.4 — Ready for F-Droid-style stores
+
+- Store-installed apps receive store updates; GitHub notifications are optional and explained.
+
+## 2.9.3 — Show the dashboard first
+
+- Bluetooth Audio no longer opens automatically at startup.
+- Automatic routing is experimental and off by default; dashboard Play routes Bluetooth audio.
+- Review detected app assignments in setup and shortcut settings.
+
+## 2.9.2 — Reliable updates and compatibility
+
+- Check all update sources and select the newest result; show individual responses.
+- Automatic Bluetooth audio routing can follow radio playback.
+- Compatibility information lists Android/manufacturer requirements.
+
+## 2.9.1 — Bluetooth audio fixes
+
+- Play works after pausing with automatic routing enabled.
+- Briefly open Bluetooth Audio when routing is needed, then return to the previous app.
+
+## 2.9.0 — Bluetooth routing without manually opening the factory app
+
+- Route phone music through the head unit; automatic Clinkway/Autochips support was revised in subsequent releases.
+- Other brands can briefly open their Bluetooth app on connection.
+- Dashboard Play activates Bluetooth audio; Bluetooth diagnostics added.
+
+## 2.8.0 — First public release
+
+- GPL-3.0 repository opened on GitHub.
+- GitHub update notifications with direct APK or QR download.
+- About page: update checks, GitHub star, donations, and issue reporting.
 
 ## 2.7
-- Ajustes rediseñados con barra lateral y categorías.
-- Modo oscuro / claro / automático.
-- Clima (°C/°F) y brillo del mapa.
 
-## 2.1 – 2.6 · StradaOS
-- Nuevo nombre e ícono, y compatibilidad con Android moderno (permisos e instalación en Android 7+, música en Android 5+).
-- Mapa en vivo con varias fuentes compatibles con Android 4.x, y diagnóstico.
-- Botones de Android Auto y CarPlay, y elección del método de conexión del celular.
-- Protección contra apps de espejo (EasyConnection) que bloquean el USB.
+- Settings redesigned with a sidebar and categories.
+- Dark, light, and automatic themes.
+- Weather units and map brightness.
+
+## 2.1–2.6 — StradaOS
+
+- New name/icon and support for modern Android permissions, APK installation on Android 7+, and music on Android 5+.
+- Live maps with multiple sources compatible with Android 4.x and map diagnostics.
+- Android Auto/CarPlay buttons and phone connection selection.
+- Protection against mirroring apps such as EasyConnection taking over USB.
 
 ## 2.0
-- Versión universal: asistente inicial, foto del vehículo con quitado de fondo y color de acento.
 
-## 1.0 – 1.9 · Picanto Launcher (prototipo)
-- Pantalla de inicio, reproductor con carátula, lectura de la pista por Bluetooth (Autochips) y Android Auto, y compatibilidad con Android 4.1.
+- Universal edition: setup wizard, vehicle photo/background removal, and accent color.
+
+## 1.0–1.9 — Picanto Launcher prototype
+
+- Dashboard, player with artwork, Autochips Bluetooth and Android Auto track information, and Android 4.1 support.

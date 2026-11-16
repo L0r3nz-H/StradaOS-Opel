@@ -906,3 +906,5 @@ Ocultar la barra del sistema	Nascondi la barra di sistema
 Esconde también la barra de navegación de tu pantalla (abajo o al costado). Desliza desde el borde para verla un momento	Nasconde anche la barra di navigazione dello schermo (in basso o di lato). Scorri dal bordo per vederla per un momento
 Corrección del velocímetro	Correzione del tachimetro
 Suma o resta a la velocidad del GPS para que coincida con el tablero de tu carro	Aggiunge o toglie alla velocità GPS perché coincida con il cruscotto della tua auto
+
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: layout compatto con accento rosso fisso.

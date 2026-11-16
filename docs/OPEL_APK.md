@@ -1,89 +1,111 @@
-# Installierbare Opel-Edition
+# Installable Opel edition
 
-- App-Name: **StradaOS Opel**
-- Paket: `com.stradaos.launcher.opel` (parallel zu StradaOS und StradaOS Prueba)
+- App name: **StradaOS Opel**
+- Package: `com.stradaos.launcher.opel`, installed alongside StradaOS and StradaOS Prueba
 - Version: `2.21.2-opel`, versionCode 54
-- Android: minSdk 16, targetSdk 28; keine Änderung der Bildschirmauflösung
-- Build-Typ: `opel`, basiert auf `release`, nicht debuggable
+- Android: minSdk 16, targetSdk 28; screen resolution remains unchanged
+- Build type: `opel`, based on `release`, not debuggable
 
-Die erste Installation verwendet Opel Navi 900 Modern, den Kompaktmodus und
-den Fahrzeugnamen „Astra J“. Der Einrichtungsassistent bleibt erhalten.
-Eigene spätere Einstellungen werden nicht bei jedem Start überschrieben.
-Hell, Dunkel und Automatisch bleiben auswählbar. Die eigene Opel-Edition bietet
-keine normalen StradaOS-Updates an; Updates benötigen dieselbe Paketkennung
-und denselben Signierschlüssel.
+On first installation, this edition selects **Opel Style**, the compact vehicle
+view, and the name **Astra J**. The setup wizard remains available. Later user
+settings are preserved across launches. Dark, Light, Automatic, and System modes
+remain selectable, with a separate Opel preference. Opel Style uses a fixed red
+accent and hides the custom accent selector, including during setup.
 
-## Installationsdatei vom 16.11.2026
+The Opel edition does not offer ordinary StradaOS updates. Compatible updates
+must use the same package name and Opel signing key.
 
-Die installierbare, lokal signierte Datei liegt unter:
+## Installation file — 2026-11-16
+
+The locally signed installation file is:
 
 `app/build/outputs/install/StradaOS-Opel-2.21.2.apk`
 
-Daneben liegt `StradaOS-Opel-2.21.2.apk.sha256` mit der SHA-256-Prüfsumme.
-APK auf das Android-Autoradio kopieren und mit dem dortigen Dateimanager öffnen.
-Die Installation aus dieser Quelle muss am Radio gegebenenfalls erlaubt werden.
-Bestehendes StradaOS wird durch das andere Paket nicht ersetzt; dessen
-Einstellungen werden auch nicht automatisch übernommen.
+Its SHA-256 checksum is in `StradaOS-Opel-2.21.2.apk.sha256` beside it. Copy the
+APK to the Android head unit and open it with its file manager. Allow installation
+from that source if requested. The different package does not replace an existing
+standard StradaOS installation or automatically import its settings.
 
-## Build und Signierung
+## Build and signing
 
-Der neue Branch `feature/opel-latest-2.21.2` basiert auf Upstream 2.21.2, Commit
-`b2f327dcfae5e8341cb7851c525dc893545b3ee2` vom 15.11.2026. Darauf sind die
-Opel-Anpassungen des bisherigen Branches portiert. Der alte Branch bleibt
-erhalten. Opel-Design, Kompaktlayout, Paketkennung und Update-Trennung bleiben
-erhalten; neuere Upstream-Funktionen wie Wartungen, Backup, Hochformat,
-System-/Zeitplan-Theme und Geschwindigkeitskorrektur werden weiterverwendet.
+Branch `feature/opel-latest-2.21.2` is based directly on upstream 2.21.2, commit
+`b2f327dcfae5e8341cb7851c525dc893545b3ee2` dated 2026-11-15. The previous Opel
+branch is retained. This port preserves the Opel package and update separation
+while reusing upstream maintenance, backup, portrait layout, system/scheduled
+themes, and speed correction.
 
-`./gradlew assembleOpel lintOpel` baut die **unsignierte** Zwischenversion unter
-`app/build/outputs/apk/opel/StradaOS-2.21.2-opel.apk`. Diese vor der Installation
-mit `zipalign` ausrichten und anschließend mit `apksigner` signieren.
-Die ausgelieferte Datei wurde mit v1-, v2- und v3-Signatur erstellt; die
-v1-Signatur ist für Android 4.2 vorhanden und mit `--min-sdk-version 16` geprüft.
+```sh
+./gradlew assembleDebug assembleOpel lintOpel
+```
 
-Der lokale Schlüssel liegt außerhalb des Repositories unter
-`~/.config/stradaos/opel-signing/stradaos-opel.jks`, Alias `stradaos-opel`.
-Die zugehörige Passwortdatei liegt im selben geschützten Verzeichnis.
-Dieses Verzeichnis für zukünftige kompatible Opel-Updates aufbewahren.
-Der Schlüssel ist unabhängig von offiziellen StradaOS-Releases.
+This produces the **unsigned** intermediate APK at
+`app/build/outputs/apk/opel/StradaOS-2.21.2-opel.apk`. Align it with `zipalign`
+before signing with `apksigner`. The distributed file has v1, v2, and v3 signatures;
+v1 is included for Android 4.2, and verification uses `--min-sdk-version 16`.
 
-## Bisherige Validierung der ausgelieferten 2.15.0
+The local key is stored outside the repository at
+`~/.config/stradaos/opel-signing/stradaos-opel.jks`, alias `stradaos-opel`.
+Its password file is in the same protected directory. Keep that directory for
+future compatible updates. This key is independent of official StradaOS releases.
 
-- `assembleOpel` erfolgreich; App-Name, Paket, minSdk und targetSdk aus der
-  finalen APK mit `aapt` kontrolliert. Nicht als debuggable markiert.
-- `apksigner verify --verbose --min-sdk-version 16`: gültig; v1/v2/v3 vorhanden.
-- Signierte APK auf Android-11-Emulator installiert und gestartet. Die
-  Berechtigungsabfrage zeigt „StradaOS Opel“; dahinter erscheint das Opel-
-  Kompaktlayout mit Fahrzeugfoto und „Astra J“. Kein Crash-Eintrag.
-- `lintOpel` ausgeführt: bestehende 60 Errors, 1 Fatal, 62 Warnings.
-  Wegen `abortOnError false` bedeutet Task-Erfolg keinen fehlerfreien Lint-Befund.
-- Laufzeit auf API 17 und herstellerspezifische Radio-/Bluetooth-/CarPlay-
-  Funktionen sind weiterhin auf dem echten Zielgerät zu prüfen.
+## Validation history
 
-## Validierung 2.16.0-opel (11.11.2026)
+### 2.15.0-opel
 
-- `assembleOpel lintOpel` mit JDK 17 und Android SDK 35 erfolgreich ausgeführt.
-- APK-Metadaten mit `aapt` geprüft: `com.stradaos.launcher.opel`,
-  `2.16.0-opel`, versionCode 46, minSdk 16, targetSdk 28.
-- Alle 33 Java-Quelldateien zusätzlich mit Java-8-Zielversion kompiliert.
-- Offline-Renderer über den übernommenen Desktop-Prüfstand mit einer echten
-  mapsforge-Karte von Monaco im hellen und dunklen Modus ausgeführt.
-- Lint: 60 Errors, 1 Fatal, 60 Warnings. Die Anzahl schwerer Befunde entspricht
-  dem vorherigen Stand; `abortOnError false` lässt den Task trotzdem passieren.
-- Die neue Build-APK ist unsigniert. Keine neue signierte Installationsdatei
-  erstellt und kein Emulator-/Zielgerätetest durchgeführt.
+- `assembleOpel` succeeded. `aapt` confirmed the app name, package, SDK levels,
+  and absence of the debuggable flag.
+- `apksigner verify --verbose --min-sdk-version 16` passed with v1/v2/v3.
+- Installed and launched on an Android 11 emulator: permission prompts showed
+  StradaOS Opel, followed by the compact photo view and Astra J. No crash entry.
+- Lint reported 60 errors, 1 fatal issue, and 62 warnings. Because
+  `abortOnError false` is configured, task success does not mean a clean report.
+- API 17 and manufacturer-specific radio, Bluetooth, and CarPlay functions
+  still require testing on the target device.
 
-## Validierung 2.21.2-opel (16.11.2026)
+### 2.16.0-opel — 2026-11-11
 
-- `assembleDebug assembleOpel lintOpel` mit JDK 17, Gradle 8.11.1 und
-  Android SDK 35 erfolgreich. minSdk 16 und targetSdk 28 unverändert.
-- Installations-APK mit dem bisherigen Opel-Schlüssel signiert und mit
-  `apksigner verify --min-sdk-version 16` geprüft; v1/v2/v3 gültig.
-  Zertifikat stimmt mit der ausgelieferten 2.15.0 überein. Metadaten:
-  `StradaOS Opel`, `com.stradaos.launcher.opel`, `2.21.2-opel`, versionCode 54.
-- Lint: 72 Errors, 1 Fatal, 81 Warnings. Auf den gegenüber Upstream
-  geänderten Opel-Java-Zeilen keine Errors/Fatals, eine RTL-Warnung.
-  Der gesamte Lint-Bericht ist weiterhin nicht fehlerfrei.
-- Kein neuer Emulator- oder Gerätetest: Kein Emulator installiert; der
-  Zugriff auf die T3-Geräteansicht ist in dieser Umgebung deaktiviert.
-  Die bisherigen Screenshots und Laufzeitnachweise oben gehören zu älteren
-  Versionen und sind kein Laufzeitnachweis für 2.21.2.
+- `assembleOpel lintOpel` succeeded with JDK 17 and Android SDK 35.
+- Metadata: package `com.stradaos.launcher.opel`, version `2.16.0-opel`,
+  versionCode 46, minSdk 16, targetSdk 28.
+- All 33 Java files also compiled with Java 8 as the target language level.
+- The inherited desktop harness rendered a real Monaco mapsforge map in both
+  light and dark modes.
+- Lint reported 60 errors, 1 fatal issue, and 60 warnings, with no increase in
+  severe findings. The build APK was unsigned; no new installation APK or
+  emulator/target-device test was produced for that revision.
+
+### 2.21.2-opel — 2026-11-16
+
+- `assembleDebug assembleOpel lintOpel` succeeded with JDK 17, Gradle 8.11.1,
+  and Android SDK 35. minSdk 16 and targetSdk 28 remain unchanged.
+- The installation APK uses the existing Opel key. Signature verification with
+  minimum SDK 16 passed for v1/v2/v3; the certificate matches the distributed
+  2.15.0 APK. Metadata: StradaOS Opel, `com.stradaos.launcher.opel`,
+  `2.21.2-opel`, versionCode 54.
+- The initial port reported 72 lint errors, 1 fatal issue, and 81 warnings.
+  Opel Java lines changed relative to upstream had no errors/fatal findings and
+  one RTL warning. The full report remains unclean.
+- A native ARM64 Android 11/API 30 test environment was subsequently installed
+  at 1024 × 600 and 160 dpi. The signed APK installs as an update and launches.
+  Appearance was checked in both styles: the single design selector switches
+  directly to compact Opel, the accent section is absent there, and switching
+  back restores the chosen standard accent and Dark mode. Opel Light persisted
+  independently across a restart.
+- Six debug-package startup cases passed: old Opel/standard, StradaOS/compact,
+  canonical Opel/compact, canonical StradaOS/standard, missing values, and unknown
+  values. Both design-switch directions wrote the matching layout while
+  preserving accent, per-style modes, car name, and dock assignment.
+- No lint finding is on the Java lines changed for this menu refinement. The
+  full lint totals remain 72 errors, 1 fatal issue, and 81 warnings. The crash
+  log was empty during the emulator checks.
+- Device-specific functions and Android 4.2/API 17 runtime compatibility remain
+  outside this emulator's coverage.
+
+## Simplified style selection
+
+Appearance now offers **StradaOS** and **Opel Style** through one selector.
+Opel Style always activates the 7-inch compact layout. Switching to StradaOS
+restores its standard layout, stored accent, and separate light/dark preference.
+Legacy installations with either the old Opel design or the compact layout are
+normalized to Opel Style. Compact vehicle/map, four-shortcut, and optional GPS
+speed settings remain available. See [the compact layout specification](COMPACT_7_INCH_PLAN.md).

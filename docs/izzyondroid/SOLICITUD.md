@@ -1,9 +1,9 @@
-# Solicitud de inclusión en IzzyOnDroid
+# Historical IzzyOnDroid inclusion request
 
-Dónde: https://codeberg.org/IzzyOnDroid/repodata/issues → **New issue** → plantilla de solicitud de app («App request»).
-Requisito: una cuenta de Codeberg (gratis).
+Location: https://codeberg.org/IzzyOnDroid/repodata/issues → **New issue** → **App request** template.
+Requires a free Codeberg account.
 
-Llena los campos de la plantilla con lo de abajo. Están en inglés porque así trabaja el equipo de IzzyOnDroid.
+The following is the original upstream submission text. Its package, feature, and APK-size descriptions are historical, not a current Opel-edition listing. Use the fields below when discussing that submission.
 
 ---
 
@@ -15,7 +15,7 @@ Llena los campos de la plantilla con lo de abajo. Están en inglés porque así 
 
 **Package name:** `com.stradaos.launcher`
 
-**Checklist (marcar todo):**
+**Checklist (as prepared for the original request):**
 - [x] The app complies with the App Inclusion Policy.
 - [x] The app is not already listed in the repo or issue tracker.
 - [x] The Fastlane folder is available in the app's repo.
@@ -63,6 +63,8 @@ Geocoder with BigDataCloud as fallback for the city name, GitHub (opt-in updates
 
 ---
 
-Después de enviarla:
-- Izzy revisa la app con su escáner y puede hacer preguntas en el mismo issue. Respóndelas o pásamelas.
-- Cuando la acepte, agrega la insignia de IzzyOnDroid al README; la URL te la da él.
+After submission:
+- IzzyOnDroid scans the app and may ask questions in the same issue. Reply there or pass the questions to the maintainer.
+- If accepted, add the provided IzzyOnDroid badge URL to the README.
+
+The later outcome is recorded in [project status](../ESTADO_PROYECTO.md): the original request was declined under the AI policy; it must not be presented as an accepted store listing.

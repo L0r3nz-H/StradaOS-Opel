@@ -1,114 +1,183 @@
 <div align="center">
 <img src="fastlane/metadata/android/es-ES/images/featureGraphic.png" alt="StradaOS">
-<h1>StradaOS</h1>
-<b>Una nueva vida para la pantalla Android de tu carro</b>
+<h1>StradaOS Opel</h1>
+<b>A new life for your Android car head unit</b>
 <br><br>
-<a href="https://github.com/lordnordic-debug/StradaOS/releases"><img src="https://img.shields.io/github/v/release/lordnordic-debug/StradaOS?color=FE3211&label=versi%C3%B3n"></a>
-<a href="https://github.com/lordnordic-debug/StradaOS/releases"><img src="https://img.shields.io/github/downloads/lordnordic-debug/StradaOS/total?color=FE3211&label=descargas"></a>
+<a href="https://github.com/lordnordic-debug/StradaOS/releases"><img src="https://img.shields.io/github/v/release/lordnordic-debug/StradaOS?color=FE3211&label=upstream%20version"></a>
+<a href="https://github.com/lordnordic-debug/StradaOS/releases"><img src="https://img.shields.io/github/downloads/lordnordic-debug/StradaOS/total?color=FE3211&label=upstream%20downloads"></a>
 <img src="https://img.shields.io/badge/Android-4.1%2B-3DDC84?logo=android&logoColor=white">
-<a href="LICENSE"><img src="https://img.shields.io/github/license/lordnordic-debug/StradaOS?label=licencia"></a>
+<a href="LICENSE"><img src="https://img.shields.io/github/license/lordnordic-debug/StradaOS?label=license"></a>
 <br><br>
-<a href="https://github.com/lordnordic-debug/StradaOS/releases/latest"><img src="https://raw.githubusercontent.com/NeoApplications/Neo-Backup/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png" width="200" alt="Descargar en GitHub"></a>
-<br>
-<b>🌐 <a href="https://lordnordic-debug.github.io/StradaOS/">lordnordic-debug.github.io/StradaOS</a></b> · <a href="#english">English</a> · <a href="#português">Português</a>
+<a href="https://lordnordic-debug.github.io/StradaOS/?lang=en">Upstream website</a> · <a href="https://github.com/lordnordic-debug/StradaOS">Original StradaOS</a>
 </div>
 
 ---
 
-**StradaOS** es un launcher (pantalla de inicio) **gratis, sin anuncios y de código abierto** para las pantallas Android de los carros. Se instala como una app más, **sin flashear ni tocar el sistema**, y si no te gusta la quitas y todo queda como estaba. Nació para revivir las radios que dicen *«Android 6»* pero por dentro corren Android 4.x, y también funciona en pantallas modernas.
+**StradaOS** is a **free, ad-free, open-source launcher** for Android car head units. Install it like any other app, **without flashing firmware or replacing Android**. Uninstall it to return to the previous setup. It was created for older radios advertised as Android 6 or newer that actually run Android 4.x, and also supports modern devices.
+
+This fork of [lordnordic-debug/StradaOS](https://github.com/lordnordic-debug/StradaOS) adds **Opel Style**, a compact dashboard for 7-inch 1024 × 600 displays. It includes a transparent Astra J photo, two large content areas, centered clock, optional GPS speed, and four large shortcuts: **Radio, CarPlay, Phone, All apps**. Select it under **Settings → Appearance → Home screen design**. The other choice is the standard **StradaOS** layout; there is no separate compact-layout selector. Opel Style uses a fixed red accent, so accent-color controls are hidden there. Dark, Light, Auto, and System modes remain available.
+
+See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/COMPACT_7_INCH_PLAN.md), and [Opel design history](docs/OPEL_NAVI_900_MODERN.md). The separate app is named **StradaOS Opel** and uses `com.stradaos.launcher.opel`.
+
+## Current Opel edition
+
+The current branch, `feature/opel-latest-2.21.2`, is based on upstream **2.21.2**
+(commit `b2f327d`, 2026-11-15). The local installable build is **2.21.2-opel**,
+versionCode **54**, with package `com.stradaos.launcher.opel` and app name
+**StradaOS Opel**. The previous Opel branch remains available. Upstream badges
+and release links above describe the original project, not an Opel APK release.
+
+| Option | StradaOS | Opel Style |
+| --- | --- | --- |
+| Home layout | Existing configurable layout, including portrait | Two large panels for a 7-inch landscape display |
+| Accent | Ten selectable colors | Fixed red; accent controls are hidden |
+| Theme | Dark, Light, Auto, System | The same modes, stored independently |
+| Main content | Vehicle, map/projection, and media options | Vehicle photo or map, plus large media controls |
+| Shortcuts | Existing configurable dock | Radio · CarPlay · Phone · All apps, or the existing dock |
+
+Switching styles preserves standard colors, theme modes, photos, and app
+assignments. Older separate Opel/compact selections migrate to Opel Style.
+The Opel edition starts in Opel Style on first installation.
+
+The vehicle panel shows **Astra J** above the transparent bundled photo; a user
+photo takes priority. Optional GPS speed is centered beneath it. With speed off,
+the name and image are centered together. The clock stays centered in the header.
+The compact dashboard has no direct navigation shortcut; navigation apps remain
+available through All apps and the standard navigation assignment.
+
+Temperature is displayed only when valid, fresh weather data is available and
+is labeled as weather. Without it, the temperature area stays empty. Reading the
+car's outside temperature is planned but **not implemented**: the target radio's
+exposed interface has not been confirmed.
 
 <p align="center">
-<img src="fastlane/metadata/android/es-ES/images/phoneScreenshots/1.png" width="49%">
-<img src="fastlane/metadata/android/es-ES/images/phoneScreenshots/2.png" width="49%">
-<img src="fastlane/metadata/android/es-ES/images/phoneScreenshots/3.png" width="49%">
-<img src="fastlane/metadata/android/es-ES/images/phoneScreenshots/5.png" width="49%">
+<img src="docs/screenshots/compact/07-opel-style-light-1024x600.png" width="49%" alt="Opel Style light dashboard with Astra J and four large shortcuts">
+<img src="docs/screenshots/compact/06-opel-style-menu-dark-1024x600.png" width="49%" alt="Current Appearance menu with StradaOS and Opel Style choices">
 </p>
 
-## ✨ Qué trae
+Actual Android 11/API 30 emulator captures at 1024 × 600, taken on 2026-11-16.
+The app is shown in German; repository documentation is in English.
+See the [screenshot index](docs/screenshots/compact/README.md) for historical captures.
 
-**En el inicio**
-- 🗺️ **Mapa en vivo y sin conexión:** descarga el mapa de tu país desde la app (gratis, de OpenStreetMap) y úsalo sin internet. La flecha se mueve suave con el GPS.
-- 📲 **Android Auto y CarPlay** con un toque: abre la app de tu pantalla o [Open Headunit](https://github.com/andreknieriem/headunit-revived) por USB.
-- 🎵 **Tu música:** título, artista y tiempo de lo que suena por Bluetooth, con controles grandes. Con Android Auto, también la carátula.
-- ⏱️ **Velocímetro**, clima, reloj y **recordatorio de cambio de aceite**.
-- 🚗 **Foto de tu vehículo**, a la que StradaOS le quita el fondo.
+## Features
 
-**Diseña tu inicio**
-- Reproductor a la izquierda o a la derecha, tarjeta del vehículo visible u oculta, Android Auto y CarPlay plegables.
-- Barra de botones **normal, compacta o lateral** (con reproductor vertical para pantallas anchas como 1280×480).
-- Modo **claro, oscuro o automático** y 10 colores.
+### Dashboard
 
-**A tu medida**
-- Cada botón de la barra abre la app o la función que quieras. Oculta las apps que no usas.
-- 9 idiomas (español, inglés, portugués, francés, italiano, alemán, malayo, árabe y turco), km/h o mph.
-- Avisos de actualización con código QR. Pesa **menos de 1 MB**.
+- **Live and offline maps:** download a free OpenStreetMap-derived country map in the app, then use it without internet. Map/arrow motion is interpolated between GPS readings.
+- **Android Auto and CarPlay shortcuts:** open the head unit's projection app or [Open Headunit](https://github.com/andreknieriem/headunit-revived) over USB.
+- **Music:** Bluetooth title, artist, and playback time with large controls. Android Auto and local music apps can also supply artwork.
+- **Speedometer, weather, clock, and oil-change reminders.**
+- **Vehicle photo**, with optional background removal.
 
-👉 Novedades de cada versión en [Releases](https://github.com/lordnordic-debug/StradaOS/releases).
+### Standard-layout customization
 
-## 📥 Instalación
+- Player left/right, vehicle card shown/hidden, and collapsible Android Auto/CarPlay controls.
+- Normal, compact, side, or hidden dock; vertical player for low, wide displays such as 1280 × 480.
+- Dark, Light, Auto with a configurable schedule, and System theme modes; ten accent colors in the standard style.
+- Portrait layout, analog/mixed speedometer options, and custom maintenance reminders.
+- Settings/photo backups to local storage or USB and an optional app opened at boot.
 
-1. Descarga **`StradaOS-x.y.z.apk`** desde [Releases](https://github.com/lordnordic-debug/StradaOS/releases/latest) y cópialo a la pantalla (si usas USB, pásalo primero a la memoria interna).
-2. Activa **Ajustes → Seguridad → Orígenes desconocidos** e instálalo.
-3. Presiona **Inicio** y elige **StradaOS → Siempre**. Un asistente te guía el resto.
+### Personalization
 
-**Android Auto en pantallas que no lo traen:** instala [Open Headunit](https://github.com/andreknieriem/headunit-revived/releases), conecta el celular por USB y toca **Android Auto**. En *Ajustes → Música* activa la carátula de Android Auto.
+- Assign installed apps or functions to shortcuts and hide unused apps from the drawer.
+- Nine app languages: Spanish, English, Portuguese, French, Italian, German, Malay, Arabic, and Turkish. Speed in km/h or mph.
+- Standard upstream releases offer update notifications and a QR download link. The Opel edition uses separately signed APKs instead.
 
-## 📋 Compatibilidad
+Upstream release notes are available in [Releases](https://github.com/lordnordic-debug/StradaOS/releases). Markdown documentation in this fork is in English; app translations and historical screenshot languages are unchanged.
 
-| Mínimo | Probado |
-|---|---|
-| Android 4.1 (API 16), cualquier pantalla horizontal | Android 4.2 (Autochips AC8227, 1024×600), Android 10 y Android 17 |
+## Installation
 
-¿La probaste en otra pantalla? Cuéntalo en un [issue](https://github.com/lordnordic-debug/StradaOS/issues).
+For **StradaOS Opel**:
 
-## ❓ Preguntas frecuentes
+1. Use the signed `StradaOS-Opel-2.21.2.apk` described in
+   [OPEL_APK.md](docs/OPEL_APK.md). The current local artifact is under
+   `app/build/outputs/install/`, with a SHA-256 checksum beside it.
+2. Copy the APK to the **Android head unit**, open it with the file manager,
+   and allow installation from that source if requested.
+3. Open **StradaOS Opel**, complete setup, and select it as the home app if desired.
+   Change styles through **Settings → Appearance → Home screen design**.
 
-<details><summary><b>¿Por qué se llama StradaOS si no es un sistema operativo?</b></summary>
-Porque el «OS» es de <b>Open Source</b>: código abierto. StradaOS es un launcher: no reemplaza Android ni toca el sistema, solo cambia lo que ves en la pantalla del carro. Y «Strada» significa «camino» en italiano. Un launcher libre para el camino.
+It installs alongside standard StradaOS and does not automatically import its
+settings. Updates must use the same Opel package and signing key; standard
+upstream APKs and update notifications are not used for this edition.
+A CarPlay-only display without Android APK installation cannot run this launcher.
+The CarPlay shortcut opens the compatible projection app already installed on
+the Android unit; it does not add projection support to unsupported hardware.
+
+To build locally, use JDK 17 and Android SDK 35:
+
+```sh
+./gradlew assembleDebug assembleOpel lintOpel
+```
+
+`assembleOpel` produces an **unsigned** intermediate APK. Follow the alignment
+and signing instructions in [OPEL_APK.md](docs/OPEL_APK.md) before installation.
+
+For **standard upstream StradaOS**:
+
+1. Download `StradaOS-x.y.z.apk` from [upstream releases](https://github.com/lordnordic-debug/StradaOS/releases/latest) and copy it to the unit. If using USB, copy it to internal storage first.
+2. Allow unknown-source installation in Android security settings and install the APK.
+3. Press Home and choose StradaOS → Always. Complete the setup wizard.
+
+For Android Auto on units without it, install [Open Headunit](https://github.com/andreknieriem/headunit-revived/releases), connect the phone by USB, and use the Android Auto button. Enable Android Auto artwork under Settings → Music.
+
+## Compatibility
+
+Minimum Android version is **4.1/API 16**, with target SDK 28. The compact
+layout targets **1024 × 600 landscape** Android radios, including Android 4.2/API
+17, without firmware or screen-resolution changes. The standard layout retains
+portrait support.
+
+The current Opel build was installed and checked on an Android 11/API 30 emulator:
+style switching, accent visibility, restart persistence, and old-preference
+migration passed. **API 17 runtime and proprietary radio/Bluetooth/CarPlay behavior
+still need testing on the actual head unit.** Upstream hardware reports do not
+replace testing this fork.
+
+Build and signing checks passed. Lint still reports existing findings (72 errors,
+1 fatal issue, 81 warnings); no finding is on the Java lines changed for the
+style menu. Full validation history is in [OPEL_APK.md](docs/OPEL_APK.md).
+
+Report additional devices through the [issue tracker](https://github.com/L0r3nz-H/StradaOS-Opel/issues).
+
+## Frequently asked questions
+
+<details><summary><b>Why “OS” if this is not an operating system?</b></summary>
+“OS” stands for <b>Open Source</b>. StradaOS changes the home screen, not Android or firmware. “Strada” means “road” in Italian: an open-source launcher for the road.
 </details>
 
-<details><summary><b>Al encender sale el menú de fábrica, no StradaOS</b></summary>
-Fija StradaOS como inicio: <b>Ajustes → Sistema → Pantalla de inicio</b>. Si tu pantalla siempre vuelve a su menú al encender, activa ahí <b>«Abrir StradaOS al encender»</b>.
+<details><summary><b>The factory menu appears at boot</b></summary>
+Set StradaOS as the home app in <b>Settings → System</b>. If the head unit still starts its factory menu, enable <b>Open StradaOS on boot</b> there.
 </details>
 
-<details><summary><b>¿Por qué no sale la carátula con música por Bluetooth?</b></summary>
-El Bluetooth entre el celular y la radio solo envía el título, el artista y el tiempo, no la imagen. La carátula sí sale con Android Auto y con las apps de música instaladas en la pantalla.
+<details><summary><b>Why is Bluetooth artwork missing?</b></summary>
+The tested Bluetooth link between phone and radio supplies title, artist, and time, but not an image. Android Auto and music apps installed on the unit can supply artwork.
 </details>
 
-<details><summary><b>La música Bluetooth se corta o no suena</b></summary>
-Sal de la app Bluetooth con <b>Inicio</b>, no con Atrás. Revisa <b>Ajustes → Música → Audio Bluetooth</b>; ahí también está la ayuda «¿La música Bluetooth se corta o no aparece?».
+<details><summary><b>Bluetooth music stops or is silent</b></summary>
+Leave the Bluetooth app with <b>Home</b>, not Back. Check <b>Settings → Music → Bluetooth audio</b> and its troubleshooting help.
 </details>
 
-<details><summary><b>El mapa no carga o no aparece mi ubicación</b></summary>
-El mapa en vivo necesita internet; con el mapa sin conexión no. Si dice «Sin señal GPS», revisa que la antena GPS de la radio esté conectada. Deja presionado el mapa para ver el diagnóstico.
+<details><summary><b>The map or my location is missing</b></summary>
+Live maps require internet; downloaded offline maps do not. For missing GPS, check the radio's GPS antenna, permission, and location settings. Long-press the map for diagnostics.
 </details>
 
-<details><summary><b>¿Cómo dejo de usar StradaOS?</b></summary>
-En <b>Ajustes → Sistema</b> puedes volver al menú de fábrica o desinstalarlo. Si la pantalla quedara en negro, reiníciala (botón <b>RES</b> o apaga y enciende el carro).
+<details><summary><b>How do I stop using StradaOS?</b></summary>
+Use <b>Settings → System</b> to return to the factory launcher or uninstall. If the screen goes black, restart the unit using its RES button or a power cycle.
 </details>
 
-## 🔒 Privacidad
+## Privacy
 
-Sin cuentas, anuncios ni analíticas. Tu ubicación se usa solo en el equipo. Detalles en [PRIVACY.md](PRIVACY.md).
+No accounts, advertising, or analytics. Location is processed locally, with map/weather requests as detailed in [PRIVACY.md](PRIVACY.md).
 
-## ☕ Apoya el proyecto
+## Supporting the original project
 
-StradaOS es y seguirá siendo gratis. Si te sirvió, dale una ⭐ a este repositorio o invítame un café en **[ko-fi.com/stradaos](https://ko-fi.com/stradaos)**. Reportes, ideas y traducciones son bienvenidos: lee [CONTRIBUTING.md](CONTRIBUTING.md).
+StradaOS is free. Star the repository or support the upstream author at [ko-fi.com/stradaos](https://ko-fi.com/stradaos). Reports, ideas, and translations are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-<a href="https://github.com/lordnordic-debug/StradaOS/graphs/contributors"><img src="https://contrib.rocks/image?repo=lordnordic-debug/StradaOS"></a>
+<a href="https://github.com/lordnordic-debug/StradaOS/graphs/contributors"><img src="https://contrib.rocks/image?repo=lordnordic-debug/StradaOS" alt="Upstream contributors"></a>
 
-## 📄 Licencia y créditos
+## License and credits
 
-[GNU GPL v3.0](LICENSE). Mapas © [colaboradores de OpenStreetMap](https://www.openstreetmap.org/copyright), OpenTopoMap y Esri; mapa sin conexión con un lector adaptado de [mapsforge](https://github.com/mapsforge/mapsforge) (LGPL-3.0) y mapas de [download.mapsforge.org](https://download.mapsforge.org/). Clima: [Open-Meteo](https://open-meteo.com). Android Auto con [Open Headunit](https://github.com/andreknieriem/headunit-revived) (GPL-3.0). QR de [Project Nayuki](https://github.com/nayuki/QR-Code-generator) (MIT). Íconos [Material Symbols](https://fonts.google.com/icons) (Apache 2.0).
+[GNU GPL v3.0](LICENSE). Maps © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), OpenTopoMap, and Esri. Offline-map reader adapted from [mapsforge](https://github.com/mapsforge/mapsforge), LGPL-3.0, with maps from [download.mapsforge.org](https://download.mapsforge.org/). Weather: [Open-Meteo](https://open-meteo.com). Android Auto: [Open Headunit](https://github.com/andreknieriem/headunit-revived), GPL-3.0. QR generation: [Project Nayuki](https://github.com/nayuki/QR-Code-generator), MIT. Icons: [Material Symbols](https://fonts.google.com/icons), Apache 2.0.
 
-StradaOS es un proyecto independiente, no afiliado a Google, Apple ni a ningún fabricante. *Android Auto* es marca de Google LLC y *CarPlay* de Apple Inc. No lo manipules mientras conduces.
-
----
-
-### English
-
-**StradaOS** is a free, ad-free, open-source launcher for Android car head units (Android 4.1+, under 1 MB). It installs like any app, without flashing. Live and **offline maps** (download your country from the app), Android Auto and CarPlay buttons, a media card for Bluetooth and Android Auto, speedometer, weather, oil change reminder, a customizable layout (player left or right, compact or side bar), light/dark themes, portrait layout, settings backup to USB and 9 languages. *Why “OS”? It stands for **Open Source**: StradaOS is a launcher, not an operating system, and “Strada” means “road” in Italian.* [Website](https://lordnordic-debug.github.io/StradaOS/?lang=en) · [Download](https://github.com/lordnordic-debug/StradaOS/releases/latest)
-
-### Português
-
-O **StradaOS** é um launcher grátis, sem anúncios e de código aberto para centrais Android de carro (Android 4.1+). Mapa ao vivo e **offline**, Android Auto e CarPlay, música, velocímetro, clima e um início que você personaliza. *Por que «OS»? Vem de **Open Source**: o StradaOS é um launcher, não um sistema operacional.* [Site](https://lordnordic-debug.github.io/StradaOS/?lang=pt) · [Baixar](https://github.com/lordnordic-debug/StradaOS/releases/latest)
+This is an independent project, not affiliated with Google, Apple, Opel, or any vehicle/head-unit manufacturer. Android Auto is a trademark of Google LLC; CarPlay is a trademark of Apple Inc. Do not operate the UI while driving.

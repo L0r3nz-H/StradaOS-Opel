@@ -921,3 +921,5 @@ Ocultar la barra del sistema	Hide the system bar
 Esconde también la barra de navegación de tu pantalla (abajo o al costado). Desliza desde el borde para verla un momento	Also hides your screen's navigation bar (bottom or side). Swipe from the edge to see it for a moment
 Corrección del velocímetro	Speedometer correction
 Suma o resta a la velocidad del GPS para que coincida con el tablero de tu carro	Adds or subtracts from the GPS speed so it matches your car's dashboard
+
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: compact layout with a fixed red accent.

@@ -1,3 +1,12 @@
+# Historical upstream F-Droid submission
+
+This is the original upstream submission draft, retained as historical material.
+Its first-person text refers to the upstream author, not the Opel fork maintainer.
+Package, APK size, screenshots, and checklist states describe that submission,
+not the current Opel edition. MR !55924 was subsequently closed on 2026-11-06
+under the development-age policy; see [project status](../ESTADO_PROYECTO.md).
+The checked items below do not imply acceptance or a current store listing.
+
 ## Abstract for new app inclusion
 
 **StradaOS** is a free (GPL-3.0) home screen launcher for Android car head units: the cheap "Android 6/10" screens sold for cars, many of which really run Android 4.x and ship with slow, ugly factory launchers.

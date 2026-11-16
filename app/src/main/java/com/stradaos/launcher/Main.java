@@ -193,6 +193,12 @@ public class Main extends Activity {
             if (!prefs.contains("car_name")) defaults.putString("car_name", "Astra J");
             defaults.putBoolean("opel_defaults_applied", true).apply();
         }
+        // Unificar las antiguas selecciones separadas de diseño y distribución.
+        // Conservar los colores y modos del usuario al pasar de un estilo al otro.
+        if (modernDesign() != compactLayout()) {
+            prefs.edit().putString("design", OpelDesign.ID)
+                    .putString("home_layout", CompactLayout.ID).apply();
+        }
         I18n.init(this, prefs);
         LiveMapView.headingUp = prefs.getBoolean("map_heading", false);
         lm = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -4314,6 +4320,10 @@ public class Main extends Activity {
     }
 
     private void chooseAccent(final Runnable next) {
+        if (modernDesign() && compactLayout()) {
+            if (next != null) next.run();
+            return;
+        }
         new TB(this, dlg())
             .setTitle("Color de acento")
             .setAdapter(new BaseAdapter() {
@@ -4630,7 +4640,8 @@ public class Main extends Activity {
     }
 
     private void setDesign(boolean modern) {
-        prefs.edit().putString("design", modern ? OpelDesign.ID : "stradaos").apply();
+        prefs.edit().putString("design", modern ? OpelDesign.ID : "stradaos")
+                .putString("home_layout", modern ? CompactLayout.ID : "standard").apply();
         applyTheme();
         applyAccent();
         rebuild();
@@ -5250,14 +5261,10 @@ public class Main extends Activity {
 
     private void catLook(LinearLayout body) {
         LinearLayout design = section(body, "Diseño");
-        segmented(design, "Diseño de inicio", "Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.",
-            new String[]{"StradaOS", "Opel Navi 900 Modern"}, modernDesign() ? 1 : 0,
+        segmented(design, "Diseño de inicio", "Opel Style: diseño compacto con acento rojo fijo.",
+            new String[]{"StradaOS", "Opel Style"}, modernDesign() ? 1 : 0,
             new IntCb() { public void on(int i) {
                 setDesign(i == 1);
-            }});
-        segmented(design, "Distribución", null, new String[]{"Estándar", "Compacto de 7 pulgadas"},
-            compactLayout() ? 1 : 0, new IntCb() { public void on(int i) {
-                prefs.edit().putString("home_layout", i == 1 ? CompactLayout.ID : "standard").apply(); rebuild();
             }});
         if (compactLayout()) {
             segmented(design, "Panel principal", null, new String[]{"Vehículo", "Mapa"},
@@ -5293,26 +5300,28 @@ public class Main extends Activity {
                 askDarkTime("dark_end", 6 * 60, "Claro desde");
             }});
         }
-        LinearLayout a = section(body, "Color de acento");
-        LinearLayout r = rowBase(a, "Color", "Botones, anillo del reproductor, ruta y etiquetas");
-        LinearLayout dots = new LinearLayout(this);
-        int cur = prefs.getInt("accent", 0xFFFE3211);
-        for (int i = 0; i < ACCENT_COLORS.length; i++) {
-            final int col = ACCENT_COLORS[i];
-            View d = new View(this);
-            GradientDrawable g = new GradientDrawable();
-            g.setShape(GradientDrawable.OVAL);
-            g.setColor(col);
-            if (col == cur) g.setStroke((int) (3 * s), TEXT);
-            d.setBackground(g);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((int) (28 * s), (int) (28 * s));
-            lp.leftMargin = (int) (8 * s);
-            dots.addView(d, lp);
-            d.setOnClickListener(new View.OnClickListener() { public void onClick(View v) {
-                prefs.edit().putInt("accent", col).apply(); applyAccent(); rebuild();
-            }});
+        if (!(modernDesign() && compactLayout())) {
+            LinearLayout a = section(body, "Color de acento");
+            LinearLayout r = rowBase(a, "Color", "Botones, anillo del reproductor, ruta y etiquetas");
+            LinearLayout dots = new LinearLayout(this);
+            int cur = prefs.getInt("accent", 0xFFFE3211);
+            for (int i = 0; i < ACCENT_COLORS.length; i++) {
+                final int col = ACCENT_COLORS[i];
+                View d = new View(this);
+                GradientDrawable g = new GradientDrawable();
+                g.setShape(GradientDrawable.OVAL);
+                g.setColor(col);
+                if (col == cur) g.setStroke((int) (3 * s), TEXT);
+                d.setBackground(g);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((int) (28 * s), (int) (28 * s));
+                lp.leftMargin = (int) (8 * s);
+                dots.addView(d, lp);
+                d.setOnClickListener(new View.OnClickListener() { public void onClick(View v) {
+                    prefs.edit().putInt("accent", col).apply(); applyAccent(); rebuild();
+                }});
+            }
+            r.addView(dots);
         }
-        r.addView(dots);
         LinearLayout tx = section(body, "Texto");
         segmented(tx, "Tamaño de la letra", "Para leer mejor de lejos o que quepa más", new String[]{"S", "M", "L", "XL"}, prefs.getInt("font_size", 1), new IntCb() { public void on(int i) {
             prefs.edit().putInt("font_size", i).apply(); rebuild(); showSettings(settingsCat);

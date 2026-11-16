@@ -906,3 +906,5 @@ Ocultar la barra del sistema	Sembunyikan bar sistem
 Esconde también la barra de navegación de tu pantalla (abajo o al costado). Desliza desde el borde para verla un momento	Turut menyembunyikan bar navigasi skrin anda (bawah atau sisi). Leret dari tepi untuk melihatnya seketika
 Corrección del velocímetro	Pembetulan meter laju
 Suma o resta a la velocidad del GPS para que coincida con el tablero de tu carro	Menambah atau menolak kelajuan GPS supaya sepadan dengan papan pemuka kereta anda
+
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: susun atur kompak dengan aksen merah tetap.
