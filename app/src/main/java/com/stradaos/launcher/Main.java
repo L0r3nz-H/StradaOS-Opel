@@ -1530,8 +1530,7 @@ public class Main extends Activity {
             }
             seedLastLocation();
         } else {
-            Bitmap photo = CarPhoto.load(this);
-            if (photo == null && modernDesign()) photo = asset("opel_astra_j.png");
+            Bitmap photo = vehiclePhoto();
             ImageView car = new ImageView(this);
             car.setScaleType(ImageView.ScaleType.FIT_CENTER);
             if (photo != null) car.setImageBitmap(photo);
@@ -1540,6 +1539,10 @@ public class Main extends Activity {
             // cuando no hay velocímetro; no reservar una fila vacía debajo.
             float vehicleTop = showSpeed ? 16 : (CompactLayout.CARD_HEIGHT - 248) / 2f;
             place(left, car, 24, vehicleTop + 48, width - 48, 200);
+            car.setContentDescription(I18n.t("Foto del vehículo"));
+            car.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) { photoMenu(); }
+            });
             car.setOnLongClickListener(new View.OnLongClickListener() {
                 public boolean onLongClick(View v) { photoMenu(); return true; }
             });
@@ -1649,7 +1652,7 @@ public class Main extends Activity {
         chip.setVisibility(prefs.getString("car_tag", "").trim().length() == 0 ? View.GONE : View.VISIBLE);
         placeWrap(card, chip, 20, 46);
 
-        Bitmap photo = CarPhoto.load(this);
+        Bitmap photo = vehiclePhoto();
         if (photo != null) {
             ImageView car = new ImageView(this);
             // 2.18: una foto con fondo (sin recortar) llena el recuadro con esquinas redondas; la recortada, como siempre
@@ -1659,6 +1662,10 @@ public class Main extends Activity {
             else car.setImageBitmap(CarPhoto.cardCrop(photo, (int) (264 * s), (int) ((160 + dy) * s), 16 * s));
             car.setScaleType(ImageView.ScaleType.FIT_CENTER);
             place(card, car, 18, 78, 264, 160 + dy);
+            car.setContentDescription(I18n.t("Foto del vehículo"));
+            car.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) { photoMenu(); }
+            });
             car.setOnLongClickListener(new View.OnLongClickListener() {
                 public boolean onLongClick(View v) { photoMenu(); return true; }
             });
@@ -4543,6 +4550,13 @@ public class Main extends Activity {
 
     private static final int REQ_PHOTO = 41;
 
+    /** La foto guardada siempre sustituye al Astra de serie; no se copia el recurso al archivo del usuario. */
+    private Bitmap vehiclePhoto() {
+        Bitmap custom = CarPhoto.load(this);
+        if (custom != null) return custom;
+        return opelEdition() || modernDesign() ? asset("opel_astra_j.png") : null;
+    }
+
     private void photoMenu() {
         final boolean has = CarPhoto.load(this) != null;
         String[] opts = has ? new String[]{"Elegir otra foto", "Quitar la foto"} : new String[]{"Elegir foto"};
@@ -5396,7 +5410,7 @@ public class Main extends Activity {
         row(c, "Nombre del vehículo", null, prefs.getString("car_name", "Mi vehículo"), edit("car_name", "Nombre del vehículo", "Mi vehículo"));
         row(c, "Etiqueta", "Versión o placa. Déjala vacía para ocultarla", prefs.getString("car_tag", ""), edit("car_tag", "Etiqueta (vacío para ocultarla)", ""));
         LinearLayout f = section(body, "Foto");
-        row(f, "Foto del vehículo", "Se usa tal cual; si quieres, le puedes quitar el fondo", CarPhoto.load(this) != null ? "Configurada" : "Sin foto",
+        row(f, "Foto del vehículo", "Se usa tal cual; si quieres, le puedes quitar el fondo", CarPhoto.load(this) != null ? "Configurada" : (opelEdition() || modernDesign() ? "Foto predeterminada" : "Sin foto"),
             new Runnable() { public void run() { photoMenu(); } });
         LinearLayout un = section(body, "Unidades");
         String su = prefs.getString("speed_unit", "auto");

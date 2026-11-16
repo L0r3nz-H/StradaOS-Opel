@@ -962,3 +962,4 @@ Gris suave	Soft gray
 Ámbar	Amber
 Ver ahora	Preview now
 Toca la pantalla para volver	Tap the screen to go back
+Foto predeterminada	Default photo

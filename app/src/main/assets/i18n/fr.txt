@@ -936,3 +936,4 @@ Gris suave	Gris doux
 Ámbar	Ambre
 Ver ahora	Voir maintenant
 Toca la pantalla para volver	Touchez l'écran pour revenir
+Foto predeterminada	Photo par défaut

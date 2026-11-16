@@ -53,7 +53,11 @@ that the panel background remains visible around the car. It is decoded with
 `inSampleSize=2` to reduce memory usage on older devices. Display the entire car
 proportionally with `FIT_CENTER`, without cropping or distortion.
 `CarPhoto.load()` continues to prefer user photos, including transparent ones.
-Other designs do not receive a new default vehicle image.
+The Opel edition uses this fallback in both standard and compact views.
+The regular StradaOS edition keeps its original empty-photo state unless Opel
+Style is active. A selected custom photo replaces the fallback immediately;
+removing it restores the bundled image. Both image views open the existing
+photo menu on tap or long-press.
 
 ## Repository architecture
 
@@ -244,8 +248,8 @@ The original planning phase introduced no builds/device tests. Later checks:
   not create an unseen map.
 - Verify radio, phone/Bluetooth, and CarPlay on the actual head unit. Emulator
   results do not validate proprietary apps or add unsupported station tuning.
-- Show the whole vehicle; prefer user photos. The bundled photo is only an Opel
-  compact fallback. Missing speed must leave balanced vertical image spacing.
+- Show the whole vehicle; prefer user photos. The bundled photo is an Opel-edition/Opel-Style fallback; standard StradaOS
+  installations keep their original empty-photo state. Missing speed must leave balanced vertical image spacing.
 - For a future car-temperature reader, test offline values, zero/negative
   Celsius, conversion, invalid/delayed data, service loss, and reconnects.
   Clearly label weather fallback and hide all unavailable temperatures.

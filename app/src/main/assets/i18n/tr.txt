@@ -936,3 +936,4 @@ Gris suave	Yumuşak gri
 Ámbar	Kehribar
 Ver ahora	Şimdi göster
 Toca la pantalla para volver	Geri dönmek için ekrana dokunun
+Foto predeterminada	Varsayılan fotoğraf

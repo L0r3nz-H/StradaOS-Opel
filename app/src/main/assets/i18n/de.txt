@@ -962,3 +962,4 @@ Gris suave	Sanftes Grau
 Ámbar	Bernstein
 Ver ahora	Jetzt ansehen
 Toca la pantalla para volver	Tippe auf den Bildschirm, um zurückzukehren
+Foto predeterminada	Standardfoto

@@ -956,3 +956,4 @@ Reproducir / pausa	播放 / 暂停
 Distribución	布局
 Diseño de inicio	主屏幕设计
 Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel 保留红色强调色。每种设计分别保存浅色或深色模式。
+Foto predeterminada	默认照片

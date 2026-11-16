@@ -947,3 +947,4 @@ Gris suave	Grigio tenue
 Ámbar	Ambra
 Ver ahora	Vedi ora
 Toca la pantalla para volver	Tocca lo schermo per tornare
+Foto predeterminada	Foto predefinita

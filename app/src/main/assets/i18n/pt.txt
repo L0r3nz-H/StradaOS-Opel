@@ -947,3 +947,4 @@ Gris suave	Cinza suave
 Ámbar	Âmbar
 Ver ahora	Ver agora
 Toca la pantalla para volver	Toque na tela para voltar
+Foto predeterminada	Foto padrão

@@ -41,7 +41,10 @@ assignments. Older separate Opel/compact selections migrate to Opel Style.
 The Opel edition starts in Opel Style on first installation.
 
 The vehicle panel shows **Astra J** above the transparent bundled photo; a user
-photo takes priority. Optional GPS speed is centered beneath it. With speed off,
+photo takes priority in both compact and standard views of the Opel edition.
+Tap the image or use Settings → Your vehicle → Vehicle photo to choose another
+photo and confirm **Use this**. Removing a custom photo restores the bundled
+Astra image. Optional GPS speed is centered beneath it. With speed off,
 the name and image are centered together. The clock stays centered in the header.
 The compact dashboard has no direct navigation shortcut; navigation apps remain
 available through All apps and the standard navigation assignment.

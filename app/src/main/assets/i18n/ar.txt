@@ -936,3 +936,4 @@ Gris suave	رمادي هادئ
 Ámbar	كهرماني
 Ver ahora	عرض الآن
 Toca la pantalla para volver	المس الشاشة للعودة
+Foto predeterminada	الصورة الافتراضية
