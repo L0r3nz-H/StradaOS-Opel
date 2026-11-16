@@ -479,6 +479,17 @@ Se muestran todas las apps	Todos os apps são mostrados
 Apps ocultas: {}	Apps ocultos: {}
 # 2.14: desinstalar desde el cajón
 Desinstalar	Desinstalar
+
+Diseño	Design
+Diseño de inicio	Design do início
+Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel mantém o destaque vermelho. Cada design salva seu modo claro ou escuro separadamente.
+
+# Compact GPS speed
+Mostrar velocidad GPS	Mostrar velocidade GPS
+En la vista compacta del vehículo o del mapa	Na vista compacta do veículo ou do mapa
+Velocidad GPS	Velocidade GPS
+
+Las actualizaciones de esta edición se instalan mediante un APK Opel firmado con la misma clave.	As atualizações desta edição são instaladas com um APK Opel assinado com a mesma chave.
 # 2.14: salir de StradaOS (issue #9)
 Salir de StradaOS	Sair do StradaOS
 Abrir el launcher de fábrica	Abrir o launcher de fábrica

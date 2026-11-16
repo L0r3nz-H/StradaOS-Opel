@@ -479,6 +479,32 @@ Se muestran todas las apps	All apps are shown
 Apps ocultas: {}	Hidden apps: {}
 # 2.14: desinstalar desde el cajón
 Desinstalar	Uninstall
+
+Diseño	Design
+Diseño de inicio	Home design
+Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel keeps its red accent. Each design saves its light or dark mode separately.
+
+# Optional compact layout
+Distribución	Layout
+Estándar	Standard
+Compacto de 7 pulgadas	7-inch compact
+Panel principal	Main panel
+Vehículo	Vehicle
+Teléfono	Phone
+Todas las apps	All apps
+Cuatro accesos grandes	Four large shortcuts
+Radio · CarPlay · Teléfono · Todas las apps	Radio · CarPlay · Phone · All apps
+Temperatura exterior del vehículo	Vehicle outside temperature
+Sin interfaz del vehículo detectada; se usa el clima si está disponible.	Vehicle connection not yet available. Weather data is used when available.
+Anterior	Previous
+Reproducir / pausa	Play / pause
+
+# Compact GPS speed
+Mostrar velocidad GPS	Show GPS speed
+En la vista compacta del vehículo o del mapa	In the compact vehicle or map view
+Velocidad GPS	GPS speed
+
+Las actualizaciones de esta edición se instalan mediante un APK Opel firmado con la misma clave.	Updates for this edition are installed using an Opel APK signed with the same key.
 # 2.14: salir de StradaOS (issue #9)
 Salir de StradaOS	Leave StradaOS
 Abrir el launcher de fábrica	Open the factory launcher
