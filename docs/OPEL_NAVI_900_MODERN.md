@@ -16,7 +16,7 @@ Opel Style selection. Preference identifiers remain unchanged for compatibility:
 
 Both styles retain Dark, Light, Automatic, and System modes. Opel stores its mode
 in `opel_theme` (default `dark`), independently of StradaOS `theme`. Automatic
-uses configurable StradaOS start/end times; System follows Android's night mode.
+uses configurable start/end times or GPS-derived sunrise/sunset since 2.22.0; System follows Android's night mode.
 Changing styles preserves the standard accent, app assignments, and map settings.
 
 ## Layout architecture

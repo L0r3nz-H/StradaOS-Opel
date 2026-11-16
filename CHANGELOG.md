@@ -2,6 +2,14 @@
 
 Detailed notes are in [`changelogs/`](changelogs) and [upstream releases](https://github.com/lordnordic-debug/StradaOS/releases).
 
+## Upstream sync — 2.22.0-opel
+
+- Merged upstream `0a7736f` / versionCode 55, preserving Opel Style, fixed accent,
+  compact shortcuts, photo, and per-style themes.
+- Added idle screen, drawer sorting, sunrise/sunset themes, Chinese, standard
+  orientation refinements, and AA disconnect fixes. Compact stays landscape.
+- See [upstream release notes](changelogs/2.22.0.md) and [Opel sync notes](changelogs/2.22.0-opel.md).
+
 ## Opel Style menu refinement
 
 - One home-screen design choice: StradaOS or Opel Style. Opel Style directly activates the 7-inch compact dashboard.
@@ -10,7 +18,7 @@ Detailed notes are in [`changelogs/`](changelogs) and [upstream releases](https:
 - Existing Opel/compact configurations migrate without discarding saved standard colors, themes, or shortcut assignments.
 - Repository Markdown documentation is maintained in English.
 
-## Current Opel build — 2.21.2-opel
+## Previous signed Opel build — 2.21.2-opel
 
 The local signed Opel build uses versionCode 54 and package
 `com.stradaos.launcher.opel`, based on upstream `b2f327d` dated 2026-11-15.

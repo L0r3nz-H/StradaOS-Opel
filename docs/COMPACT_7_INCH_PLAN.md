@@ -1,6 +1,7 @@
 # Optional 7-inch compact mode — architecture and implementation plan
 
-Updated: 2026-11-16. Target: Android head units with a 1024 × 600 display,
+Updated: 2026-11-16. Current source on `main` is synced to upstream 2.22.0
+(`0a7736f`); the earlier port history below refers to 2.21.2. Target: Android head units with a 1024 × 600 display,
 especially Android 4.2/API 17. The initial compact mode was implemented on
 2026-11-10 and subsequently ported to upstream 2.21.2 (`b2f327d`) on branch
 `feature/opel-latest-2.21.2`.

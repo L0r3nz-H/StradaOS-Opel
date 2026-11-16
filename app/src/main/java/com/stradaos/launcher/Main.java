@@ -133,13 +133,15 @@ public class Main extends Activity {
     /** Escala de 1024x600 para Ajustes, el cajón y sus ventanas: con la barra lateral el inicio se agranda, pero
      *  esas pantallas deben conservar su tamaño (en un S23 con barra lateral Ajustes quedaba cortado arriba). */
     private float uiS = 1f;
-    static final int[] SIM_W = {0, 1024, 1280, 1920, 2000, 1280, 768, 1080};
-    static final int[] SIM_H = {0, 600, 720, 720, 1200, 480, 1024, 1920};
+    static final int[] SIM_W = {0, 1024, 1280, 1920, 2000, 1280, 768, 1080, 768};
+    static final int[] SIM_H = {0, 600, 720, 720, 1200, 480, 1024, 1920, 880};   // 8: tipo Tesla con barra de clima (casi cuadrada)
 
     private TextView weatherTv, weatherCityTv;
     private ImageView weatherIc;
     private LinearLayout weatherBox;
     private double wLat = Double.NaN, wLon = Double.NaN;
+    /** Última ubicación conocida para calcular el amanecer y el atardecer del tema automático (#33). */
+    private double sunLat = Double.NaN, sunLon = Double.NaN;
     private long weatherAt;
     private Weather.Now weatherNow;
     private LinearLayout panelWx, panelWxHours;
@@ -229,6 +231,8 @@ public class Main extends Activity {
             if (ll == null) ll = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (ll != null) { wLat = ll.getLatitude(); wLon = ll.getLongitude(); }
         } catch (Throwable ignored) { }
+        if (prefs.contains("sun_lat")) { sunLat = prefs.getFloat("sun_lat", 0); sunLon = prefs.getFloat("sun_lon", 0); }
+        if (!Double.isNaN(wLat)) sunSpot(wLat, wLon);
         loadApps();
         startOdo();
         // mapa sin conexión: aviso al terminar la descarga y, si quedó a medias (se apagó el carro), continuarla
@@ -467,6 +471,123 @@ public class Main extends Activity {
         h.removeCallbacks(progressTick);
         h.post(progressTick);
         applyAaNotif(NotifArt.lastArt, NotifArt.lastTexts);
+        hideIdle();
+        idleReset();
+    }
+
+    // ───────────────────────── pantalla en reposo (2.22, #27 / #28) ─────────────────────────
+    // Tras X minutos sin tocar StradaOS, la pantalla se pone negra con la hora, la fecha y la velocidad.
+    // Viene apagada (idle_on). Un toque la quita (ese toque no llega a lo de abajo).
+
+    static final int[] IDLE_MIN = {1, 2, 5, 10, 15, 30};
+    static final int[] IDLE_COLORS = {0xFFFFFFFF, 0, 0xFF9AA0A8, 0xFFFFB13B};   // 0 = color de acento
+    private FrameLayout idleView;
+    private TextView idleClock, idleDate, idleSpeedTv;
+    private Gauge idleGauge;
+    private boolean idleSwallow;
+
+    private final Runnable idleRun = new Runnable() { public void run() { showIdle(); } };
+
+    private void idleReset() {
+        h.removeCallbacks(idleRun);
+        if (prefs != null && prefs.getBoolean("idle_on", false))
+            h.postDelayed(idleRun, prefs.getInt("idle_min", 2) * 60000L);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent e) {
+        if (idleView != null || idleSwallow) {
+            // el toque que despierta la pantalla no hace nada más
+            if (e.getAction() == MotionEvent.ACTION_DOWN) { hideIdle(); idleSwallow = true; }
+            if (e.getAction() == MotionEvent.ACTION_UP || e.getAction() == MotionEvent.ACTION_CANCEL) { idleSwallow = false; idleReset(); }
+            return true;
+        }
+        if (e.getAction() == MotionEvent.ACTION_DOWN) idleReset();
+        return super.dispatchTouchEvent(e);
+    }
+
+    private int idleColor() {
+        int c = IDLE_COLORS[Math.max(0, Math.min(IDLE_COLORS.length - 1, prefs.getInt("idle_color", 0)))];
+        return c == 0 ? RED : c;
+    }
+
+    private void showIdle() {
+        if (root == null || idleView != null) return;
+        float keep = s;
+        s = uiS > 0 ? uiS : s;
+        try { showIdle0(); } catch (Throwable ignored) { } finally { s = keep; }
+    }
+
+    private void showIdle0() {
+        int col = idleColor();
+        float f = new float[]{1f, 1.25f, 1.5f}[Math.max(0, Math.min(2, prefs.getInt("idle_size", 0)))];
+        int sp = prefs.getInt("idle_speed", prefs.getInt("speedo", 0));   // 0 digital, 1 analógico, 2 mixto, 3 sin velocidad
+        boolean speedOn = sp != 3 && prefs.getBoolean("car_speed", true);
+        if (!vertical && speedOn) f = Math.min(f, 1.25f);   // en horizontal, hora + velocímetro lado a lado deben caber en 1024
+        FrameLayout ov = new FrameLayout(this);
+        ov.setBackgroundColor(Color.BLACK);
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(vertical ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+        box.setGravity(Gravity.CENTER);
+        LinearLayout tc = new LinearLayout(this);
+        tc.setOrientation(LinearLayout.VERTICAL);
+        tc.setGravity(Gravity.CENTER);
+        idleClock = tv("", 150 * f, col, false);
+        idleClock.setGravity(Gravity.CENTER);
+        idleDate = tv("", 30 * f, col, false);
+        idleDate.setGravity(Gravity.CENTER);
+        idleDate.setAlpha(0.7f);
+        idleDate.setPadding(0, (int) (10 * s), 0, 0);
+        tc.addView(idleClock, new LinearLayout.LayoutParams(-2, -2));
+        tc.addView(idleDate, new LinearLayout.LayoutParams(-2, -2));
+        box.addView(tc, new LinearLayout.LayoutParams(-2, -2));
+        if (speedOn) {
+            View speed;
+            float gap = 56 * s;
+            if (sp == 0) {
+                LinearLayout sv = new LinearLayout(this);
+                sv.setOrientation(LinearLayout.HORIZONTAL);
+                sv.setGravity(Gravity.BOTTOM);
+                idleSpeedTv = tv("--", 110 * f, col, true);
+                TextView u = tv(useMph() ? "mph" : "km/h", 30 * f, col, false);
+                u.setAlpha(0.7f);
+                u.setPadding((int) (10 * s), 0, 0, (int) (14 * s * f));
+                sv.addView(idleSpeedTv);
+                sv.addView(u);
+                speed = sv;
+            } else {
+                idleGauge = new Gauge(this, s * f);
+                idleGauge.setColors(RED, col, (col & 0x00FFFFFF) | 0xB0000000);
+                idleGauge.setUnit(useMph());
+                idleGauge.setNumber(sp == 2);
+                speed = idleGauge;
+            }
+            int gs = (int) (260 * s * f);
+            LinearLayout.LayoutParams lp = sp == 0 ? new LinearLayout.LayoutParams(-2, -2) : new LinearLayout.LayoutParams(gs, gs);
+            if (vertical) lp.topMargin = (int) gap; else lp.leftMargin = (int) (gap * 1.5f);
+            box.addView(speed, lp);
+        }
+        ov.addView(box, new FrameLayout.LayoutParams(-1, -1));
+        idleView = ov;
+        root.addView(ov, new FrameLayout.LayoutParams(-1, -1));
+        updateIdleClock();
+        setGps(lastOk, lastKmh);
+    }
+
+    private void hideIdle() {
+        if (idleView == null) return;
+        try { root.removeView(idleView); } catch (Throwable ignored) { }
+        idleView = null; idleClock = idleDate = idleSpeedTv = null; idleGauge = null;
+    }
+
+    private void updateIdleClock() {
+        if (idleClock == null) return;
+        Date now = new Date();
+        String fmt = prefs.getString("clock", "auto");
+        boolean h24 = "24".equals(fmt) || ("auto".equals(fmt) && android.text.format.DateFormat.is24HourFormat(this));
+        idleClock.setText(I18n.sdf(h24 ? "HH:mm" : "h:mm").format(now));
+        String d = I18n.sdf(I18n.datePattern()).format(now);
+        idleDate.setText(d.substring(0, 1).toUpperCase(I18n.loc) + d.substring(1));
     }
 
     /** Android 6+: respuesta a la solicitud de permisos. */
@@ -495,6 +616,7 @@ public class Main extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        h.removeCallbacks(idleRun);
         stopGps();
         h.removeCallbacks(ticker);
         h.removeCallbacks(progressTick);
@@ -570,6 +692,18 @@ public class Main extends Activity {
                 }
                 else if ("tema:claro".equals(v) || "tema:oscuro".equals(v) || "tema:sistema".equals(v)) {
                     prefs.edit().putString(modernDesign() ? "opel_theme" : "theme", "tema:claro".equals(v) ? "light" : "tema:sistema".equals(v) ? "system" : "dark").apply();
+                    applyTheme(); applyAccent(); rebuild();
+                }
+                else if ("reposo".equals(v)) h.postDelayed(new Runnable() { public void run() { showIdle(); } }, 1500);
+                else if (v.startsWith("pref:") && v.indexOf('=') > 5) {
+                    // pref:clave=valor (true/false, número o texto); «pref:clave=» la borra
+                    String k = v.substring(5, v.indexOf('=')), val = v.substring(v.indexOf('=') + 1);
+                    SharedPreferences.Editor e = prefs.edit();
+                    if (val.length() == 0) e.remove(k);
+                    else if ("true".equals(val) || "false".equals(val)) e.putBoolean(k, Boolean.parseBoolean(val));
+                    else if (val.matches("-?\\d{1,9}")) e.putInt(k, Integer.parseInt(val));
+                    else e.putString(k, val);
+                    e.apply();
                     applyTheme(); applyAccent(); rebuild();
                 }
                 else if (v.startsWith("diseno:")) {
@@ -906,6 +1040,7 @@ public class Main extends Activity {
         applyTheme();
         applyAccent();
         root.removeAllViews();
+        idleView = null; idleClock = idleDate = idleSpeedTv = null; idleGauge = null;
         // versión de prueba: simular otra pantalla (p. ej. una ancha de 1920x720 en una tablet)
         int sim = getPackageName().endsWith(".debug") ? prefs.getInt("sim_screen", 0) : 0;
         if (sim > 0) {
@@ -942,8 +1077,26 @@ public class Main extends Activity {
         dockLabels = prefs.getBoolean("dock_labels", true);
         // Lienzo virtual: 1024x600. Con la barra lateral los botones salen de abajo y el lienzo queda más bajo
         // (1128x460): en pantallas bajas y anchas como 1280x480 todo se ve ~30 % más grande.
-        vertical = !compactLayout() && H >= W * 1.2f;
+        // Diseño (2.22, Jorge Morales): Automático = vertical si la pantalla es al menos 20 % más alta que ancha (como
+        // siempre). Las pantallas tipo Tesla con barra de clima de fábrica quedan casi cuadradas: ahí se puede forzar.
+        boxW = W; boxH = H;
+        // 2.22: Automático pasa a vertical desde 1,05·H (antes 1,2): en pantallas un poco más altas que anchas el diseño
+        // horizontal queda chico en el medio (Jorge Morales). Quien ya tenía StradaOS con una pantalla así se queda en
+        // horizontal (se guarda una sola vez); las instalaciones nuevas arrancan en vertical sin tocar Ajustes.
+        if (!prefs.getBoolean("layout_mig_222", false)) {
+            SharedPreferences.Editor me = prefs.edit().putBoolean("layout_mig_222", true);
+            if (prefs.getBoolean("setup_done", false) && !prefs.contains("layout_mode") && H >= W * 1.05f && H < W * 1.2f)
+                me.putString("layout_mode", "horizontal");
+            me.apply();
+        }
+        String lmode = prefs.getString("layout_mode", "auto");
+        vertical = !compactLayout() && ("vertical".equals(lmode) ? canVertical(W, H) : !"horizontal".equals(lmode) && H >= W * 1.05f);
         if (vertical) sideDock = false;   // en vertical la barra va abajo (la lateral le quitaría ancho al mapa)
+        // Vertical bajo (2.22, Jorge Morales: Tesla con barra de clima, ~768×880): menos de 900 de alto en el lienzo de
+        // 720 de ancho. La barra de botones normal se vuelve compacta para que el mapa tenga espacio. Las verticales de
+        // siempre (768×1024 = 960, 1080×1920 = 1280) no cambian.
+        shortVertical = vertical && H / (W / 720f) < 900;
+        if (shortVertical && !noDock) compactDock = true;
         float dw = 1024 + (sideDock ? RAIL + 8 : 0), dh = sideDock ? 460 : 600;
         s = Math.min(W / dw, H / dh);
         if (vertical) buildVerticalMetrics(W, H);
@@ -1028,6 +1181,11 @@ public class Main extends Activity {
      * pantalla horizontal de 9") y tan alto como la pantalla. Se reparten así, de arriba abajo: barra de arriba (64),
      * mapa (lo que sobra), fila de tarjetas y barra de botones.
      */
+    /** El diseño vertical cabe si la pantalla es casi cuadrada o más alta que ancha. */
+    private static boolean canVertical(int W, int H) { return H >= W * 0.95f; }
+    private int boxW, boxH;
+    private boolean shortVertical;
+
     private void buildVerticalMetrics(int W, int H) {
         s = W / 720f;
         float dh = H / s;
@@ -1040,7 +1198,12 @@ public class Main extends Activity {
         float avail = dockTop - 12 - 64;   // del borde de arriba del mapa al borde de abajo de las tarjetas
         mapY = 64;
         insL = insR = 0;
-        if (showCar && showPlayer) {
+        if (showCar && showPlayer && shortVertical) {
+            // vertical bajo: tarjetas más bajas para que el mapa quede de un tamaño parecido al de ellas
+            cardH = Math.max(330, Math.min(360, avail * 0.5f));
+            mapH = avail - cardH - 12;
+            rowY = mapY + mapH + 12;
+        } else if (showCar && showPlayer) {
             // mapa arriba, y debajo el vehículo y el reproductor lado a lado
             cardH = Math.max(380, Math.min(470, avail * 0.38f));
             if (avail - cardH - 12 < 170) cardH = Math.max(300, avail - 12 - 170);
@@ -2963,7 +3126,7 @@ public class Main extends Activity {
         place(card, sourceTv, 70, 14, audW - 88, 18);   // ancho de sobra: en Android 11 «BLUETOOTH» salía cortado
         playerArt = new PlayerArt(this, s, asset("ic/music_note.png"));
         // Tarjeta alta (barra lateral): diseño vertical que llena el alto en vez de dejar espacio vacío (Andrés, Picanto)
-        tallPlayer = cardH - 380 >= 60;
+        tallPlayer = cardH - 380 >= 60 || shortVertical;   // vertical bajo: el mismo diseño, calculado con el alto real
         final View prev, play, next;
         if (vertical && cardH < 240) {
             // Franja ancha (vertical sin la tarjeta del vehículo): carátula a la izquierda, canción al centro y
@@ -2989,9 +3152,9 @@ public class Main extends Activity {
             place(card, play, bx + bs + gap, (cardH - ps) / 2, ps, ps);
             place(card, next, bx + bs + gap + ps + gap, (cardH - bs) / 2, bs, bs);
         } else if (tallPlayer) {
-            boolean big = audW >= 290;
-            float bs = big ? 66 : 60, ps = big ? 86 : 76, gap = big ? 12 : 10;
-            float yb = cardH - 22 - ps;                 // botones abajo
+            boolean big = audW >= 290, low = cardH < 380;
+            float bs = low ? 52 : big ? 66 : 60, ps = low ? 66 : big ? 86 : 76, gap = big ? 12 : 10;
+            float yb = cardH - (low ? 16 : 22) - ps;    // botones abajo
             float yt = yb - 18 - 18;                    // tiempo (el avance lo muestra el anillo de la carátula)
             float ya = yt - 6 - 20;                     // artista
             float yti = ya - 28;                        // canción
@@ -3566,6 +3729,7 @@ public class Main extends Activity {
     // ───────────────────────── reloj, GPS, audio ─────────────────────────
 
     private void updateClock() {
+        updateIdleClock();
         if (timeTv == null) return;
         Date now = new Date();
         String fmt = prefs.getString("clock", "auto");
@@ -3589,6 +3753,7 @@ public class Main extends Activity {
                     && !Float.isInfinite(gpsSpeedKmh) && gpsSpeedKmh >= 0;
             setGps(true, l.hasSpeed() ? l.getSpeed() * 3.6f : 0);
             feedMap(l);
+            sunSpot(l.getLatitude(), l.getLongitude());
         }
         public void onStatusChanged(String p, int st, Bundle e) { }
         public void onProviderEnabled(String p) { }
@@ -3618,7 +3783,17 @@ public class Main extends Activity {
         try { lm.removeUpdates(netListener); } catch (Exception ignored) { }
     }
 
+    private float lastKmh;
+    private boolean lastOk;
+
     private void setGps(boolean ok, float kmh) {
+        lastKmh = kmh;
+        lastOk = ok;
+        if (idleView != null) {
+            float iv = speedFix(useMph() ? kmh * 0.621371f : kmh);
+            if (idleSpeedTv != null) idleSpeedTv.setText(ok ? String.valueOf(Math.round(kmh < 2 ? 0 : iv)) : "--");
+            if (idleGauge != null) idleGauge.setSpeed(kmh < 2 ? 0 : iv, ok);
+        }
         if (!ok) lastFix = 0;
         updateCompactSpeed();
         float v = speedFix(useMph() ? kmh * 0.621371f : kmh);
@@ -3733,6 +3908,11 @@ public class Main extends Activity {
         // y a veces sin título (solo tiempo o estado). Mientras Android Auto sea la fuente, Bluetooth solo aporta
         // tiempo y estado: nunca cambia la etiqueta ni borra la pista. Antes esos avisos sin título ponían
         // «Bluetooth» y la notificación de Open Headunit volvía a poner «Android Auto»: la etiqueta titilaba.
+        // Al quitar el cable, la canción de Bluetooth (cada 2 s) puede llegar antes que checkAaGone: antes cambiaba la
+        // etiqueta a «Bluetooth» y la carátula de Android Auto se quedaba (Andrés, 16 nov.). Primero se hace la
+        // desconexión completa (carátula fuera, registro, app Bluetooth) y después sigue lo de Bluetooth.
+        if ("bt".equals(t.origin) && "Android Auto".equals(curSource) && !"rcc".equals(curOrigin) && !aaRunning())
+            checkAaGone(false);
         boolean aaOwns = "rcc".equals(curOrigin) || ("Android Auto".equals(curSource) && aaRunning());
         // La canción vino de la notificación de Open Headunit (celular solo por cable, sin Bluetooth): lo que mande
         // Bluetooth con otro título es de otro celular o lo que la app Bluetooth recordaba. No lo reemplaza.
@@ -3779,7 +3959,7 @@ public class Main extends Activity {
             durMs = -1;
             if (!t.artSet) curArt = null;
             // ¿La notificación de Open Headunit ya trae la carátula de esta canción?
-            if (!t.artSet && NotifArt.lastArt != null && textsMatch(NotifArt.lastTexts, t.title)) {
+            if (!t.artSet && NotifArt.lastArt != null && textsMatch(NotifArt.lastTexts, t.title) && aaRunning()) {
                 curArt = NotifArt.lastArt;
                 t.source = "Android Auto";
                 aaWaitTitle = null;
@@ -3936,6 +4116,8 @@ public class Main extends Activity {
         }
         boolean own = "aa".equals(curOrigin);
         if (art == null && !own) return;
+        // Al quitar el cable Open Headunit manda una última notificación: sin Android Auto no se pone su carátula.
+        if (!aaRunning()) return;
         if (aaWaitTitle != null && sameTitle(aaWaitTitle, curTitle)) { aaWaitTitle = null; h.removeCallbacks(aaWait); }
         if (art != null) curArt = art;
         curSource = "Android Auto";
@@ -4677,11 +4859,44 @@ public class Main extends Activity {
         }
     }
 
+    /** Guarda la ubicación para el amanecer/atardecer solo si cambió bastante (~25 km): no escribe a cada lectura. */
+    private void sunSpot(double la, double lo) {
+        if (!Double.isNaN(sunLat) && Math.abs(la - sunLat) < 0.25 && Math.abs(lo - sunLon) < 0.25) return;
+        sunLat = la; sunLon = lo;
+        prefs.edit().putFloat("sun_lat", (float) la).putFloat("sun_lon", (float) lo).apply();
+    }
+
+    /**
+     * Minutos del día (hora local) de la salida [0] y la puesta [1] del sol, sin internet (fórmulas de NOAA,
+     * error de 1–2 min). null si ese día no sale o no se pone (zonas polares).
+     */
+    static int[] sunTimes(double lat, double lon, Calendar c) {
+        double g = 2 * Math.PI / 365.0 * (c.get(Calendar.DAY_OF_YEAR) - 1);
+        double eqt = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
+        double decl = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g)
+                + 0.000907 * Math.sin(2 * g) - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
+        double la = Math.toRadians(lat);
+        double cosH = Math.cos(Math.toRadians(90.833)) / (Math.cos(la) * Math.cos(decl)) - Math.tan(la) * Math.tan(decl);
+        if (cosH > 1 || cosH < -1) return null;
+        double ha = Math.toDegrees(Math.acos(cosH));
+        double tz = (c.get(Calendar.ZONE_OFFSET) + c.get(Calendar.DST_OFFSET)) / 60000.0;
+        int rise = (int) Math.round(720 - 4 * (lon + ha) - eqt + tz), set = (int) Math.round(720 - 4 * (lon - ha) - eqt + tz);
+        return new int[]{((rise % 1440) + 1440) % 1440, ((set % 1440) + 1440) % 1440};
+    }
+
+    /** Amanecer y atardecer de hoy si el modo automático los usa y ya hay ubicación; si no, null (horas fijas). */
+    private int[] sunToday() {
+        if (!prefs.getBoolean("auto_sun", false) || Double.isNaN(sunLat)) return null;
+        return sunTimes(sunLat, sunLon, Calendar.getInstance());
+    }
+
     /** Modo automático: ¿estamos en el horario oscuro? (por defecto de 6 p. m. a 6 a. m., como siempre). */
     private boolean darkHours() {
         Calendar c = Calendar.getInstance();
         int m = c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE);
         int a = prefs.getInt("dark_start", 18 * 60), b = prefs.getInt("dark_end", 6 * 60);
+        int[] sun = sunToday();
+        if (sun != null) { a = sun[1]; b = sun[0]; }
         if (a == b) return false;
         return a < b ? (m >= a && m < b) : (m >= a || m < b);
     }
@@ -5293,12 +5508,25 @@ public class Main extends Activity {
                 applyTheme(); applyAccent(); rebuild(); showSettings(settingsCat);
             }});
         if ("auto".equals(t)) {
-            row(c, "Oscuro desde", null, fmtMinutes(prefs.getInt("dark_start", 18 * 60)), new Runnable() { public void run() {
-                askDarkTime("dark_start", 18 * 60, "Oscuro desde");
-            }});
-            row(c, "Claro desde", null, fmtMinutes(prefs.getInt("dark_end", 6 * 60)), new Runnable() { public void run() {
-                askDarkTime("dark_end", 6 * 60, "Claro desde");
-            }});
+            final boolean sunOn = prefs.getBoolean("auto_sun", false);
+            segmented(c, "Horario", "Amanecer y atardecer: se calcula con el GPS, sin internet", new String[]{"Horas fijas", "Amanecer y atardecer"},
+                sunOn ? 1 : 0, new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("auto_sun", i == 1).apply();
+                    applyTheme(); applyAccent(); rebuild(); showSettings(settingsCat);
+                }});
+            int[] sun = sunToday();
+            if (sunOn && sun != null) {
+                row(c, "Hoy", I18n.t("Amanecer") + " " + fmtMinutes(sun[0]) + " · " + I18n.t("Atardecer") + " " + fmtMinutes(sun[1])
+                    + " · " + I18n.t("oscuro desde el atardecer hasta el amanecer"), null, null);
+            } else {
+                if (sunOn) row(c, "Esperando la ubicación del GPS", "Mientras tanto usa las horas fijas", "", null);
+                row(c, "Oscuro desde", null, fmtMinutes(prefs.getInt("dark_start", 18 * 60)), new Runnable() { public void run() {
+                    askDarkTime("dark_start", 18 * 60, "Oscuro desde");
+                }});
+                row(c, "Claro desde", null, fmtMinutes(prefs.getInt("dark_end", 6 * 60)), new Runnable() { public void run() {
+                    askDarkTime("dark_end", 6 * 60, "Claro desde");
+                }});
+            }
         }
         if (!(modernDesign() && compactLayout())) {
             LinearLayout a = section(body, "Color de acento");
@@ -5364,6 +5592,16 @@ public class Main extends Activity {
 
     /** Pantalla de inicio: qué tarjetas se ven, el mapa y la barra de arriba. */
     private void catHome(LinearLayout body) {
+        if (boxW > 0 && canVertical(boxW, boxH)) {
+            // Solo en pantallas casi cuadradas o verticales (en las horizontales no tiene sentido).
+            final String[] lk = {"auto", "horizontal", "vertical"};
+            LinearLayout ds = section(body, "Diseño");
+            segmented(ds, "Diseño de la pantalla", "Automático: según la forma de la pantalla. Elige Vertical si tu pantalla es vertical y se ve chica en el medio",
+                new String[]{"Automático", "Horizontal", "Vertical"},
+                Math.max(0, java.util.Arrays.asList(lk).indexOf(prefs.getString("layout_mode", "auto"))), new IntCb() { public void on(int i) {
+                    prefs.edit().putString("layout_mode", lk[i]).apply(); rebuild();
+                }});
+        }
         LinearLayout lay = section(body, "Tarjetas");
         segmented(lay, "Reproductor de música", "Ponlo del lado del conductor para tenerlo a la mano", new String[]{"Derecha", "Izquierda"},
             playerLeft ? 1 : 0, new IntCb() { public void on(int i) {
@@ -5433,6 +5671,36 @@ public class Main extends Activity {
             new IntCb() { public void on(int i) {
                 prefs.edit().putString("clock", i == 1 ? "12" : i == 2 ? "24" : "auto").apply(); updateClock(); showSettings(settingsCat);
             }});
+        // 2.22: pantalla en reposo (#27, #28), apagada por defecto
+        LinearLayout idl = section(body, "Pantalla en reposo");
+        final boolean idleOn = prefs.getBoolean("idle_on", false);
+        toggle(idl, "Pantalla en reposo", "Si no tocas la pantalla un rato, se pone negra con la hora, la fecha y la velocidad. Un toque la quita",
+            idleOn, new IntCb() { public void on(int i) {
+                prefs.edit().putBoolean("idle_on", i == 1).apply(); idleReset(); showSettings(settingsCat);
+            }});
+        if (idleOn) {
+            String[] mins = new String[IDLE_MIN.length];
+            int mSel = 1;
+            for (int i = 0; i < IDLE_MIN.length; i++) {
+                mins[i] = I18n.t(IDLE_MIN[i] == 1 ? "1 minuto" : IDLE_MIN[i] + " minutos");
+                if (IDLE_MIN[i] == prefs.getInt("idle_min", 2)) mSel = i;
+            }
+            choice(idl, "Después de", "Tiempo sin tocar la pantalla", mins, mSel, new IntCb() { public void on(int i) {
+                prefs.edit().putInt("idle_min", IDLE_MIN[i]).apply(); idleReset(); showSettings(settingsCat);
+            }});
+            choice(idl, "Velocidad", "Con el diseño de velocímetro que prefieras", new String[]{"Digital", "Analógico", "Mixto", "Sin velocidad"},
+                prefs.getInt("idle_speed", prefs.getInt("speedo", 0)), new IntCb() { public void on(int i) {
+                    prefs.edit().putInt("idle_speed", i).apply(); showSettings(settingsCat);
+                }});
+            segmented(idl, "Tamaño", null, new String[]{"Normal", "Grande", "Muy grande"}, prefs.getInt("idle_size", 0), new IntCb() { public void on(int i) {
+                prefs.edit().putInt("idle_size", i).apply(); showSettings(settingsCat);
+            }});
+            choice(idl, "Color de la letra", null, new String[]{"Blanco", "Color de acento", "Gris suave", "Ámbar"},
+                prefs.getInt("idle_color", 0), new IntCb() { public void on(int i) {
+                    prefs.edit().putInt("idle_color", i).apply(); showSettings(settingsCat);
+                }});
+            row(idl, "Ver ahora", "Toca la pantalla para volver", null, new Runnable() { public void run() { showIdle(); } });
+        }
         if (SDK >= 19) {
             LinearLayout scr = section(body, "Pantalla completa");
             toggle(scr, "Ocultar la barra del sistema", "Esconde también la barra de navegación de tu pantalla (abajo o al costado). Desliza desde el borde para verla un momento",
@@ -6207,7 +6475,8 @@ public class Main extends Activity {
         StringBuilder b = new StringBuilder();
         b.append(I18n.t("Esta pantalla:")).append(" Android ").append(android.os.Build.VERSION.RELEASE).append(" (API ").append(SDK).append(")")
          .append(" · ").append(android.os.Build.MANUFACTURER).append(" ").append(android.os.Build.MODEL).append("\n");
-        if (!android.os.Build.VERSION.RELEASE.startsWith(androidName(SDK).split(" ")[0]))
+        // «Android 8.1» → «8.1» (antes se comparaba con la palabra «Android» y el aviso salía en todas las pantallas)
+        if (!android.os.Build.VERSION.RELEASE.startsWith(androidName(SDK).replace("Android ", "").replace("W", "").replace("L", "")))
             b.append(I18n.t("Ojo: la pantalla dice Android " + android.os.Build.VERSION.RELEASE + ", pero por dentro es " + androidName(SDK) + ".")).append("\n");
         b.append("\n");
         compatLine(b, "Inicio, mapa, clima, velocímetro", "Android 4.1+", true, null);
@@ -6225,7 +6494,9 @@ public class Main extends Activity {
         compatLine(b, "Tema según el modo oscuro del sistema", "Pantallas que lo cambian (p. ej. con las luces)", true,
             systemNight() ? "el sistema está en modo oscuro" : "el sistema está en modo claro");
         compatLine(b, "Copia de seguridad en un archivo (pantalla o USB)", "Android 4.1+", true, SDK >= 29 ? "en Android 10+ la carpeta se elige con el selector de archivos" : null);
-        compatLine(b, "Diseño vertical", "Pantallas en vertical (tipo Tesla)", true, vertical ? "en uso" : "esta pantalla es horizontal");
+        compatLine(b, "Diseño vertical", "Pantallas en vertical (tipo Tesla)", true, vertical ? "en uso"
+            : canVertical(boxW, boxH) ? "se puede elegir en Ajustes → Pantalla de inicio → Diseño" : "esta pantalla es horizontal");
+        b.append(I18n.t("Área útil de la pantalla:")).append(" ").append(boxW).append(" × ").append(boxH).append(" px\n");
         new TB(this, dlg()).diag().setTitle("Compatibilidad").setMessage(b.toString().trim()).setPositiveButton("OK", null).show();
     }
 
@@ -6615,6 +6886,8 @@ public class Main extends Activity {
         String c = prefs.getString(key, null);
         if (c == null) return false;
         try {
+            ComponentName cn0 = ComponentName.unflattenFromString(c);
+            if (cn0 != null) markUsed(cn0.getPackageName());
             Intent i = new Intent(Intent.ACTION_MAIN);
             i.addCategory(Intent.CATEGORY_LAUNCHER);
             i.setComponent(ComponentName.unflattenFromString(c));
@@ -6634,9 +6907,82 @@ public class Main extends Activity {
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         try {
             startActivity(i);
+            markUsed(r.activityInfo.packageName);
         } catch (Exception e) {
             toast("No se pudo abrir la app");
         }
+    }
+
+    // ── orden del cajón (2.22, #27): A-Z (como siempre), Z-A, usadas o instaladas recientemente, o a mano ──
+
+    static final String[] APP_ORDERS = {"az", "za", "used", "installed", "manual"};
+    static final String[] APP_ORDER_NAMES = {"A-Z", "Z-A", "Usadas recientemente", "Instaladas recientemente", "A mano"};
+
+    /** Anota cuándo se abrió una app desde StradaOS (para «Usadas recientemente»; se guardan las últimas 60). */
+    private void markUsed(String pkg) {
+        if (pkg == null) return;
+        java.util.LinkedHashMap<String, Long> m = usedApps();
+        m.remove(pkg);
+        m.put(pkg, System.currentTimeMillis());
+        StringBuilder b = new StringBuilder();
+        int skip = Math.max(0, m.size() - 60), n = 0;
+        for (java.util.Map.Entry<String, Long> e : m.entrySet()) {
+            if (n++ < skip) continue;
+            if (b.length() > 0) b.append('\n');
+            b.append(e.getKey()).append('\t').append(e.getValue());
+        }
+        prefs.edit().putString("app_used", b.toString()).apply();
+    }
+
+    private java.util.LinkedHashMap<String, Long> usedApps() {
+        java.util.LinkedHashMap<String, Long> m = new java.util.LinkedHashMap<String, Long>();
+        for (String l : prefs.getString("app_used", "").split("\n")) {
+            int t = l.indexOf('\t');
+            if (t <= 0) continue;
+            try { m.put(l.substring(0, t), Long.parseLong(l.substring(t + 1))); } catch (Throwable ignored) { }
+        }
+        return m;
+    }
+
+    private java.util.List<String> manualOrder() {
+        java.util.List<String> out = new ArrayList<String>();
+        for (String k : prefs.getString("apps_manual", "").split("\n")) if (k.length() > 0) out.add(k);
+        return out;
+    }
+
+    private void saveManual(java.util.List<ResolveInfo> list) {
+        StringBuilder b = new StringBuilder();
+        for (ResolveInfo r : list) { if (b.length() > 0) b.append('\n'); b.append(compKey(r)); }
+        prefs.edit().putString("apps_manual", b.toString()).putString("apps_order", "manual").apply();
+    }
+
+    /** Ordena la lista del cajón (llega en A-Z). Lo que no tenga dato (nunca abierta, fuera del orden a mano) va al final en A-Z. */
+    private void sortApps(java.util.List<ResolveInfo> list) {
+        String o = prefs.getString("apps_order", "az");
+        if ("za".equals(o)) { Collections.reverse(list); return; }
+        final HashMap<ResolveInfo, Long> key = new HashMap<ResolveInfo, Long>();
+        if ("used".equals(o)) {
+            java.util.LinkedHashMap<String, Long> u = usedApps();
+            for (ResolveInfo r : list) { Long t = u.get(r.activityInfo.packageName); key.put(r, t != null ? -t : 0L); }
+        } else if ("installed".equals(o)) {
+            PackageManager pm = getPackageManager();
+            for (ResolveInfo r : list) {
+                long t = 0;
+                try { t = pm.getPackageInfo(r.activityInfo.packageName, 0).firstInstallTime; } catch (Throwable ignored) { }
+                key.put(r, -t);
+            }
+        } else if ("manual".equals(o)) {
+            java.util.List<String> m = manualOrder();
+            for (ResolveInfo r : list) { int ix = m.indexOf(compKey(r)); key.put(r, ix >= 0 ? (long) ix - 100000 : 0L); }
+        } else return;
+        final HashMap<ResolveInfo, Integer> az = new HashMap<ResolveInfo, Integer>();
+        for (int i = 0; i < list.size(); i++) az.put(list.get(i), i);
+        Collections.sort(list, new Comparator<ResolveInfo>() {
+            public int compare(ResolveInfo a, ResolveInfo b) {
+                int c = key.get(a).compareTo(key.get(b));
+                return c != 0 ? c : az.get(a).compareTo(az.get(b));
+            }
+        });
     }
 
     private boolean launchPkg(String pkg) {
@@ -7126,10 +7472,37 @@ public class Main extends Activity {
         final List<ResolveInfo> shown = new ArrayList<ResolveInfo>();
         for (ResolveInfo r : apps) if (!hidden.contains(compKey(r))) shown.add(r);
         int nHidden = apps.size() - shown.size();
+        sortApps(shown);
 
         LinearLayout bar = new LinearLayout(this);
         bar.setOrientation(LinearLayout.HORIZONTAL);
         bar.setGravity(Gravity.CENTER_VERTICAL);
+        final int oi = Math.max(0, java.util.Arrays.asList(APP_ORDERS).indexOf(prefs.getString("apps_order", "az")));
+        TextView ord = tv(I18n.t("Orden") + ": " + I18n.t(APP_ORDER_NAMES[oi]), 15, SOFT, false);
+        ord.setGravity(Gravity.CENTER);
+        ord.setBackground(round(BTN, 18));
+        ord.setPadding((int) (16 * s), (int) (8 * s), (int) (16 * s), (int) (8 * s));
+        LinearLayout.LayoutParams olp = new LinearLayout.LayoutParams(-2, -2);
+        olp.rightMargin = (int) (10 * s);
+        bar.addView(ord, olp);
+        ord.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String[] tr = new String[APP_ORDER_NAMES.length];
+                for (int i = 0; i < tr.length; i++) tr[i] = I18n.t(APP_ORDER_NAMES[i]);
+                new TB(Main.this, dlg()).raw()
+                    .setTitle(I18n.t("Orden de las apps"))
+                    .setSingleChoiceItems(tr, oi, new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+                        d.dismiss();
+                        if (w == 4 && manualOrder().isEmpty()) {
+                            saveManual(shown);   // arranca del orden que se ve
+                            toast("Deja presionada una app y elige «Mover» para cambiarla de lugar");
+                        }
+                        prefs.edit().putString("apps_order", APP_ORDERS[w]).apply();
+                        closeDrawer(); openDrawer();
+                    }})
+                    .show();
+            }
+        });
         if (nHidden > 0) {
             TextView hid = tv(I18n.t("Ocultas: " + nHidden), 15, SOFT, false);
             hid.setGravity(Gravity.CENTER);
@@ -7197,8 +7570,20 @@ public class Main extends Activity {
                 return cell;
             }
         });
+        final ResolveInfo[] moving = new ResolveInfo[1];
+        final TextView titleTv = title;
         grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> a, View v, int p, long id) {
+                if (moving[0] != null) {
+                    // modo «Mover»: la app elegida pasa al lugar tocado
+                    ResolveInfo m = moving[0];
+                    moving[0] = null;
+                    shown.remove(m);
+                    shown.add(Math.min(p, shown.size()), m);
+                    saveManual(shown);
+                    closeDrawer(); openDrawer();
+                    return;
+                }
                 launch(shown.get(p));
             }
         });
@@ -7208,8 +7593,14 @@ public class Main extends Activity {
                 final ResolveInfo r = shown.get(p);
                 new TB(Main.this, dlg())
                     .setTitle(String.valueOf(r.loadLabel(pm)))
-                    .setItems(new String[]{"Ocultar del cajón", "Desinstalar", "Información de la app"}, new DialogInterface.OnClickListener() {
+                    .setItems(new String[]{"Ocultar del cajón", "Desinstalar", "Información de la app", "Mover"}, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface d, int w) {
+                            if (w == 3) {
+                                moving[0] = r;
+                                titleTv.setText(I18n.t("Toca el lugar donde quieres poner «" + r.loadLabel(pm) + "»"));
+                                titleTv.setTextColor(RED);
+                                return;
+                            }
                             if (w == 0) {
                                 java.util.HashSet<String> h = hiddenApps();
                                 h.add(compKey(r));

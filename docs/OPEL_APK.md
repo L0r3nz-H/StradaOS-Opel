@@ -1,5 +1,15 @@
 # Installable Opel edition
 
+## Current source after upstream sync
+
+The source on `main` is now **2.22.0-opel**, versionCode **55**, based on upstream
+`0a7736f`. Debug and Opel builds pass. The sections below describe the previously
+signed **2.21.2-opel installation file**; that APK is not a build of the synced
+2.22.0 source. A current `assembleOpel` output is unsigned at
+`app/build/outputs/apk/opel/StradaOS-2.22.0-opel.apk` and needs alignment/signing
+before installation. See [sync notes](../changelogs/2.22.0-opel.md).
+
+
 - App name: **StradaOS Opel**
 - Package: `com.stradaos.launcher.opel`, installed alongside StradaOS and StradaOS Prueba
 - Version: `2.21.2-opel`, versionCode 54
@@ -109,3 +119,14 @@ restores its standard layout, stored accent, and separate light/dark preference.
 Legacy installations with either the old Opel design or the compact layout are
 normalized to Opel Style. Compact vehicle/map, four-shortcut, and optional GPS
 speed settings remain available. See [the compact layout specification](COMPACT_7_INCH_PLAN.md).
+
+## Upstream sync validation — 2.22.0-opel
+
+- `assembleDebug assembleOpel lintOpel` passed after merging upstream `0a7736f`.
+- Lint totals: 72 errors, 1 fatal issue, 82 warnings; task success does not mean
+  a clean report. minSdk 16 and targetSdk 28 are unchanged.
+- Debug APK checked on Android 11/API 30, 1024 × 600: Opel compact home,
+  new idle screen with simulated GPS speed 62 km/h, wake touch, style selector,
+  sunrise/sunset settings, and Chinese labels. API 17 and hardware tests remain.
+- This sync produced unsigned Opel and debug build outputs. The older signed
+  2.21.2 installation APK described above remains a separate historical artifact.

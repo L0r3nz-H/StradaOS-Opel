@@ -1,13 +1,12 @@
 # StradaOS project status
 
-Updated: 2026-11-16. Current Opel edition: **2.21.2-opel**, versionCode **54**.
-Upstream issue/PR references and proposals below describe the recorded
-2026-11-15 snapshot, not newly verified upstream activity.
+Updated: 2026-11-16. Current Opel source: **2.22.0-opel**, versionCode **55**.
+The historical roadmap below records the earlier upstream snapshot; the sync update below supersedes items shipped or reviewed afterward.
 
 ## Current Opel edition
 
 This fork ports the Opel work onto upstream
-`b2f327dcfae5e8341cb7851c525dc893545b3ee2` (StradaOS 2.21.2).
+`0a7736f` (StradaOS 2.22.0).
 The previous `feature/opel-navi900-theme` branch is retained.
 
 - Application **StradaOS Opel**, package `com.stradaos.launcher.opel`, with a
@@ -32,12 +31,12 @@ The previous `feature/opel-navi900-theme` branch is retained.
 - All Markdown documentation is in English. Multilingual UI strings, Spanish
   source keys, preference identifiers, and historical screenshot languages remain.
 
-The local installation artifact is
+The earlier 2.21.2 local installation artifact is
 `app/build/outputs/install/StradaOS-Opel-2.21.2.apk`, with a SHA-256 file.
 It uses the existing Opel key and verified v1/v2/v3 signatures. Standard upstream
 APKs/update notices are not Opel updates. This is not a published-release claim.
 
-Builds succeeded. Android 11/API 30 at 1024 × 600 covered design switching,
+For the earlier 2.21.2 port, builds succeeded. Android 11/API 30 at 1024 × 600 covered design switching,
 accent visibility, restart persistence, six startup migration/fallback cases,
 and both switch directions, retaining settings. Crash log was empty. Full lint:
 72 errors, 1 fatal issue, 81 warnings; none on Java lines changed for the menu.
@@ -47,6 +46,23 @@ See [README](../README.md), [APK installation/validation](OPEL_APK.md),
 [compact architecture](COMPACT_7_INCH_PLAN.md),
 [design history](OPEL_NAVI_900_MODERN.md), and
 [screenshots](screenshots/compact/README.md).
+
+## Upstream sync — 2026-11-16
+
+Upstream 2.22.0 is merged while retaining Opel Style and its stored preferences.
+Idle display, app sorting, sunrise/sunset themes, Chinese, near-square portrait
+handling, and AA disconnect fixes are included. Standard orientation preferences
+do not switch Opel's landscape compact layout into portrait. GPS updates feed
+both compact speed and the new idle display without requiring a standard speed
+widget. Existing API 17/device limitations still apply.
+
+Upstream's Nov 16 status marks blocks 10 and 12 paused by its maintainer.
+PR #35 by nothanks91 replaces #31 and remains under review, not merged here.
+The review branch compiled and passed upstream emulator workflows; blockers
+include sun-coordinate String/float preference mismatch, unconditional player
+volume controls, always-on trip/parking tracking, speed-camera defaults,
+expanded scope, 2.22 conflicts, and incomplete translations. Review evidence
+for that proposal is not validation of this fork or authorization to merge it.
 
 ## Upstream publication and testing history
 

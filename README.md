@@ -21,10 +21,10 @@ See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/
 
 ## Current Opel edition
 
-The current Opel code is maintained on **`main`**, based on upstream **2.21.2**
-(commit `b2f327d`, 2026-11-15). The port was prepared on
-`feature/opel-latest-2.21.2`, which remains available. The local installable build is **2.21.2-opel**,
-versionCode **54**, with package `com.stradaos.launcher.opel` and app name
+The current Opel code is maintained on **`main`**, based on upstream **2.22.0**
+(commit `0a7736f`, 2026-11-16). The port was prepared on
+`feature/opel-latest-2.21.2`, which remains available. The current app version is **2.22.0-opel**,
+versionCode **55**, with package `com.stradaos.launcher.opel` and app name
 **StradaOS Opel**. The previous Opel branch remains available. Upstream badges
 and release links above describe the original project, not an Opel APK release.
 
@@ -81,7 +81,8 @@ See the [screenshot index](docs/screenshots/compact/README.md) for historical ca
 ### Personalization
 
 - Assign installed apps or functions to shortcuts and hide unused apps from the drawer.
-- Nine app languages: Spanish, English, Portuguese, French, Italian, German, Malay, Arabic, and Turkish. Speed in km/h or mph.
+- Ten app languages: Spanish, English, Portuguese, French, Italian, German, Malay, Arabic, Turkish, and Chinese. Speed in km/h or mph.
+- App drawer sorting, an optional idle screen, and GPS-based sunrise/sunset themes are also available.
 - Standard upstream releases offer update notifications and a QR download link. The Opel edition uses separately signed APKs instead.
 
 Upstream release notes are available in [Releases](https://github.com/lordnordic-debug/StradaOS/releases). Markdown documentation in this fork is in English; app translations and historical screenshot languages are unchanged.
@@ -90,9 +91,10 @@ Upstream release notes are available in [Releases](https://github.com/lordnordic
 
 For **StradaOS Opel**:
 
-1. Use the signed `StradaOS-Opel-2.21.2.apk` described in
-   [OPEL_APK.md](docs/OPEL_APK.md). The current local artifact is under
-   `app/build/outputs/install/`, with a SHA-256 checksum beside it.
+1. Use a signed Opel APK as described in
+   [OPEL_APK.md](docs/OPEL_APK.md). Signed local installation artifacts are stored under
+   `app/build/outputs/install/`, with matching SHA-256 files. Check their version;
+   older artifacts are not builds of the current source.
 2. Copy the APK to the **Android head unit**, open it with the file manager,
    and allow installation from that source if requested.
 3. Open **StradaOS Opel**, complete setup, and select it as the home app if desired.
@@ -129,7 +131,7 @@ layout targets **1024 × 600 landscape** Android radios, including Android 4.2/A
 17, without firmware or screen-resolution changes. The standard layout retains
 portrait support.
 
-The current Opel build was installed and checked on an Android 11/API 30 emulator:
+The earlier 2.21.2-opel build was installed and checked on an Android 11/API 30 emulator:
 style switching, accent visibility, restart persistence, and old-preference
 migration passed. **API 17 runtime and proprietary radio/Bluetooth/CarPlay behavior
 still need testing on the actual head unit.** Upstream hardware reports do not
