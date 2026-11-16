@@ -1,18 +1,25 @@
 # Installable Opel edition
 
-## Current source after upstream sync
+## Published releases — 2026-11-16
 
-The source on `main` is now **2.22.0-opel**, versionCode **55**, based on upstream
-`0a7736f`. Debug and Opel builds pass. The sections below describe the previously
-signed **2.21.2-opel installation file**; that APK is not a build of the synced
-2.22.0 source. A current `assembleOpel` output is unsigned at
-`app/build/outputs/apk/opel/StradaOS-2.22.0-opel.apk` and needs alignment/signing
-before installation. See [sync notes](../changelogs/2.22.0-opel.md).
+1. [StradaOS Opel 2.16.0](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/v2.16.0)
+   was published first, from historical Opel commit `48d2993`, versionCode 46.
+2. [StradaOS Opel 2.22.0](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/v2.22.0)
+   followed 15 seconds later, from `b7da6ce`, versionCode 55, and is **Latest**.
 
+Each release includes a signed `StradaOS-Opel-<version>.apk` and its `.apk.sha256`
+checksum. Both use the existing Opel key, matching previously distributed Opel
+APKs. v1/v2/v3 signatures were verified at minimum SDK 16, along with package,
+app label, version, SDK levels, APK alignment, and uploaded asset sizes/digests.
+2.22.0 installed over the previous Opel version and launched on Android 11/API 30;
+no crash entry occurred. No new runtime test was performed for historical 2.16.0.
+The earlier build records below remain historical rather than claims about a
+new target-device test. API 17 and manufacturer-specific functions still need
+hardware validation.
 
 - App name: **StradaOS Opel**
 - Package: `com.stradaos.launcher.opel`, installed alongside StradaOS and StradaOS Prueba
-- Version: `2.21.2-opel`, versionCode 54
+- Latest version: `2.22.0-opel`, versionCode 55
 - Android: minSdk 16, targetSdk 28; screen resolution remains unchanged
 - Build type: `opel`, based on `release`, not debuggable
 
@@ -29,9 +36,9 @@ must use the same package name and Opel signing key.
 
 The locally signed installation file is:
 
-`app/build/outputs/install/StradaOS-Opel-2.21.2.apk`
+`app/build/outputs/install/StradaOS-Opel-2.22.0.apk`
 
-Its SHA-256 checksum is in `StradaOS-Opel-2.21.2.apk.sha256` beside it. Copy the
+Its SHA-256 checksum is in `StradaOS-Opel-2.22.0.apk.sha256` beside it. Copy the
 APK to the Android head unit and open it with its file manager. Allow installation
 from that source if requested. The different package does not replace an existing
 standard StradaOS installation or automatically import its settings.
@@ -49,7 +56,7 @@ themes, and speed correction.
 ```
 
 This produces the **unsigned** intermediate APK at
-`app/build/outputs/apk/opel/StradaOS-2.21.2-opel.apk`. Align it with `zipalign`
+`app/build/outputs/apk/opel/StradaOS-2.22.0-opel.apk`. Align it with `zipalign`
 before signing with `apksigner`. The distributed file has v1, v2, and v3 signatures;
 v1 is included for Android 4.2, and verification uses `--min-sdk-version 16`.
 

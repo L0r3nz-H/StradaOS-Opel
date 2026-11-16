@@ -3,6 +3,11 @@
 Updated: 2026-11-16. Current Opel source: **2.22.0-opel**, versionCode **55**.
 The historical roadmap below records the earlier upstream snapshot; the sync update below supersedes items shipped or reviewed afterward.
 
+Published Opel releases are now available:
+[2.16.0](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/v2.16.0) and
+[2.22.0 (Latest)](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/v2.22.0),
+with signed APKs and checksums. See [installation](OPEL_APK.md).
+
 ## Current Opel edition
 
 This fork ports the Opel work onto upstream
@@ -34,7 +39,7 @@ The previous `feature/opel-navi900-theme` branch is retained.
 The earlier 2.21.2 local installation artifact is
 `app/build/outputs/install/StradaOS-Opel-2.21.2.apk`, with a SHA-256 file.
 It uses the existing Opel key and verified v1/v2/v3 signatures. Standard upstream
-APKs/update notices are not Opel updates. This is not a published-release claim.
+APKs/update notices are not Opel updates. Current published downloads are linked above.
 
 For the earlier 2.21.2 port, builds succeeded. Android 11/API 30 at 1024 × 600 covered design switching,
 accent visibility, restart persistence, six startup migration/fallback cases,

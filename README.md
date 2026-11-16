@@ -8,7 +8,7 @@
 <img src="https://img.shields.io/badge/Android-4.1%2B-3DDC84?logo=android&logoColor=white">
 <a href="LICENSE"><img src="https://img.shields.io/github/license/lordnordic-debug/StradaOS?label=license"></a>
 <br><br>
-<a href="https://lordnordic-debug.github.io/StradaOS/?lang=en">Upstream website</a> · <a href="https://github.com/lordnordic-debug/StradaOS">Original StradaOS</a>
+<a href="https://github.com/L0r3nz-H/StradaOS-Opel/releases/latest">Download StradaOS Opel</a> · <a href="https://lordnordic-debug.github.io/StradaOS/?lang=en">Upstream website</a> · <a href="https://github.com/lordnordic-debug/StradaOS">Original StradaOS</a>
 </div>
 
 ---
@@ -25,8 +25,8 @@ The current Opel code is maintained on **`main`**, based on upstream **2.22.0**
 (commit `0a7736f`, 2026-11-16). The port was prepared on
 `feature/opel-latest-2.21.2`, which remains available. The current app version is **2.22.0-opel**,
 versionCode **55**, with package `com.stradaos.launcher.opel` and app name
-**StradaOS Opel**. The previous Opel branch remains available. Upstream badges
-and release links above describe the original project, not an Opel APK release.
+**StradaOS Opel**. The previous Opel branch remains available. The upstream version/download-count badges
+describe the original project. Opel release downloads use this fork.
 
 | Option | StradaOS | Opel Style |
 | --- | --- | --- |
@@ -110,10 +110,10 @@ Upstream release notes are available in [Releases](https://github.com/lordnordic
 
 For **StradaOS Opel**:
 
-1. Use a signed Opel APK as described in
-   [OPEL_APK.md](docs/OPEL_APK.md). Signed local installation artifacts are stored under
-   `app/build/outputs/install/`, with matching SHA-256 files. Check their version;
-   older artifacts are not builds of the current source.
+1. Download **[StradaOS-Opel-2.22.0.apk](https://github.com/L0r3nz-H/StradaOS-Opel/releases/download/v2.22.0/StradaOS-Opel-2.22.0.apk)**
+   from the [latest Opel release](https://github.com/L0r3nz-H/StradaOS-Opel/releases/latest). A SHA-256 checksum is attached.
+   The [historical 2.16.0 release](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/v2.16.0) is also available.
+   See [OPEL_APK.md](docs/OPEL_APK.md) for installation and signing details.
 2. Copy the APK to the **Android head unit**, open it with the file manager,
    and allow installation from that source if requested.
 3. Open **StradaOS Opel**, complete setup, and select it as the home app if desired.
