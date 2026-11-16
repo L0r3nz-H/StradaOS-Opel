@@ -952,3 +952,5 @@ Proyección en el inicio Opel	Proiezione nella home Opel
 Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Scegli il collegamento nella home Opel. Puoi cambiarlo in Connessioni.
 Elige el acceso de los cuatro botones grandes del inicio.	Scegli il collegamento di proiezione nei quattro pulsanti grandi.
 Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Telefono · Tutte le app
+Información de Android Auto	Informazioni Android Auto
+Configura tu vehículo, la proyección y la apariencia de Opel Style.	Configura veicolo, proiezione e aspetto di Opel Style.

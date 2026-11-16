@@ -522,7 +522,7 @@ public class Main extends Activity {
         int col = idleColor();
         float f = new float[]{1f, 1.25f, 1.5f}[Math.max(0, Math.min(2, prefs.getInt("idle_size", 0)))];
         int sp = prefs.getInt("idle_speed", prefs.getInt("speedo", 0));   // 0 digital, 1 analógico, 2 mixto, 3 sin velocidad
-        boolean speedOn = sp != 3 && prefs.getBoolean("car_speed", true);
+        boolean speedOn = sp != 3 && (opelSettings() || prefs.getBoolean("car_speed", true));
         if (!vertical && speedOn) f = Math.min(f, 1.25f);   // en horizontal, hora + velocímetro lado a lado deben caber en 1024
         FrameLayout ov = new FrameLayout(this);
         ov.setBackgroundColor(Color.BLACK);
@@ -4419,7 +4419,7 @@ public class Main extends Activity {
 
     /** Solo Opel: elegir el acceso visible, sin cambiar las apps asignadas ni la conexión USB. */
     private void chooseOpelProjection(final Runnable next) {
-        if (!modernDesign()) { if (next != null) next.run(); return; }
+        if (!fixedOpelShortcuts()) { if (next != null) next.run(); return; }
         new TB(this, dlg())
             .setTitle("Proyección en el inicio Opel")
             .setMessage("Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.")
@@ -4432,24 +4432,37 @@ public class Main extends Activity {
             .show();
     }
 
+    private void wizardVehicleFields(final Runnable next) {
+        if (opelSettings()) {
+            if (!homeMapAvailable()) ask("car_name", "Nombre del vehículo", "Astra J", next);
+            else if (next != null) next.run();
+            return;
+        }
+        ask("user_name", "¿Cómo te llamas?", "", new Runnable() { public void run() {
+            ask("car_name", "Nombre del vehículo (ej.: Mazda 2, Spark GT)", "Mi vehículo", new Runnable() { public void run() {
+                ask("car_tag", "Etiqueta corta (versión o placa). Déjalo vacío si no quieres", "", next);
+            }});
+        }});
+    }
+
+    private void wizardPhoto() {
+        if (!opelSettings() || !homeMapAvailable()) pickPhoto();
+    }
+
     private void wizardWelcome() {
         new TB(this, dlg())
             .setTitle("Bienvenido a StradaOS")
-            .setMessage("Vamos a dejar el launcher a tu gusto: tu nombre, tu vehículo, el color y la foto. Toma menos de un minuto y lo puedes cambiar después en el engranaje ⚙.")
+            .setMessage(opelSettings() ? "Configura tu vehículo, la proyección y la apariencia de Opel Style." : "Vamos a dejar el launcher a tu gusto: tu nombre, tu vehículo, el color y la foto. Toma menos de un minuto y lo puedes cambiar después en el engranaje ⚙.")
             .setPositiveButton("Empezar", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int w) {
-                    ask("user_name", "¿Cómo te llamas?", "", new Runnable() { public void run() {
-                    ask("car_name", "Nombre del vehículo (ej.: Mazda 2, Spark GT)", "Mi vehículo", new Runnable() { public void run() {
-                    ask("car_tag", "Etiqueta corta (versión o placa). Déjalo vacío si no quieres", "", new Runnable() { public void run() {
+                    wizardVehicleFields(new Runnable() { public void run() {
                     chooseAccent(new Runnable() { public void run() {
                     chooseFontSize(new Runnable() { public void run() {
                         prefs.edit().putBoolean("setup_done", true).apply();
                         rebuild();
                         reviewShortcuts(new Runnable() { public void run() {
-                            if (!askDefaultHome(new Runnable() { public void run() { pickPhoto(); } })) pickPhoto();
+                            if (!askDefaultHome(new Runnable() { public void run() { wizardPhoto(); } })) wizardPhoto();
                         } });
-                    }});
-                    }});
                     }});
                     }});
                     }});
@@ -4489,8 +4502,10 @@ public class Main extends Activity {
 
     /** Lista de botones con su app; tocar uno deja elegir otra. Funciona igual en cualquier versión de Android. */
     private void reviewShortcuts(final Runnable next) {
-        final String[] items = new String[REVIEW.length];
-        final String[][] entries = REVIEW.clone();
+        final String[][] entries = fixedOpelShortcuts()
+                ? new String[][]{{"radio", "Radio"}, {"bt", "Bluetooth"}, {opelProjectionAction(), opelProjectionLabel()}}
+                : REVIEW.clone();
+        final String[] items = new String[entries.length];
         if (modernDesign()) entries[entries.length - 1] = new String[]{opelProjectionAction(), opelProjectionLabel()};
         for (int i = 0; i < entries.length; i++) items[i] = entries[i][1] + "\n    → " + shortcutLabel(entries[i][0]);
         new TB(this, dlg())
@@ -5146,6 +5161,24 @@ public class Main extends Activity {
     private int settingsScrollCat = -1;
     private int settingsPendingY = -1;   // posición por restaurar en una página que aún no se ha acomodado
 
+    private boolean opelSettings() { return modernDesign() && compactLayout(); }
+
+    private boolean fixedOpelShortcuts() {
+        return opelSettings() && prefs.getBoolean("compact_four_shortcuts", true);
+    }
+
+    private boolean homeMapAvailable() {
+        return !opelSettings() || "map".equals(prefs.getString("compact_main_panel", "vehicle"));
+    }
+
+    private boolean androidAutoSettings() {
+        return !fixedOpelShortcuts() || "aa".equals(opelProjectionAction());
+    }
+
+    private String settingsCategoryName(int cat) {
+        return cat == C_MAP && !homeMapAvailable() ? "Clima" : CAT_NAMES[cat];
+    }
+
     private void closeSettings() {
         settingsCat = -1;
         settingsScroll = null; settingsScrollCat = -1; settingsPendingY = -1;
@@ -5210,7 +5243,7 @@ public class Main extends Activity {
             if (sel) ic.setColorFilter(RED);
             else if (ICON == 0xFFFFFFFF) ic.setAlpha(0.7f);
             it.addView(ic, new LinearLayout.LayoutParams((int) (20 * s), (int) (20 * s)));
-            TextView lt = tv(CAT_NAMES[i], 14, sel ? RED : SOFT, sel);
+            TextView lt = tv(settingsCategoryName(i), 14, sel ? RED : SOFT, sel);
             lt.setPadding((int) (12 * s), 0, 0, 0);
             it.addView(lt);
             LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(-1, (int) (40 * s));
@@ -5252,7 +5285,7 @@ public class Main extends Activity {
         body.setOrientation(LinearLayout.VERTICAL);
         body.setPadding((int) (8 * s), (int) (6 * s), (int) (8 * s), (int) (24 * s));
         sc.addView(body, new FrameLayout.LayoutParams(-1, -2));
-        TextView title = tv(CAT_NAMES[cat], 24, TEXT, true);
+        TextView title = tv(settingsCategoryName(cat), 24, TEXT, true);
         title.setPadding((int) (4 * s), 0, 0, (int) (14 * s));
         body.addView(title);
 
@@ -5287,7 +5320,7 @@ public class Main extends Activity {
             else if (ICON == 0xFFFFFFFF) ic.setAlpha(0.7f);
             it.addView(ic, new LinearLayout.LayoutParams((int) (20 * s), (int) (20 * s)));
             if (i > 0) {   // «Volver al inicio» es solo la flecha
-                TextView lt = tv(CAT_NAMES[i], 14, sel ? RED : SOFT, sel);
+                TextView lt = tv(settingsCategoryName(i), 14, sel ? RED : SOFT, sel);
                 lt.setPadding((int) (10 * s), 0, 0, 0);
                 it.addView(lt);
             }
@@ -5441,13 +5474,15 @@ public class Main extends Activity {
     // ── categorías ──
 
     private void catVehicle(LinearLayout body) {
-        LinearLayout c = section(body, "Datos");
-        row(c, "Tu nombre", "Aparece en el saludo de la pantalla de inicio", prefs.getString("user_name", ""), edit("user_name", "Tu nombre", ""));
-        row(c, "Nombre del vehículo", null, prefs.getString("car_name", "Mi vehículo"), edit("car_name", "Nombre del vehículo", "Mi vehículo"));
-        row(c, "Etiqueta", "Versión o placa. Déjala vacía para ocultarla", prefs.getString("car_tag", ""), edit("car_tag", "Etiqueta (vacío para ocultarla)", ""));
-        LinearLayout f = section(body, "Foto");
-        row(f, "Foto del vehículo", "Se usa tal cual; si quieres, le puedes quitar el fondo", CarPhoto.load(this) != null ? "Configurada" : (opelEdition() || modernDesign() ? "Foto predeterminada" : "Sin foto"),
-            new Runnable() { public void run() { photoMenu(); } });
+        if (!opelSettings() || !homeMapAvailable()) {
+            LinearLayout c = section(body, "Datos");
+            if (!opelSettings()) row(c, "Tu nombre", "Aparece en el saludo de la pantalla de inicio", prefs.getString("user_name", ""), edit("user_name", "Tu nombre", ""));
+            row(c, "Nombre del vehículo", null, prefs.getString("car_name", "Mi vehículo"), edit("car_name", "Nombre del vehículo", "Mi vehículo"));
+            if (!opelSettings()) row(c, "Etiqueta", "Versión o placa. Déjala vacía para ocultarla", prefs.getString("car_tag", ""), edit("car_tag", "Etiqueta (vacío para ocultarla)", ""));
+            LinearLayout f = section(body, "Foto");
+            row(f, "Foto del vehículo", "Se usa tal cual; si quieres, le puedes quitar el fondo", CarPhoto.load(this) != null ? "Configurada" : (opelEdition() || modernDesign() ? "Foto predeterminada" : "Sin foto"),
+                new Runnable() { public void run() { photoMenu(); } });
+        }
         LinearLayout un = section(body, "Unidades");
         String su = prefs.getString("speed_unit", "auto");
         segmented(un, "Velocidad", "Automático: mph en EE. UU. y Reino Unido", new String[]{"Auto", "km/h", "mph"}, "kmh".equals(su) ? 1 : "mph".equals(su) ? 2 : 0,
@@ -5488,15 +5523,17 @@ public class Main extends Activity {
         }
         addIcon(o, 0, "oil_barrel");
         maintSection(body);
-        LinearLayout h = section(body, "En el inicio");
-        if (carSpeed)
-            toggle(h, "Mantenimiento en el inicio", "Junto a la velocidad se ve el más próximo (el aceite u otro). Los avisos siguen saliendo aunque lo ocultes",
-                prefs.getBoolean("oil_home", true), new IntCb() { public void on(int i) {
-                    prefs.edit().putBoolean("oil_home", i == 1).apply(); rebuild();
-                }});
-        else
-            row(h, "Mantenimiento en el inicio", "Se muestra junto a la velocidad: activa «Velocidad y servicio» en Pantalla de inicio", null,
-                new Runnable() { public void run() { showSettings(C_HOME); } });
+        if (!opelSettings()) {
+            LinearLayout h = section(body, "En el inicio");
+            if (carSpeed)
+                toggle(h, "Mantenimiento en el inicio", "Junto a la velocidad se ve el más próximo (el aceite u otro). Los avisos siguen saliendo aunque lo ocultes",
+                    prefs.getBoolean("oil_home", true), new IntCb() { public void on(int i) {
+                        prefs.edit().putBoolean("oil_home", i == 1).apply(); rebuild();
+                    }});
+            else
+                row(h, "Mantenimiento en el inicio", "Se muestra junto a la velocidad: activa «Velocidad y servicio» en Pantalla de inicio", null,
+                    new Runnable() { public void run() { showSettings(C_HOME); } });
+        }
     }
 
     /** Ícono al comienzo de la fila «n» de una tarjeta de Ajustes (las filas van separadas por líneas). */
@@ -5545,7 +5582,6 @@ public class Main extends Activity {
                 prefs.getBoolean("compact_show_speed", false), new IntCb() { public void on(int i) {
                     prefs.edit().putBoolean("compact_show_speed", i == 1).apply(); rebuild();
                 }});
-            row(design, "Temperatura exterior del vehículo", "Sin interfaz del vehículo detectada; se usa el clima si está disponible.", null, null);
         }
         LinearLayout c = section(body, "Tema");
         final String themeKey = modernDesign() ? "opel_theme" : "theme";
@@ -5605,15 +5641,17 @@ public class Main extends Activity {
             prefs.edit().putInt("font_size", i).apply(); rebuild(); showSettings(settingsCat);
         }});
         LinearLayout ic = section(body, "Íconos");
-        boolean appStyle = "apps".equals(prefs.getString("dock_style", "circle"));
-        segmented(ic, "Íconos de la barra", "Apps: el ícono de la app que abre cada botón (radio, cámara…)", new String[]{"StradaOS", "Apps"}, appStyle ? 1 : 0, new IntCb() { public void on(int i) {
-            prefs.edit().putString("dock_style", i == 1 ? "apps" : "circle").apply(); rebuild(); showSettings(settingsCat);
-        }});
+        if (!fixedOpelShortcuts()) {
+            boolean appStyle = "apps".equals(prefs.getString("dock_style", "circle"));
+            segmented(ic, "Íconos de la barra", "Apps: el ícono de la app que abre cada botón (radio, cámara…)", new String[]{"StradaOS", "Apps"}, appStyle ? 1 : 0, new IntCb() { public void on(int i) {
+                prefs.edit().putString("dock_style", i == 1 ? "apps" : "circle").apply(); rebuild(); showSettings(settingsCat);
+            }});
+        }
         final List<String[]> packs = IconPack.installed(this);
         String curPack = prefs.getString("icon_pack", "");
         String curLabel = I18n.t("Ninguno");
         for (String[] pk : packs) if (pk[0].equals(curPack)) curLabel = pk[1];
-        row(ic, "Pack de íconos", packs.isEmpty() ? "Instala uno (los de Nova o ADW sirven) y elígelo aquí" : "Cambia los íconos de la barra y del cajón de apps",
+        row(ic, "Pack de íconos", packs.isEmpty() ? "Instala uno (los de Nova o ADW sirven) y elígelo aquí" : fixedOpelShortcuts() ? null : "Cambia los íconos de la barra y del cajón de apps",
             curLabel, new Runnable() { public void run() {
                 if (packs.isEmpty()) { toast("No hay packs de íconos instalados"); return; }
                 String[] names = new String[packs.size() + 1];
@@ -5631,7 +5669,7 @@ public class Main extends Activity {
                             IconPack ip = IconPack.get(Main.this, pk);
                             if (ip == null) { toast("Ese pack no trae la lista de íconos (appfilter)"); return; }
                             prefs.edit().putString("icon_pack", pk).apply();
-                            if (!"apps".equals(prefs.getString("dock_style", "circle"))) prefs.edit().putString("dock_style", "apps").apply();
+                            if (!fixedOpelShortcuts() && !"apps".equals(prefs.getString("dock_style", "circle"))) prefs.edit().putString("dock_style", "apps").apply();
                             toast(I18n.t("Pack listo: {} íconos").replace("{}", String.valueOf(ip.size())));
                         }
                         rebuild(); showSettings(settingsCat);
@@ -5642,80 +5680,84 @@ public class Main extends Activity {
 
     /** Pantalla de inicio: qué tarjetas se ven, el mapa y la barra de arriba. */
     private void catHome(LinearLayout body) {
-        if (boxW > 0 && canVertical(boxW, boxH)) {
-            // Solo en pantallas casi cuadradas o verticales (en las horizontales no tiene sentido).
-            final String[] lk = {"auto", "horizontal", "vertical"};
-            LinearLayout ds = section(body, "Diseño");
-            segmented(ds, "Diseño de la pantalla", "Automático: según la forma de la pantalla. Elige Vertical si tu pantalla es vertical y se ve chica en el medio",
-                new String[]{"Automático", "Horizontal", "Vertical"},
-                Math.max(0, java.util.Arrays.asList(lk).indexOf(prefs.getString("layout_mode", "auto"))), new IntCb() { public void on(int i) {
-                    prefs.edit().putString("layout_mode", lk[i]).apply(); rebuild();
-                }});
-        }
-        LinearLayout lay = section(body, "Tarjetas");
-        segmented(lay, "Reproductor de música", "Ponlo del lado del conductor para tenerlo a la mano", new String[]{"Derecha", "Izquierda"},
-            playerLeft ? 1 : 0, new IntCb() { public void on(int i) {
-                prefs.edit().putString("player_side", i == 1 ? "left" : "right").apply(); rebuild();
-            }});
-        toggle(lay, "Tarjeta del reproductor", "Si la ocultas, el mapa gana espacio", showPlayer, new IntCb() { public void on(int i) {
-            prefs.edit().putBoolean("show_player", i == 1).apply(); rebuild();
-        }});
-        toggle(lay, "Tarjeta del vehículo", "Si la ocultas, la velocidad pasa arriba y el mapa y el reproductor ganan espacio", showCar, new IntCb() { public void on(int i) {
-            prefs.edit().putBoolean("show_car", i == 1).apply(); rebuild();
-        }});
-        toggle(lay, "Velocidad y servicio", "En la tarjeta del vehículo (o arriba si la ocultas). Apágalo si tu carro o pantalla no tiene GPS: la foto ocupa ese espacio",
-            carSpeed, new IntCb() { public void on(int i) {
-                prefs.edit().putBoolean("car_speed", i == 1).apply(); rebuild();
-            }});
-        if (carSpeed && showCar) {
-            segmented(lay, "Velocímetro", "En la tarjeta del vehículo. Toma el color de acento", new String[]{"Digital", "Analógico", "Mixto"},
-                prefs.getInt("speedo", 0), new IntCb() { public void on(int i) {
-                    prefs.edit().putInt("speedo", i).apply(); rebuild();
-                }});
-        }
-        LinearLayout mp = section(body, "Mapa");
-        final String[] connKeys = {"both", "aa", "cp", "none"};
-        choice(mp, "Botones de conexión", "Con uno o ninguno, el clima ocupa el espacio libre del mapa",
-            new String[]{"Android Auto y CarPlay", "Solo Android Auto", "Solo CarPlay", "Ninguno"},
-            Math.max(0, java.util.Arrays.asList(connKeys).indexOf(prefs.getString("conn_buttons", "both"))), new IntCb() { public void on(int i) {
-                prefs.edit().putString("conn_buttons", connKeys[i]).apply(); rebuild();
-            }});
-        final int nbSize = prefs.getInt("nav_btn_size", 0);
-        choice(mp, "Botón del navegador", "El botón redondo del mapa que abre tu app de navegación",
-            new String[]{"Normal", "Grande", "Muy grande", "Oculto"}, nbSize, new IntCb() { public void on(int i) {
-                prefs.edit().putInt("nav_btn_size", i).apply(); rebuild();
-            }});
-        if (nbSize != 3) {
-            final String[] sideKeys = {"auto", "left", "right"};
-            segmented(mp, "Lado del botón del navegador", "Automático: del lado del reproductor (el del conductor)",
-                new String[]{"Automático", "Izquierda", "Derecha"},
-                Math.max(0, java.util.Arrays.asList(sideKeys).indexOf(prefs.getString("nav_btn_side", "auto"))), new IntCb() { public void on(int i) {
-                    prefs.edit().putString("nav_btn_side", sideKeys[i]).apply(); rebuild();
-                }});
-        }
-        if (carSpeed && !showCar) {
-            final boolean mg = prefs.getBoolean("map_gauge", false);
-            toggle(mp, "Velocímetro sobre el mapa", "Redondo, en una esquina del mapa (en vez de la velocidad de arriba)", mg, new IntCb() { public void on(int i) {
-                prefs.edit().putBoolean("map_gauge", i == 1).apply(); rebuild();
-            }});
-            if (mg) {
-                final String[] corners = {"auto", "tl", "tr", "bl", "br"};
-                choice(mp, "Esquina del velocímetro", "Automático: arriba, en el lado contrario al botón del navegador",
-                    new String[]{"Automático", "Arriba a la izquierda", "Arriba a la derecha", "Abajo a la izquierda", "Abajo a la derecha"},
-                    Math.max(0, java.util.Arrays.asList(corners).indexOf(prefs.getString("map_gauge_corner", "auto"))), new IntCb() { public void on(int i) {
-                        prefs.edit().putString("map_gauge_corner", corners[i]).apply(); rebuild();
+        if (!opelSettings()) {
+            if (boxW > 0 && canVertical(boxW, boxH)) {
+                // Solo en pantallas casi cuadradas o verticales (en las horizontales no tiene sentido).
+                final String[] lk = {"auto", "horizontal", "vertical"};
+                LinearLayout ds = section(body, "Diseño");
+                segmented(ds, "Diseño de la pantalla", "Automático: según la forma de la pantalla. Elige Vertical si tu pantalla es vertical y se ve chica en el medio",
+                    new String[]{"Automático", "Horizontal", "Vertical"},
+                    Math.max(0, java.util.Arrays.asList(lk).indexOf(prefs.getString("layout_mode", "auto"))), new IntCb() { public void on(int i) {
+                        prefs.edit().putString("layout_mode", lk[i]).apply(); rebuild();
                     }});
-                segmented(mp, "Tamaño del velocímetro", "En pantallas bajas se limita para no tapar el mapa", new String[]{"Pequeño", "Normal", "Grande"},
-                    prefs.getInt("map_gauge_size", 1), new IntCb() { public void on(int i) {
-                        prefs.edit().putInt("map_gauge_size", i).apply(); rebuild();
+            }
+            LinearLayout lay = section(body, "Tarjetas");
+            segmented(lay, "Reproductor de música", "Ponlo del lado del conductor para tenerlo a la mano", new String[]{"Derecha", "Izquierda"},
+                playerLeft ? 1 : 0, new IntCb() { public void on(int i) {
+                    prefs.edit().putString("player_side", i == 1 ? "left" : "right").apply(); rebuild();
+                }});
+            toggle(lay, "Tarjeta del reproductor", "Si la ocultas, el mapa gana espacio", showPlayer, new IntCb() { public void on(int i) {
+                prefs.edit().putBoolean("show_player", i == 1).apply(); rebuild();
+            }});
+            toggle(lay, "Tarjeta del vehículo", "Si la ocultas, la velocidad pasa arriba y el mapa y el reproductor ganan espacio", showCar, new IntCb() { public void on(int i) {
+                prefs.edit().putBoolean("show_car", i == 1).apply(); rebuild();
+            }});
+            toggle(lay, "Velocidad y servicio", "En la tarjeta del vehículo (o arriba si la ocultas). Apágalo si tu carro o pantalla no tiene GPS: la foto ocupa ese espacio",
+                carSpeed, new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("car_speed", i == 1).apply(); rebuild();
+                }});
+            if (carSpeed && showCar) {
+                segmented(lay, "Velocímetro", "En la tarjeta del vehículo. Toma el color de acento", new String[]{"Digital", "Analógico", "Mixto"},
+                    prefs.getInt("speedo", 0), new IntCb() { public void on(int i) {
+                        prefs.edit().putInt("speedo", i).apply(); rebuild();
                     }});
+            }
+            LinearLayout mp = section(body, "Mapa");
+            final String[] connKeys = {"both", "aa", "cp", "none"};
+            choice(mp, "Botones de conexión", "Con uno o ninguno, el clima ocupa el espacio libre del mapa",
+                new String[]{"Android Auto y CarPlay", "Solo Android Auto", "Solo CarPlay", "Ninguno"},
+                Math.max(0, java.util.Arrays.asList(connKeys).indexOf(prefs.getString("conn_buttons", "both"))), new IntCb() { public void on(int i) {
+                    prefs.edit().putString("conn_buttons", connKeys[i]).apply(); rebuild();
+                }});
+            final int nbSize = prefs.getInt("nav_btn_size", 0);
+            choice(mp, "Botón del navegador", "El botón redondo del mapa que abre tu app de navegación",
+                new String[]{"Normal", "Grande", "Muy grande", "Oculto"}, nbSize, new IntCb() { public void on(int i) {
+                    prefs.edit().putInt("nav_btn_size", i).apply(); rebuild();
+                }});
+            if (nbSize != 3) {
+                final String[] sideKeys = {"auto", "left", "right"};
+                segmented(mp, "Lado del botón del navegador", "Automático: del lado del reproductor (el del conductor)",
+                    new String[]{"Automático", "Izquierda", "Derecha"},
+                    Math.max(0, java.util.Arrays.asList(sideKeys).indexOf(prefs.getString("nav_btn_side", "auto"))), new IntCb() { public void on(int i) {
+                        prefs.edit().putString("nav_btn_side", sideKeys[i]).apply(); rebuild();
+                    }});
+            }
+            if (carSpeed && !showCar) {
+                final boolean mg = prefs.getBoolean("map_gauge", false);
+                toggle(mp, "Velocímetro sobre el mapa", "Redondo, en una esquina del mapa (en vez de la velocidad de arriba)", mg, new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("map_gauge", i == 1).apply(); rebuild();
+                }});
+                if (mg) {
+                    final String[] corners = {"auto", "tl", "tr", "bl", "br"};
+                    choice(mp, "Esquina del velocímetro", "Automático: arriba, en el lado contrario al botón del navegador",
+                        new String[]{"Automático", "Arriba a la izquierda", "Arriba a la derecha", "Abajo a la izquierda", "Abajo a la derecha"},
+                        Math.max(0, java.util.Arrays.asList(corners).indexOf(prefs.getString("map_gauge_corner", "auto"))), new IntCb() { public void on(int i) {
+                            prefs.edit().putString("map_gauge_corner", corners[i]).apply(); rebuild();
+                        }});
+                    segmented(mp, "Tamaño del velocímetro", "En pantallas bajas se limita para no tapar el mapa", new String[]{"Pequeño", "Normal", "Grande"},
+                        prefs.getInt("map_gauge_size", 1), new IntCb() { public void on(int i) {
+                            prefs.edit().putInt("map_gauge_size", i).apply(); rebuild();
+                        }});
+                }
             }
         }
         LinearLayout top = section(body, "Barra de arriba");
-        toggle(top, "Íconos de Wi-Fi y Bluetooth", "Arriba, junto al clima. Toca para encender o apagar; déjalo presionado para abrir sus ajustes",
-            prefs.getBoolean("status_icons", true), new IntCb() { public void on(int i) {
-                prefs.edit().putBoolean("status_icons", i == 1).apply(); rebuild();
-            }});
+        if (!opelSettings()) {
+            toggle(top, "Íconos de Wi-Fi y Bluetooth", "Arriba, junto al clima. Toca para encender o apagar; déjalo presionado para abrir sus ajustes",
+                prefs.getBoolean("status_icons", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("status_icons", i == 1).apply(); rebuild();
+                }});
+        }
         String ck = prefs.getString("clock", "auto");
         segmented(top, "Formato de hora", null, new String[]{"Auto", "12 h", "24 h"}, "12".equals(ck) ? 1 : "24".equals(ck) ? 2 : 0,
             new IntCb() { public void on(int i) {
@@ -5763,33 +5805,43 @@ public class Main extends Activity {
     }
 
     private void catConnection(LinearLayout body) {
-        if (modernDesign()) {
+        if (fixedOpelShortcuts()) {
             LinearLayout opel = section(body, "Opel Style");
             segmented(opel, "Proyección en el inicio Opel", "Elige el acceso de los cuatro botones grandes del inicio.",
                 new String[]{"CarPlay", "Android Auto"}, "aa".equals(opelProjectionAction()) ? 1 : 0,
                 new IntCb() { public void on(int i) { setOpelProjection(i); } });
         }
         LinearLayout c = section(body, "Celular");
-        String chosen = prefs.getString("conn_app", null);
-        row(c, "Cómo conectar el celular", "La app que se abre al conectar por USB", chosen != null ? labelOf(chosen) : "Preguntar",
-            new Runnable() { public void run() { chooseConnection(null); } });
-        row(c, "App de Android Auto", "Botón naranja de la tarjeta central", appLabel("aa", "Automática"),
-            new Runnable() { public void run() { pickFor("aa", "Android Auto"); } });
-        row(c, "App de CarPlay", "Requiere pantalla con CarPlay o un adaptador", appLabel("carplay", carPlayApp() != null ? labelOf(carPlayApp()) : "Ninguna"),
-            new Runnable() { public void run() { pickFor("carplay", "CarPlay"); } });
-        LinearLayout hl = section(body, "Ayuda");
-        row(hl, "El celular dice «Ninguna aplic. funciona…»", "Cómo evitar que EasyConnection tome el USB", null,
-            new Runnable() { public void run() { usbHelp(); } });
+        if (androidAutoSettings()) {
+            String chosen = prefs.getString("conn_app", null);
+            row(c, "Cómo conectar el celular", "La app que se abre al conectar por USB", chosen != null ? labelOf(chosen) : "Preguntar",
+                new Runnable() { public void run() { chooseConnection(null); } });
+            row(c, "App de Android Auto", opelSettings() ? null : "Botón naranja de la tarjeta central", appLabel("aa", "Automática"),
+                new Runnable() { public void run() { pickFor("aa", "Android Auto"); } });
+        }
+        if (!fixedOpelShortcuts() || !androidAutoSettings()) {
+            row(c, "App de CarPlay", "Requiere pantalla con CarPlay o un adaptador", appLabel("carplay", carPlayApp() != null ? labelOf(carPlayApp()) : "Ninguna"),
+                new Runnable() { public void run() { pickFor("carplay", "CarPlay"); } });
+        }
+        if (androidAutoSettings()) {
+            LinearLayout hl = section(body, "Ayuda");
+            row(hl, "El celular dice «Ninguna aplic. funciona…»", "Cómo evitar que EasyConnection tome el USB", null,
+                new Runnable() { public void run() { usbHelp(); } });
+        }
     }
 
     /** Barra de apps: cómo se ve la barra, qué abre cada botón y el cajón. */
     private void catDock(LinearLayout body) {
-        LinearLayout lay = section(body, "Diseño de la barra");
-        segmented(lay, "Barra de botones", "Lateral: los botones van al costado y todo se ve más grande en pantallas bajas como 1280×480. Oculta: el botón Apps va arriba", new String[]{"Normal", "Compacta", "Lateral", "Oculta"},
-            noDock ? 3 : sideDock ? 2 : compactDock ? 1 : 0, new IntCb() { public void on(int i) {
-                prefs.edit().putString("dock_mode", i == 3 ? "none" : i == 2 ? "side" : i == 1 ? "compact" : "normal").apply(); rebuild();
-            }});
-        if (!noDock) {
+        LinearLayout lay = null;
+        if (!opelSettings()) {
+            lay = section(body, "Diseño de la barra");
+            segmented(lay, "Barra de botones", "Lateral: los botones van al costado y todo se ve más grande en pantallas bajas como 1280×480. Oculta: el botón Apps va arriba", new String[]{"Normal", "Compacta", "Lateral", "Oculta"},
+                noDock ? 3 : sideDock ? 2 : compactDock ? 1 : 0, new IntCb() { public void on(int i) {
+                    prefs.edit().putString("dock_mode", i == 3 ? "none" : i == 2 ? "side" : i == 1 ? "compact" : "normal").apply(); rebuild();
+                }});
+        }
+        if (!noDock && !fixedOpelShortcuts()) {
+            if (lay == null) lay = section(body, "Diseño de la barra");
             if (sideDock) {
                 String rs = prefs.getString("rail_side", "auto");
                 segmented(lay, "Lado de la barra lateral", "Automático: del lado del reproductor", new String[]{"Automático", "Izquierda", "Derecha"},
@@ -5821,9 +5873,14 @@ public class Main extends Activity {
         }});
         }
         LinearLayout fa = section(body, "Apps de cada función");
-        String[][] items = {{"radio", "Radio"}, {"bt", "Bluetooth"}, {"cam", "Cámara"}, {"web", "Navegador web"}, {"files", "Archivos"}};
+        String[][] items = fixedOpelShortcuts() ? new String[][]{{"radio", "Radio"}, {"bt", "Bluetooth"}}
+                : new String[][]{{"radio", "Radio"}, {"bt", "Bluetooth"}, {"cam", "Cámara"}, {"web", "Navegador web"}, {"files", "Archivos"}};
         for (final String[] it : items) {
             row(fa, it[1], null, "web".equals(it[0]) ? appLabel(it[0], "Automático") : shortcutLabel(it[0]), new Runnable() { public void run() { pickFor(it[0], it[1]); } });
+        }
+        if (opelSettings() && !fixedOpelShortcuts()) {
+            row(fa, "App de navegación preferida", null, autoLabel("nav_app", NAV_PKGS, "Toca para elegir"),
+                new Runnable() { public void run() { pickFor("nav_app", "Navegación"); } });
         }
         row(fa, "Música Bluetooth", "La app que hace sonar el Bluetooth (se usa para pasar el sonido)", shortcutLabel("btaudio"), new Runnable() { public void run() { pickFor("btaudio", "Música Bluetooth"); } });
         LinearLayout dw = section(body, "Cajón de apps");
@@ -5833,8 +5890,10 @@ public class Main extends Activity {
         LinearLayout r = section(body, "Restablecer");
         row(r, "Restablecer accesos", "La barra vuelve a lo de siempre y se buscan las apps de fábrica", null, new Runnable() { public void run() {
             SharedPreferences.Editor e = prefs.edit();
-            for (String k : new String[]{"radio", "bt", "cam", "files", "settings", "aa", "web", "carplay", "music_app", "nav_app"}) e.remove(k);
-            for (int i = 0; i < 10; i++) e.remove("dock_" + i).remove("dock_" + i + "_name");
+            String[] keys = fixedOpelShortcuts() ? new String[]{"radio", "bt", opelProjectionAction()}
+                    : new String[]{"radio", "bt", "cam", "files", "settings", "aa", "web", "carplay", "music_app", "nav_app"};
+            for (String k : keys) e.remove(k);
+            if (!fixedOpelShortcuts()) for (int i = 0; i < 10; i++) e.remove("dock_" + i).remove("dock_" + i + "_name");
             e.apply();
             toast("Accesos restablecidos");
             refreshStates();
@@ -5845,7 +5904,7 @@ public class Main extends Activity {
 
     private void catMapWeather(LinearLayout body) {
         LinearLayout w = section(body, "Clima");
-        toggle(w, "Mostrar el clima", "Arriba, junto al saludo (necesita internet)", prefs.getBoolean("weather_on", true), new IntCb() { public void on(int i) {
+        toggle(w, "Mostrar el clima", opelSettings() ? null : "Arriba, junto al saludo (necesita internet)", prefs.getBoolean("weather_on", true), new IntCb() { public void on(int i) {
             prefs.edit().putBoolean("weather_on", i == 1).apply(); refreshWeatherNow(); showSettings(settingsCat);
         }});
         segmented(w, "Unidad", null, new String[]{"°C", "°F"}, "F".equals(prefs.getString("temp_unit", "C")) ? 1 : 0, new IntCb() { public void on(int i) {
@@ -5854,18 +5913,25 @@ public class Main extends Activity {
         String manual = prefs.getString("city_manual", "");
         row(w, "Ciudad", "Vacío = automática por GPS", manual.length() > 0 ? manual : (weatherNow != null && weatherNow.city != null ? weatherNow.city + " (GPS)" : "Automática"),
             edit("city_manual", "Ciudad (vacío = automática por GPS)", ""));
+        dlStatusTv = null;
+        if (!homeMapAvailable()) return;
         LinearLayout mo = section(body, "Mapa");
         LinearLayout ml = mo, nv = mo;
-        segmented(mo, "El mapa apunta", "Según tu dirección: gira con el carro mientras te mueves", new String[]{"Norte arriba", "Según tu dirección"},
-            prefs.getBoolean("map_heading", false) ? 1 : 0, new IntCb() { public void on(int i) {
-                prefs.edit().putBoolean("map_heading", i == 1).apply(); LiveMapView.headingUp = i == 1;
-                if (liveMap != null) liveMap.invalidate(); showSettings(settingsCat);
-            }});
+        if (!opelSettings() || prefs.getBoolean("map_live", true)) {
+            segmented(mo, "El mapa apunta", "Según tu dirección: gira con el carro mientras te mueves", new String[]{"Norte arriba", "Según tu dirección"},
+                prefs.getBoolean("map_heading", false) ? 1 : 0, new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("map_heading", i == 1).apply(); LiveMapView.headingUp = i == 1;
+                    if (liveMap != null) liveMap.invalidate(); showSettings(settingsCat);
+                }});
+        }
         toggle(ml, "Mapa en vivo", "Apágalo si la pantalla va lenta: queda un mapa de adorno y el velocímetro sigue funcionando", prefs.getBoolean("map_live", true), new IntCb() { public void on(int i) {
             prefs.edit().putBoolean("map_live", i == 1).apply(); rebuild(); showSettings(settingsCat);
         }});
-        row(nv, "App de navegación preferida", "Se abre con el botón del mapa (Waze, Maps, OsmAnd…)", autoLabel("nav_app", NAV_PKGS, "Toca para elegir"),
-            new Runnable() { public void run() { pickFor("nav_app", "Navegación"); } });
+        if (opelSettings() && !prefs.getBoolean("map_live", true)) return;
+        if (!opelSettings()) {
+            row(nv, "App de navegación preferida", "Se abre con el botón del mapa (Waze, Maps, OsmAnd…)", autoLabel("nav_app", NAV_PKGS, "Toca para elegir"),
+                new Runnable() { public void run() { pickFor("nav_app", "Navegación"); } });
+        }
         LinearLayout m = mo;
         segmented(m, "Brillo del mapa", "Solo en modo oscuro", new String[]{"Bajo", "Medio", "Alto"}, prefs.getInt("map_bright", 1), new IntCb() { public void on(int i) {
             prefs.edit().putInt("map_bright", i).apply(); rebuild();
@@ -6150,8 +6216,10 @@ public class Main extends Activity {
         row(ma, "App de música preferida", "Se abre al tocar el reproductor del inicio", autoLabel("music_app", MUSIC_PKGS, "Toca para elegir"),
             new Runnable() { public void run() { pickFor("music_app", "Música"); } });
         LinearLayout c = section(body, "Pista en reproducción");
-        row(c, "Carátula de Android Auto", "Lee la notificación de Open Headunit (accesibilidad)", NotifArt.running ? "Activada" : "Desactivada",
-            new Runnable() { public void run() { openAccessibility(); } });
+        if (androidAutoSettings()) {
+            row(c, opelSettings() ? "Información de Android Auto" : "Carátula de Android Auto", "Lee la notificación de Open Headunit (accesibilidad)", NotifArt.running ? "Activada" : "Desactivada",
+                new Runnable() { public void run() { openAccessibility(); } });
+        }
         if (SDK >= 18) row(c, "Música de cualquier app", "Android 5+: acceso a notificaciones", MediaListener.connected ? "Activado" : "Desactivado",
             new Runnable() { public void run() {
                 try { startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
@@ -6160,10 +6228,12 @@ public class Main extends Activity {
         row(c, "Diagnóstico del reproductor", "Fuente activa, lector de notificaciones y Bluetooth", null, new Runnable() { public void run() { showPlayerDiag(); } });
         LinearLayout b = section(body, "Audio Bluetooth");
         row(b, "¿La música Bluetooth se corta o no aparece?", "Qué hacer en cada caso", null, new Runnable() { public void run() { btHelp(); } });
-        toggle(b, "Volver al Bluetooth al desconectar Android Auto", "Al quitar el cable, abre un instante la app de música Bluetooth para que el sonido siga por Bluetooth",
-            prefs.getBoolean("aa_off_bt", true), new IntCb() { public void on(int i) {
-                prefs.edit().putBoolean("aa_off_bt", i == 1).apply(); showSettings(settingsCat);
-            }});
+        if (androidAutoSettings()) {
+            toggle(b, "Volver al Bluetooth al desconectar Android Auto", "Al quitar el cable, abre un instante la app de música Bluetooth para que el sonido siga por Bluetooth",
+                prefs.getBoolean("aa_off_bt", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("aa_off_bt", i == 1).apply(); showSettings(settingsCat);
+                }});
+        }
         if (clwBt) {
             row(b, "Escuchar el Bluetooth", "En esta pantalla, toca ▶ en el inicio: StradaOS pasa el sonido a Bluetooth (por ejemplo, si venías de la radio)", null, null);
             toggle(b, "Pasar a Bluetooth al dar play en el celular (en prueba)", "Abre un instante «Audio Bluetooth» y vuelve. En algunas pantallas no detecta el play del celular",
@@ -6258,7 +6328,7 @@ public class Main extends Activity {
         row(c, "Ajustes del equipo", "Los ajustes de la pantalla (los de la marca si los tiene)", null, new Runnable() { public void run() {
             openSystemSettings();
         }});
-        row(c, "Asistente de configuración inicial", "Nombre, vehículo, color y foto", null, new Runnable() { public void run() { closeSettings(); wizard(); } });
+        row(c, "Asistente de configuración inicial", opelSettings() ? "Configura tu vehículo, la proyección y la apariencia de Opel Style." : "Nombre, vehículo, color y foto", null, new Runnable() { public void run() { closeSettings(); wizard(); } });
         LinearLayout k = section(body, "Compatibilidad");
         row(k, "Qué funciona en esta pantalla", "Cada función, desde qué Android sirve y su estado aquí", null, new Runnable() { public void run() { showCompat(); } });
         LinearLayout d = section(body, "Soporte");

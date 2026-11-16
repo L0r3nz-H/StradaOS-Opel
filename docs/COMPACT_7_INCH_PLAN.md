@@ -258,3 +258,14 @@ The original planning phase introduced no builds/device tests. Later checks:
 - Run `assembleDebug`, `lintDebug`, and `git diff --check`, and inspect findings.
   No new firmware, root, MCU/CAN, resolution, minimum-SDK, permission, or UI-library
   changes are part of this work.
+
+## Settings availability
+
+Opel settings are filtered by the active view and supported controls. The standard
+card/gauge/status/navigation configuration remains stored but is not offered in
+Opel. Vehicle fields require the vehicle panel; map controls require the map panel
+and, where applicable, live mode. Fixed shortcuts exclude normal dock layout,
+count, size, labels, and app-icon style; icon packs remain useful for the app drawer.
+Connections follows the chosen projection. Functional maintenance alerts, music,
+clock, idle display, units, backup, and system features remain available. Returning
+to StradaOS exposes its original options without resetting their preferences.

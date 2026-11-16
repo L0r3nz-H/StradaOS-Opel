@@ -961,3 +961,5 @@ Proyección en el inicio Opel	Opel 主屏幕投屏
 Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	选择 Opel 主屏幕上的快捷方式。之后可在连接设置中更改。
 Elige el acceso de los cuatro botones grandes del inicio.	选择四个大按钮中的投屏快捷方式。
 Radio · Android Auto · Teléfono · Todas las apps	收音机 · Android Auto · 电话 · 所有应用
+Información de Android Auto	Android Auto 信息
+Configura tu vehículo, la proyección y la apariencia de Opel Style.	设置车辆、投屏和 Opel Style 外观。

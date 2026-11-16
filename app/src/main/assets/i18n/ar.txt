@@ -941,3 +941,5 @@ Proyección en el inicio Opel	العرض على شاشة أوبل الرئيسي
 Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	اختر الاختصار في شاشة أوبل الرئيسية. يمكنك تغييره لاحقًا في الاتصالات.
 Elige el acceso de los cuatro botones grandes del inicio.	اختر اختصار العرض ضمن الأزرار الأربعة الكبيرة.
 Radio · Android Auto · Teléfono · Todas las apps	الراديو · Android Auto · الهاتف · كل التطبيقات
+Información de Android Auto	معلومات Android Auto
+Configura tu vehículo, la proyección y la apariencia de Opel Style.	اضبط مركبتك والعرض ومظهر Opel Style.

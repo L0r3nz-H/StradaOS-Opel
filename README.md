@@ -47,6 +47,15 @@ choice updates the label, icon, and launch action, and survives restarts/style
 changes. CarPlay remains the default for existing installations. The normal
 configurable StradaOS dock and its app assignments are retained.
 
+Settings follow the active Opel layout: standard-only card arrangements,
+vehicle tags/greetings, gauges, header status icons, navigation buttons, and
+home maintenance badges are hidden. Map controls appear only for the selected
+map panel; live-map options require its live view. Fixed shortcuts omit normal
+dock layout/icon/count controls; selecting the configurable dock restores its
+supported controls. With four fixed shortcuts, Connections shows only the chosen projection app;
+the configurable dock keeps both projection-app assignments. Hidden standard
+preferences remain stored and return when switching back to StradaOS.
+
 The vehicle panel shows **Astra J** above the transparent bundled photo; a user
 photo takes priority in both compact and standard views of the Opel edition.
 Tap the image or use Settings → Your vehicle → Vehicle photo to choose another

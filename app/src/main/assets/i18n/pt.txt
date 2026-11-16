@@ -952,3 +952,5 @@ Proyección en el inicio Opel	Projeção no início Opel
 Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Escolha o atalho no início Opel. Pode alterá-lo depois em Conexões.
 Elige el acceso de los cuatro botones grandes del inicio.	Escolha o atalho de projeção nos quatro botões grandes.
 Radio · Android Auto · Teléfono · Todas las apps	Rádio · Android Auto · Telefone · Todas as apps
+Información de Android Auto	Informações do Android Auto
+Configura tu vehículo, la proyección y la apariencia de Opel Style.	Configure o veículo, a projeção e a aparência do Opel Style.

@@ -967,3 +967,5 @@ Proyección en el inicio Opel	Opel home projection
 Elige qué acceso aparece en el inicio Opel. Puedes cambiarlo después en Conexiones.	Choose the shortcut shown on the Opel home screen. You can change it later in Connections.
 Elige el acceso de los cuatro botones grandes del inicio.	Choose the projection shortcut in the four large home buttons.
 Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Phone · All apps
+Información de Android Auto	Android Auto information
+Configura tu vehículo, la proyección y la apariencia de Opel Style.	Set up your vehicle, projection and Opel Style appearance.
