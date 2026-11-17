@@ -8,16 +8,48 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  check-pages:
     runs-on: ubuntu-latest
+    permissions:
+      pages: read
+    outputs:
+      enabled: ${{ steps.pages.outputs.result }}
+    steps:
+      - name: Check Pages configuration
+        id: pages
+        uses: actions/github-script@v8
+        with:
+          result-encoding: string
+          script: |
+            let site;
+            try {
+              const response = await github.rest.repos.getPages(context.repo);
+              site = response.data;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              core.notice('GitHub Pages is not enabled for this repository; skipping website deployment.');
+              return false;
+            }
+            if (site.build_type !== 'workflow') {
+              core.notice('GitHub Pages is not configured to build with GitHub Actions; skipping website deployment.');
+              return false;
+            }
+            return true;
+
+  deploy:
+    needs: check-pages
+    if: needs.check-pages.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
