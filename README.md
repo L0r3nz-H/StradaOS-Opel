@@ -83,6 +83,8 @@ See the [screenshot index](docs/screenshots/compact/README.md) for historical ca
 
 ### Dashboard
 
+- **Optional built-in navigation:** upstream 2.23.0 adds destination search, voice guidance, route alternatives and approximate offline routing. It stays off until selected in the standard layout.
+
 - **Live and offline maps:** download a free OpenStreetMap-derived country map in the app, then use it without internet. Map/arrow motion is interpolated between GPS readings.
 - **Android Auto and CarPlay shortcuts:** open the head unit's projection app or [Open Headunit](https://github.com/andreknieriem/headunit-revived) over USB.
 - **Music:** Bluetooth title, artist, and playback time with large controls. Android Auto and local music apps can also supply artwork.

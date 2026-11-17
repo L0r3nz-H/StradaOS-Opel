@@ -1,3 +1,10 @@
+## Pending upstream 2.23.0 sync
+
+Upstream release `v2.23.0`, commit `42ecf12c4a42b7d43024f8adfc9e720f99322d20`,
+adds optional built-in navigation, disabled by default. The Opel port is pending
+GitHub-hosted build, lint, signing and startup verification before main integration.
+The previous release and validation records below remain historical.
+
 # StradaOS project status
 
 Updated: 2026-11-16. Current Opel source: **2.22.0-opel**, versionCode **55**.
