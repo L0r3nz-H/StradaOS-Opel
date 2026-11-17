@@ -1142,4 +1142,3 @@ Obras en la vía	Roadworks
 Tráfico detenido	Stopped traffic
 Incidente en la vía	Road incident
 Radar de velocidad adelante	Speed camera ahead
-

@@ -6919,8 +6919,8 @@ public class Main extends Activity {
         }});
         if (opelSettings() && !prefs.getBoolean("map_live", true)) return;
         if (!opelSettings()) {
-        row(nv, "App de navegación preferida", "Se abre con el botón del mapa (Waze, Maps, OsmAnd… o integrada en el mapa)", autoLabel("nav_app", NAV_PKGS, "Toca para elegir"),
-            new Runnable() { public void run() { pickFor("nav_app", "Navegación"); } });
+            row(nv, "App de navegación preferida", "Se abre con el botón del mapa (Waze, Maps, OsmAnd… o integrada en el mapa)", autoLabel("nav_app", NAV_PKGS, "Toca para elegir"),
+                new Runnable() { public void run() { pickFor("nav_app", "Navegación"); } });
         }
         final boolean navIn = !opelSettings() && "internal".equals(prefs.getString("nav_app", null));
         if (navIn) {
