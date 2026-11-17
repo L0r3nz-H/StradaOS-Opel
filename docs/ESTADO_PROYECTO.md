@@ -86,8 +86,10 @@ for that proposal is not validation of this fork or authorization to merge it.
 
 Since v2.8.0, upstream releases use the upstream publishing key from GitHub
 secrets, compatible with earlier manual installs. `release.yml` updates
-`update.json`; standard apps use it for release notices. `pages.yml` publishes
-`site/` at https://lordnordic-debug.github.io/StradaOS/; downloads use the latest
+`update.json`; standard apps use it for release notices. Upstream's `pages.yml`
+publishes `site/` at https://lordnordic-debug.github.io/StradaOS/. The Opel fork
+intentionally removes that deployment workflow and does not require GitHub Pages.
+Upstream website downloads use the latest
 GitHub release, excluding prereleases. Ko-fi is `ko-fi.com/stradaos`.
 GitHub Sponsors awaited billing-name correction, support ticket #4952223.
 

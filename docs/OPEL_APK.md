@@ -164,6 +164,11 @@ speed settings remain available. See [the compact layout specification](COMPACT_
 
 ## GitHub-hosted verification and prereleases
 
+GitHub Pages is not required by this fork. The inherited `pages.yml` deployment
+workflow was intentionally removed; keep it removed during future upstream syncs.
+The `site/` source remains in the repository. APK builds, verification, signing
+and GitHub Releases operate independently of website hosting.
+
 The VPS performs Git operations only. Android builds, signing and the Android 11
 startup smoke test run on GitHub-hosted runners through `Opel preview`.
 Repository Actions secrets are `OPEL_KEYSTORE_BASE64`, `OPEL_KEYSTORE_PASSWORD`,
