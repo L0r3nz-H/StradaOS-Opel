@@ -26,6 +26,13 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Ensure GitHub Pages stays removed
+        run: |
+          test ! -e .github/workflows/pages.yml
+          if rg -l 'actions/(configure-pages|deploy-pages|upload-pages-artifact)@' .github/workflows; then
+            echo '::error::GitHub Pages deployment must remain removed from the Opel fork.'
+            exit 1
+          fi
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -47,6 +54,13 @@ jobs:
             app/build/reports/lint-results-opel.*
             verification/
             app/build/outputs/apk/opel/*.apk
+            app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: opel-debug-tests
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
           retention-days: 14
       - name: Sign with existing Opel key and compare published certificate
         if: github.event_name == 'workflow_dispatch'
@@ -65,49 +79,26 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  emulation:
+    needs: verify
+    uses: ./.github/workflows/android-emulators.yml
+    with:
+      artifact: opel-debug-tests
+      mode: debug
+      artifact-prefix: opel-ui
+
   smoke:
     if: github.event_name == 'workflow_dispatch'
     needs: verify
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-      - uses: android-actions/setup-android@v3
-        with:
-          packages: platform-tools
-          log-accepted-android-sdk-licenses: false
-      - uses: actions/download-artifact@v4
-        with:
-          name: opel-signed
-          path: dist
-      - name: Enable KVM on GitHub runner
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-      - name: Signed Opel launch on Android 11
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 30
-          arch: x86_64
-          target: default
-          profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -skin 1024x600
-          disable-animations: true
-          script: bash .github/scripts/opel-smoke.sh
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: opel-smoke
-          path: smoke/
+    uses: ./.github/workflows/android-emulators.yml
+    with:
+      artifact: opel-signed
+      mode: opel
+      artifact-prefix: opel-signed-startup
 
   publish:
     if: github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/main'
-    needs: [verify, smoke]
+    needs: [verify, emulation, smoke]
     runs-on: ubuntu-latest
     permissions:
       contents: write

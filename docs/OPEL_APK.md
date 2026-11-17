@@ -169,8 +169,11 @@ workflow was intentionally removed; keep it removed during future upstream syncs
 The `site/` source remains in the repository. APK builds, verification, signing
 and GitHub Releases operate independently of website hosting.
 
-The VPS performs Git operations only. Android builds, signing and the Android 11
-startup smoke test run on GitHub-hosted runners through `Opel preview`.
+The VPS performs Git operations only. Android builds, signing and emulator tests
+run on GitHub-hosted runners through `Opel preview`. Both upstream debug UI tests
+and signed Opel installation/three cold starts cover APIs 16, 19, 21, 23, 24, 28,
+30 and 34, matching the original emulator matrix. Screenshots and logs are saved
+as per-API workflow artifacts. Emulator failures block publication.
 Repository Actions secrets are `OPEL_KEYSTORE_BASE64`, `OPEL_KEYSTORE_PASSWORD`,
 `OPEL_KEY_ALIAS` and `OPEL_KEY_PASSWORD`. The existing Opel keystore stays backed
 up on the original machine; it is not copied to the VPS.
@@ -178,10 +181,11 @@ up on the original machine; it is not copied to the VPS.
 A sync records its stable upstream release ID, tag, resolved commit, previous Opel
 `main` commit and unique preview tag in `.github/upstream-sync.json`.
 Pull requests build debug/Opel, compare actual lint XML findings against that
-baseline and validate APK metadata without accessing signing secrets.
+baseline, validate APK metadata and run the full upstream debug UI emulator
+matrix without accessing signing secrets.
 Dispatch `opel-preview.yml` on a sync branch with `publish=false` to additionally
-verify signing against the published Opel 2.22.0 certificate and run a signed
-Android 11 startup smoke test. Only after these checks pass may the sync be
+verify signing against the published Opel 2.22.0 certificate and run the signed
+Opel startup matrix in addition to the upstream debug UI tests. Only after these checks pass may the sync be
 merged/pushed to `main`. Dispatch on that exact `main` commit with `publish=true`
 to repeat verification and publish the APK plus checksum as a prerelease.
 
@@ -192,5 +196,8 @@ update metadata are unchanged. The inherited official release and debug-release
 publication jobs are restricted to the original upstream repository.
 
 Existing lint findings remain visible; any additional Error/Fatal finding blocks
-the workflow. Android 11 startup coverage does not establish API 17, settings
-interaction or head-unit hardware compatibility.
+the workflow. Emulator coverage does not establish API 17, detailed Opel settings
+interaction or head-unit hardware compatibility. The separate inherited
+`pruebas.yml` uses the same reusable emulator workflow, retains its screenshot
+branch, and explicitly depends on both build and emulator results when publishing
+that report. The preview release depends on both emulator matrices succeeding.

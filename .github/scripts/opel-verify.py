@@ -29,7 +29,7 @@ regressions = new - old
 report = {'baseline_lint': dict(old_totals), 'current_lint': dict(new_totals),
           'new_errors': [{'id': k[0], 'file': k[1], 'message': k[2], 'count': v}
                          for k, v in sorted(regressions.items())],
-          'runtime_tests': 'Signed Opel startup is checked on Android 11 in a separate job; API 17, settings interactions and head-unit hardware remain untested.'}
+          'runtime_tests': 'Publication requires upstream debug UI tests and signed Opel install/three cold starts on APIs 16, 19, 21, 23, 24, 28, 30 and 34. API 17, detailed Opel settings interactions and head-unit hardware remain untested.'}
 Path('verification/summary.json').write_text(json.dumps(report, indent=2) + '\n')
 print(json.dumps(report, indent=2))
 if regressions:

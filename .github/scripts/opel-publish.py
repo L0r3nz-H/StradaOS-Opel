@@ -28,8 +28,15 @@ subprocess.run(['git', 'merge-base', '--is-ancestor', m['upstream_commit'], sha]
 tag = m['preview_tag']
 assert tag.startswith('opel-') and '-preview.' in tag
 # Fetch list successfully before deciding absence; API failures must not look like no release.
-releases = json.loads(run('gh', 'api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100'))
-existing = next((r for page in releases for r in page if r['tag_name'] == tag), None)
+releases = run('gh', 'api', '--paginate', '--jq', '.[] | @json',
+               f'repos/{repo}/releases?per_page=100')
+existing = next((r for line in releases.splitlines()
+                 if (r := json.loads(line))['tag_name'] == tag), None)
+apk = next(Path('dist').glob('*.apk'))
+checksum = Path(str(apk) + '.sha256')
+assert checksum.read_text().split()[0] == hashlib.sha256(apk.read_bytes()).hexdigest()
+assets = [apk, checksum]
+
 remote = run('git', 'ls-remote', 'origin', f'refs/tags/{tag}', f'refs/tags/{tag}^{{}}')
 if remote:
     refs = dict(line.split()[::-1] for line in remote.splitlines())
@@ -40,10 +47,6 @@ else:
     subprocess.run(['git', 'tag', tag, sha], check=True)
     subprocess.run(['git', 'push', 'origin', f'refs/tags/{tag}'], check=True)
 
-apk = next(Path('dist').glob('*.apk'))
-checksum = Path(str(apk) + '.sha256')
-assert checksum.read_text().split()[0] == hashlib.sha256(apk.read_bytes()).hexdigest()
-assets = [apk, checksum]
 if existing:
     assert not existing['draft'] and existing['prerelease']
     assert {a['name'] for a in existing['assets']} == {p.name for p in assets}

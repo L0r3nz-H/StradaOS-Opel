@@ -13,18 +13,23 @@ permissions:
   contents: write
 
 concurrency:
-  group: pruebas
+  group: pruebas-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
       - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew --no-daemon assembleDebug
       - run: cp app/build/outputs/apk/debug/*.apk app-prueba.apk
@@ -35,47 +40,13 @@ jobs:
 
   emulador:
     needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { api: 16, arch: x86 }
-          - { api: 19, arch: x86 }
-          - { api: 21, arch: x86 }
-          - { api: 23, arch: x86 }   # Android 6 real, como las pantallas AC8227L
-          - { api: 24, arch: x86 }
-          - { api: 28, arch: x86 }
-          - { api: 30, arch: x86_64 }
-          - { api: 34, arch: x86_64 }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: apk
-      - name: Activar KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-      - name: Emulador Android API ${{ matrix.api }}
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api }}
-          arch: ${{ matrix.arch }}
-          target: default
-          disable-animations: false
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -skin 1024x600
-          emulator-boot-timeout: 900
-          script: bash .github/scripts/smoke.sh ${{ matrix.api }} app-prueba.apk capturas/api${{ matrix.api }}
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: capturas-api${{ matrix.api }}
-          path: capturas/
+    uses: ./.github/workflows/android-emulators.yml
+    with:
+      artifact: apk
+      mode: debug
 
   publicar:
-    needs: emulador
+    needs: [build, emulador]
     if: always() && needs.build.result == 'success'
     runs-on: ubuntu-latest
     steps:
