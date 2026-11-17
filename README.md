@@ -21,12 +21,17 @@ See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/
 
 ## Current Opel edition
 
-The current Opel code is maintained on **`main`**, based on upstream **2.22.0**
-(commit `0a7736f`, 2026-11-16). The port was prepared on
-`feature/opel-latest-2.21.2`, which remains available. The current app version is **2.22.0-opel**,
-versionCode **55**, with package `com.stradaos.launcher.opel` and app name
+The current Opel code is maintained on **`main`**, based on upstream **2.23.0**
+(commit `42ecf12`, 2026-11-16). The port was prepared on
+`feature/opel-latest-2.21.2`, which remains available. The current app version is **2.23.0-opel**,
+versionCode **56**, with package `com.stradaos.launcher.opel` and app name
 **StradaOS Opel**. The previous Opel branch remains available. The upstream version/download-count badges
 describe the original project. Opel release downloads use this fork.
+
+[Opel 2.23.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.23.0-preview.1)
+is available with a signed APK and checksum. The stable Latest release remains
+2.22.0. The preview passed build, lint regression, signing-certificate and Android
+11 startup checks; API 17 and head-unit hardware compatibility remain untested.
 
 | Option | StradaOS | Opel Style |
 | --- | --- | --- |

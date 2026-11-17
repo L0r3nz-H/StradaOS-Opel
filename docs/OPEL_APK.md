@@ -1,5 +1,29 @@
 # Installable Opel edition
 
+## Published preview — 2026-11-17
+
+[StradaOS Opel 2.23.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.23.0-preview.1)
+is a prerelease from commit `5b9159be770f8bfaa23ce319857860bcdef808f9`, based on
+upstream `v2.23.0` / `42ecf12c4a42b7d43024f8adfc9e720f99322d20`.
+Version `2.23.0-opel`, versionCode 56; stable Latest remains 2.22.0.
+
+- GitHub-hosted `assembleDebug assembleOpel lintOpel` passed. Actual lint XML
+  comparison found no additional Error/Fatal findings: baseline 72 errors,
+  1 fatal, 82 warnings; preview 72 errors, 1 fatal, 91 warnings.
+- Opel package/name/version, minSdk 16, targetSdk 28, non-debuggable flag and
+  increasing versionCode were checked. zipalign and v1/v2/v3 signature verification
+  with minimum SDK 16 passed. The certificate matches published Opel 2.22.0.
+- Signed APK installation and three cold starts passed on Android 11/API 30,
+  1024 × 600, with no Opel crash entry. This does not cover API 17, detailed
+  settings interactions or vehicle/head-unit hardware.
+- Release APK SHA-256:
+  `8f10942411516a551360664cdae9bc396d040dc68d66e8d7f69aeb88b48a15ff`.
+  Both uploaded asset digests were verified. Re-running publication skipped the
+  existing identical release without changing its tag or assets.
+- Verification run: [Opel preview 44118771959](https://github.com/L0r3nz-H/StradaOS-Opel/actions/runs/44118771959).
+  The same signed artifact was published from the VPS after fast-forwarding main
+  to the exact tested commit; no Android build or key export occurred on the VPS.
+
 ## Published releases — 2026-11-16
 
 1. [StradaOS Opel 2.16.0](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/v2.16.0)

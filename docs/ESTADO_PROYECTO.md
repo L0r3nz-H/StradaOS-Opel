@@ -1,8 +1,14 @@
-## Pending upstream 2.23.0 sync
+## Upstream 2.23.0 sync — published preview
 
 Upstream release `v2.23.0`, commit `42ecf12c4a42b7d43024f8adfc9e720f99322d20`,
-adds optional built-in navigation, disabled by default. The Opel port is pending
-GitHub-hosted build, lint, signing and startup verification before main integration.
+adds optional built-in navigation, disabled by default. The Opel port was integrated
+into main at `5b9159be770f8bfaa23ce319857860bcdef808f9` after GitHub-hosted build,
+lint regression, signature/certificate and signed Android 11 startup checks passed.
+[Opel 2.23.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.23.0-preview.1)
+contains the signed APK and checksum. Stable Latest remains 2.22.0.
+Lint remains unclean (72 errors, 1 fatal finding, 91 warnings), with no additional
+Error/Fatal findings versus the baseline (82 warnings). API 17, settings interactions
+and head-unit hardware remain outside this startup test's coverage.
 The previous release and validation records below remain historical.
 
 # StradaOS project status
