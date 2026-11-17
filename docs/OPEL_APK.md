@@ -137,3 +137,31 @@ speed settings remain available. See [the compact layout specification](COMPACT_
   sunrise/sunset settings, and Chinese labels. API 17 and hardware tests remain.
 - This sync produced unsigned Opel and debug build outputs. The older signed
   2.21.2 installation APK described above remains a separate historical artifact.
+
+## GitHub-hosted verification and prereleases
+
+The VPS performs Git operations only. Android builds, signing and the Android 11
+startup smoke test run on GitHub-hosted runners through `Opel preview`.
+Repository Actions secrets are `OPEL_KEYSTORE_BASE64`, `OPEL_KEYSTORE_PASSWORD`,
+`OPEL_KEY_ALIAS` and `OPEL_KEY_PASSWORD`. The existing Opel keystore stays backed
+up on the original machine; it is not copied to the VPS.
+
+A sync records its stable upstream release ID, tag, resolved commit, previous Opel
+`main` commit and unique preview tag in `.github/upstream-sync.json`.
+Pull requests build debug/Opel, compare actual lint XML findings against that
+baseline and validate APK metadata without accessing signing secrets.
+Dispatch `opel-preview.yml` on a sync branch with `publish=false` to additionally
+verify signing against the published Opel 2.22.0 certificate and run a signed
+Android 11 startup smoke test. Only after these checks pass may the sync be
+merged/pushed to `main`. Dispatch on that exact `main` commit with `publish=true`
+to repeat verification and publish the APK plus checksum as a prerelease.
+
+Tags use `opel-<upstream-version>-preview.<n>` and never move. Existing identical
+releases are skipped; inconsistent tags/assets block publication. A retry after
+pushing `main` can dispatch the pending marker again. Stable Latest and official
+update metadata are unchanged. The inherited official release and debug-release
+publication jobs are restricted to the original upstream repository.
+
+Existing lint findings remain visible; any additional Error/Fatal finding blocks
+the workflow. Android 11 startup coverage does not establish API 17, settings
+interaction or head-unit hardware compatibility.

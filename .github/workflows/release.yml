@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   release:
+    if: github.repository == 'lordnordic-debug/StradaOS'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
