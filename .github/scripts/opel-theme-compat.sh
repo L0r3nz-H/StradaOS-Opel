@@ -77,8 +77,44 @@ for theme in aurora cobalto; do
   fi
   assert_stored_theme
 done
+# Brightness changes must follow opel_theme even when the standard mode is fixed Light.
+go tema-premium:
+go sim:0
+go pref:home_layout=compact_7
+go pref:design=opel_navi_900_modern
+go pref:theme=light
+adb shell settings put system screen_brightness_mode 0
+adb shell settings put system screen_brightness 230
+go pref:auto_bright=true
+go pref:opel_theme=auto
+go inicio
+dump opel-brightness-light
+adb shell settings put system screen_brightness 20
+sleep 3
+dump opel-brightness-dark
+adb shell settings put system screen_brightness 230
+sleep 3
+dump opel-brightness-light-restored
+python3 - "$OUT" <<'PYBRIGHT'
+from pathlib import Path
+import sys,xml.etree.ElementTree as ET
+p=Path(sys.argv[1])
+for name,color in [('opel-brightness-light','ffe9edf1'),('opel-brightness-dark','ff17191d'),('opel-brightness-light-restored','ffe9edf1')]:
+ root=ET.parse(p/(name+'.xml')).getroot()
+ assert root.find('node').get('background-color')==color, name+': brightness observer did not update the Opel view'
+PYBRIGHT
+read_prefs
+python3 - "$OUT/opel-theme-prefs.xml" <<'PYPREFS'
+import sys,xml.etree.ElementTree as ET
+prefs={e.get('name'):e.text for e in ET.parse(sys.argv[1]).getroot()}
+assert prefs.get('theme')=='light' and prefs.get('opel_theme')=='auto', 'Per-style theme modes changed'
+PYPREFS
+go pref:auto_bright=false
+go pref:opel_theme=light
+go pref:home_layout=standard
+go pref:design=stradaos
 adb logcat -b crash -d > "$OUT/opel-theme-crashes.txt"
 if grep -q "$PKG" "$OUT/opel-theme-crashes.txt"; then
   echo '::error::Opel/standard theme transition crashed'; exit 1
 fi
-printf 'Aurora/Cobalto: Opel layout, projection, theme settings and restart preservation passed.\n' > "$OUT/opel-theme-result.txt"
+printf 'Aurora/Cobalto: Opel layout, projection, theme settings and restart preservation and brightness-observer isolation passed.\n' > "$OUT/opel-theme-result.txt"

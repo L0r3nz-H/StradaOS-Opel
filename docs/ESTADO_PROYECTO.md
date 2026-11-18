@@ -1,3 +1,9 @@
+## Pending upstream 2.24.1 sync
+
+Stable tag `v2.24.1` resolves to `0644024d9a73f27dc055170820e6d290915b7977`.
+The candidate preserves Opel and corrects the new brightness observer to follow
+the active layout's stored theme. GitHub-hosted validation and publication are pending.
+
 ## Pending upstream 2.24.0 sync
 
 Stable upstream `v2.24.0`, commit `858e2a5c4e958076ee47c489caff9752d8f57af2`,

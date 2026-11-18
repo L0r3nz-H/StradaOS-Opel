@@ -1065,11 +1065,13 @@ Compatibilidad TLS en rutas	Rotalar için TLS uyumluluğu
 Para radios antiguas donde falle el HTTPS de rutas o búsqueda	Rota veya arama HTTPS'inin çalışmadığı eski teypler için
 Mostrando hora de llegada	Varış saati gösteriliyor
 Mostrando tiempo restante	Kalan süre gösteriliyor
+Radar	Radar
 Ir a Casa	Eve git
 Ir a Trabajo	İşe git
 Configura «{}» primero en Navegación	Önce Navigasyon bölümünde «{}» ayarlayın
 PARADAS	DURAKLAR
 Limpiar	Temizle
++ Añadir parada intermedia	+ Ara durak ekle
 Modo parada activo: elige una parada	Durak modu açık: bir durak seçin
 Buscar parada intermedia	Ara durak ara
 Añadir parada en ruta	Rotaya durak ekle
@@ -1080,6 +1082,11 @@ Elegir parada	Durak seç
 Elegir ruta	Rota seç
 Ruta	Rota
 Más rápida	En hızlı
+incidente	olay
+incidentes	olaylar
+incidente en la ruta	rotada olay
+incidentes en la ruta	rotada olaylar
+Incidentes en la ruta	Rotadaki olaylar
 Mostrar tiempo restante	Kalan süreyi göster
 Mostrar hora de llegada	Varış saatini göster
 Evitar peajes	Ücretli yollardan kaçın
@@ -1089,6 +1096,22 @@ Intenta evitar autopistas o vías rápidas	Otoyol ve ekspres yollardan kaçınma
 Rutas alternativas	Alternatif rotalar
 Muestra 2 o 3 opciones de ruta antes de iniciar	Başlamadan önce 2 veya 3 rota seçeneği gösterir
 Muestra la hora estimada en lugar del tiempo restante	Kalan süre yerine tahmini varış saatini gösterir
+Consulta cierres o accidentes una sola vez al calcular ruta (TomTom)	Rota hesaplarken kapanışları veya kazaları bir kez sorgular (TomTom)
+Límite y alerta de velocidad	Hız limiti ve uyarısı
+Muestra la señal de límite en el mapa y avisa al excederlo	Haritada hız limiti levhasını gösterir ve aşınca uyarır
+Tolerancia de exceso	Aşım toleransı
+Margen sobre el límite antes de activar alerta	Uyarı devreye girmeden önceki limit üstü pay
+Sonido al exceder límite	Hız aşımında ses
+Pitido de alerta cuando superas la tolerancia	Toleransı aştığında uyarı bipi çalar
+Alertas de radares sin conexión	Çevrimdışı radar uyarıları
+Avisa al acercarse a radares del mapa local .map	Yerel .map haritasındaki radarlara yaklaşınca uyarır
+Vía cerrada	Yol kapalı
+Carril cerrado	Şerit kapalı
+Accidente	Kaza
+Obras en la vía	Yolda çalışma
+Tráfico detenido	Trafik durdu
+Incidente en la vía	Yolda olay
+Radar de velocidad adelante	İleride hız radarı
 En 500 metros	500 metre sonra
 En 150 metros	150 metre sonra
 En 500 pies	500 fit sonra
@@ -1131,3 +1154,15 @@ Cobalto	Kobalt
 Azul noche en tres columnas: el mapa se difumina hasta el reproductor de carátula redonda, y tu vehículo muestra el velocímetro arriba, su foto en el medio y el mantenimiento abajo. La temperatura va sobre el mapa.	Üç sütunda gece mavisi: harita yuvarlak kapaklı oynatıcıya doğru solar; aracın üstte hız göstergesini, ortada fotoğrafını ve altta bakımı gösterir. Sıcaklık haritanın üstündedir.
 Gratis	Ücretsiz
 Gratis para todos. Los próximos temas premium se desbloquearán con una donación.	Herkes için ücretsiz. Sonraki premium temaların kilidi bağışla açılacak.
+Brillo de la pantalla	Ekran parlaklığı
+Amanecer y atardecer: se calcula con el GPS, sin internet. Brillo: para pantallas que bajan el brillo al encender las luces	Gün doğumu ve batımı: GPS ile, internetsiz hesaplanır. Parlaklık: farlar açılınca kararan ekranlar için
+Brillo actual	Mevcut parlaklık
+Prende y apaga las luces del carro para ver cuánto cambia	Ne kadar değiştiğini görmek için aracın farlarını açıp kapatın
+Oscuro con brillo menor a	Parlaklık şunun altındaysa koyu
+Elige un nivel entre el brillo de día y el de noche	Gündüz ve gece parlaklığı arasında bir seviye seçin
+Esta pantalla no informa su brillo	Bu ekran parlaklığını bildirmiyor
+Países del Golfo	Körfez ülkeleri
+Irlanda del Norte	Kuzey İrlanda
+Islas Canarias	Kanarya Adaları
+Tiempo en StradaOS: {}	StradaOS'taki süre: {}
+Último tiempo por Bluetooth: {}	Bluetooth'tan son süre: {}

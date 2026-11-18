@@ -172,6 +172,9 @@ public class Main extends Activity {
     private String curTitle, curArtist, curSource;
     private Bitmap curArt;
     private long durMs = -1, posBaseMs = 0, posBaseAt = 0;
+    // para el diagnóstico del reproductor: de dónde salió el tiempo y el último que mandó Bluetooth
+    private String posSrc = "—";
+    private long btPosMs = -1, btPosAt;
     private boolean posKnown;
     private String curOrigin;
     private BtBridge bt;
@@ -233,8 +236,9 @@ public class Main extends Activity {
         setContentView(root);
         try {
             Location ll = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (ll == null) ll = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (ll != null) { wLat = ll.getLatitude(); wLon = ll.getLongitude(); }
+            if (!validLoc(ll)) ll = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (!validLoc(ll)) ll = savedLoc();
+            if (validLoc(ll)) { wLat = ll.getLatitude(); wLon = ll.getLongitude(); }
         } catch (Throwable ignored) { }
         if (prefs.contains("sun_lat")) { sunLat = prefs.getFloat("sun_lat", 0); sunLon = prefs.getFloat("sun_lon", 0); }
         if (!Double.isNaN(wLat)) sunSpot(wLat, wLon);
@@ -253,6 +257,10 @@ public class Main extends Activity {
         f.addAction(Intent.ACTION_PACKAGE_CHANGED);
         f.addDataScheme("package");
         registerReceiver(pkgReceiver, f);
+        try {
+            getContentResolver().registerContentObserver(
+                android.provider.Settings.System.getUriFor(android.provider.Settings.System.SCREEN_BRIGHTNESS), false, brightObs);
+        } catch (Throwable ignored) { }
         IntentFilter t = new IntentFilter(Intent.ACTION_TIME_TICK);
         t.addAction(Intent.ACTION_TIME_CHANGED);
         t.addAction(Intent.ACTION_TIMEZONE_CHANGED);
@@ -438,6 +446,7 @@ public class Main extends Activity {
 
     @Override
     protected void onDestroy() {
+        try { getContentResolver().unregisterContentObserver(brightObs); } catch (Throwable ignored) { }
         try { unregisterReceiver(screenReceiver); } catch (Throwable ignored) { }
         try { prefs.unregisterOnSharedPreferenceChangeListener(backupWatch); } catch (Throwable ignored) { }
         try { unregisterReceiver(pkgReceiver); } catch (Exception ignored) { }
@@ -684,6 +693,9 @@ public class Main extends Activity {
         if (view == null || view.getVisibility() != View.VISIBLE) return;
         xml.startTag(null, "node");
         xml.attribute(null, "class", view.getClass().getName());
+        if (view.getBackground() instanceof ColorDrawable) {
+            xml.attribute(null, "background-color", Integer.toHexString(((ColorDrawable) view.getBackground()).getColor()));
+        }
         if (view instanceof TextView) xml.attribute(null, "text", ((TextView) view).getText().toString());
         if (view.getContentDescription() != null) xml.attribute(null, "content-desc", view.getContentDescription().toString());
         if (view instanceof ViewGroup) {
@@ -712,6 +724,32 @@ public class Main extends Activity {
                 else if ("cajon".equals(v)) openDrawer();
                 else if ("ocultas".equals(v)) manageHidden(null);
                 else if ("salir-fabrica".equals(v)) openFactoryLauncher();
+                else if (v.startsWith("aa-simular:")) {
+                    // simula Android Auto conectado (solo StradaOS Prueba, se pierde al cerrar la app)
+                    aaSim = v.endsWith("1");
+                    aaCheckedAt = 0;
+                }
+                else if (v.startsWith("aa-rcc:")) {
+                    // canción por el control remoto de Open Headunit, sin tiempo: «aa-rcc:Título,duración_s»
+                    // (con coma: «|» lo corta la consola del equipo)
+                    String[] a = v.substring(7).split(",");
+                    NowPlaying.Track t = new NowPlaying.Track();
+                    t.origin = "rcc"; t.title = a[0].replace('_', ' '); t.artist = "StradaOS"; t.source = "Android Auto";
+                    t.durationMs = a.length > 1 ? Long.parseLong(a[1]) * 1000 : -1; t.playing = true;
+                    showTrack(t);
+                }
+                else if (v.startsWith("aa-notif:")) {
+                    // notificación de Open Headunit con el tiempo: «aa-notif:Título,posición_s,duración_s»
+                    String[] a = v.substring(9).split(",");
+                    long ps = Long.parseLong(a[1]), ds = Long.parseLong(a[2]);
+                    String prog = String.format(Locale.US, "%02d:%02d / %02d:%02d", ps / 60, ps % 60, ds / 60, ds % 60);
+                    java.util.List<String> tx = new java.util.ArrayList<String>();
+                    tx.add(a[0].replace('_', ' ')); tx.add("StradaOS"); tx.add(prog);
+                    NotifArt.lastTitle = tx.get(0); NotifArt.lastArtist = "StradaOS";
+                    NotifArt.lastPosMs = ps * 1000; NotifArt.lastDurMs = ds * 1000; NotifArt.lastPlaying = Boolean.TRUE;
+                    NotifArt.lastTexts = tx; NotifArt.lastAt = SystemClock.elapsedRealtime();
+                    applyAaNotif(curArt, tx);
+                }
                 else if ("pista-demo".equals(v) || v.startsWith("pista-demo:")) {
                     // canción de ejemplo con duración y posición, para ver la línea de tiempo en las capturas
                     // («pista-demo:Night_Drive» cambia el título; «_» = espacio)
@@ -901,6 +939,16 @@ public class Main extends Activity {
                 else if (v.startsWith("mapa-zoom:")) { if (liveMap != null) liveMap.setZoom(Integer.parseInt(v.substring(10))); }
                 else if ("mapa-buscar".equals(v)) pickMapFile();
                 else if ("mapa-diag".equals(v)) showMapDiag();
+                else if (v.startsWith("mapa-nombres:")) {
+                    // registro (StradaMapas) con el nombre que la lista de descargas le da a cada archivo de una carpeta
+                    final String folder = v.substring(13);
+                    new Thread(new Runnable() { public void run() {
+                        try {
+                            for (MapDownload.Entry e : MapDownload.list(folder))
+                                android.util.Log.w("StradaMapas", e.path + " = " + e.name);
+                        } catch (Throwable e) { android.util.Log.w("StradaMapas", folder + " error " + e); }
+                    }}).start();
+                }
                 else if (v.startsWith("mapa-lista")) chooseMapToDownload(v.length() > 11 ? v.substring(11) : "");
                 else if (v.startsWith("mapa-descargar:")) { String pth = v.substring(15); MapDownload.start(Main.this, pth, pth.substring(pth.lastIndexOf('/') + 1)); }
                 else if ("mapa-pausar".equals(v)) MapDownload.stop(false);
@@ -1978,7 +2026,7 @@ public class Main extends Activity {
     };
 
     private void odoStep(Location l) {
-        if (l == null) return;
+        if (!validLoc(l)) return;
         if (!odoNeeded()) return;
         if (l.hasAccuracy() && l.getAccuracy() > 40) return;
         if (odoLast == null) { odoLast = l; return; }
@@ -3344,13 +3392,53 @@ public class Main extends Activity {
         for (String p : new String[]{LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER, "passive"}) {
             try {
                 Location l = lm.getLastKnownLocation(p);
-                if (l != null && (best == null || l.getTime() > best.getTime())) best = l;
+                if (validLoc(l) && (best == null || l.getTime() > best.getTime())) best = l;
             } catch (Throwable ignored) { }
         }
-        if (best != null) feedMap(best);
+        if (best != null) { feedMap(best); return; }
+        // #37: la pantalla no recuerda ninguna ubicación buena (o solo el 0,0): se usa la última que guardó StradaOS.
+        // Solo ubica el mapa; no pasa por la navegación para no recalcular con una posición vieja.
+        Location sv = savedLoc();
+        if (sv == null) return;
+        if (Double.isNaN(wLat) || Double.isNaN(wLon)) { wLat = sv.getLatitude(); wLon = sv.getLongitude(); }
+        if (liveMap != null && !liveMap.hasFix()) {
+            liveMap.setPosition(sv.getLatitude(), sv.getLongitude(), Float.NaN, 0);
+            liveMap.setVisibility(View.VISIBLE);
+            updateMapTag();
+        }
+    }
+
+    /**
+     * #37 (jothaxc): algunas pantallas mandan 0,0 («Null Island», en medio del mar) cuando no hay señal, en túneles
+     * o al arrancar. Eso no es una ubicación: se ignora en el mapa, la navegación, el clima y el amanecer.
+     */
+    static boolean validLoc(Location l) {
+        if (l == null) return false;
+        double la = l.getLatitude(), lo = l.getLongitude();
+        if (Double.isNaN(la) || Double.isNaN(lo) || Math.abs(la) > 90 || Math.abs(lo) > 180) return false;
+        return Math.abs(la) > 0.0001 || Math.abs(lo) > 0.0001;
+    }
+
+    private long locSavedAt;
+
+    /** Guarda la última ubicación buena del GPS (cada 2 min como mucho) para cuando la pantalla arranque sin señal. */
+    private void saveLoc(Location l) {
+        long now = SystemClock.elapsedRealtime();
+        if (locSavedAt != 0 && now - locSavedAt < 120000) return;
+        locSavedAt = now;
+        prefs.edit().putFloat("last_lat", (float) l.getLatitude()).putFloat("last_lon", (float) l.getLongitude()).apply();
+    }
+
+    private Location savedLoc() {
+        if (prefs == null || !prefs.contains("last_lat")) return null;
+        Location l = new Location("saved");
+        l.setLatitude(prefs.getFloat("last_lat", 0));
+        l.setLongitude(prefs.getFloat("last_lon", 0));
+        return validLoc(l) ? l : null;
     }
 
     private void feedMap(Location l) {
+        if (l != null && !validLoc(l)) return;
         if (l != null) {
             wLat = l.getLatitude(); wLon = l.getLongitude();
             if (Nav.active != null) {
@@ -5909,6 +5997,7 @@ public class Main extends Activity {
 
     private final LocationListener gpsListener = new LocationListener() {
         public void onLocationChanged(Location l) {
+            if (!validLoc(l)) return;   // 0,0 sin señal (#37): cuenta como «sin GPS»
             lastFix = SystemClock.elapsedRealtime();
             lastFixAny = lastFix;
             gpsSpeedKmh = l.hasSpeed() ? l.getSpeed() * 3.6f : 0;
@@ -5917,6 +6006,7 @@ public class Main extends Activity {
             setGps(true, l.hasSpeed() ? l.getSpeed() * 3.6f : 0);
             feedMap(l);
             sunSpot(l.getLatitude(), l.getLongitude());
+            saveLoc(l);
         }
         public void onStatusChanged(String p, int st, Bundle e) { }
         public void onProviderEnabled(String p) { }
@@ -5925,7 +6015,7 @@ public class Main extends Activity {
 
     /** Ubicación por red (WiFi/datos): solo para ubicar el mapa mientras llega el GPS. */
     private final LocationListener netListener = new LocationListener() {
-        public void onLocationChanged(Location l) { if (lastFix == 0) feedMap(l); }
+        public void onLocationChanged(Location l) { if (lastFix == 0 && validLoc(l)) feedMap(l); }
         public void onStatusChanged(String p, int st, Bundle e) { }
         public void onProviderEnabled(String p) { }
         public void onProviderDisabled(String p) { }
@@ -6063,6 +6153,7 @@ public class Main extends Activity {
 
     private void showTrack(NowPlaying.Track t) {
         long now = SystemClock.elapsedRealtime();
+        if ("bt".equals(t.origin) && t.positionMs >= 0) { btPosMs = t.positionMs; btPosAt = now; }
         boolean hasContent = t.title != null || t.artist != null;
         // Un aviso sin pista de otra fuente (p. ej. el sistema cuando entra la cámara de reversa)
         // no debe borrar ni pausar lo que muestra la fuente actual.
@@ -6119,6 +6210,7 @@ public class Main extends Activity {
             posBaseMs = 0;
             posBaseAt = now;
             posKnown = true;
+            posSrc = "canción nueva";
             durMs = -1;
             if (!t.artSet) curArt = null;
             // ¿La notificación de Open Headunit ya trae la carátula de esta canción?
@@ -6135,7 +6227,13 @@ public class Main extends Activity {
         if (t.durationMs > 0) durMs = t.durationMs;
         if (t.artSet) curArt = t.art;
         long pos = currentPos();
-        if (t.positionMs >= 0) { pos = t.positionMs; posKnown = true; }
+        if (t.positionMs >= 0) {
+            // Con Android Auto, el tiempo bueno es el de la notificación de Open Headunit: si otra fuente (Bluetooth)
+            // manda uno que se aleja más de 3 s, es el que no se corrigió al adelantar en el celular y se ignora.
+            long aa = "aa".equals(t.origin) ? -1 : aaPosNow();
+            if (aa >= 0 && Math.abs(t.positionMs - aa) > 3000) { pos = aa; posKnown = true; posSrc = "Android Auto"; }
+            else { pos = t.positionMs; posKnown = true; posSrc = String.valueOf(t.origin); }
+        }
         if (t.playing != null) {
             playingState = t.playing;
         }
@@ -6158,7 +6256,10 @@ public class Main extends Activity {
      * Open Headunit sigue corriendo después de quitar el cable, así que el proceso solo no basta.
      * Se revisa cada 3 s como máximo.
      */
+    private static boolean aaSim;   // gancho «aa-simular:1» (pruebas)
+
     private boolean aaRunning() {
+        if (aaSim) return true;
         long now = SystemClock.elapsedRealtime();
         if (now - aaCheckedAt > 3000) {
             aaCheckedAt = now;
@@ -6271,6 +6372,7 @@ public class Main extends Activity {
             posBaseMs = Math.max(0, NotifArt.lastPosMs);
             posBaseAt = now;
             posKnown = NotifArt.lastPosMs >= 0;
+            if (posKnown) posSrc = "Android Auto";
             if (NotifArt.lastPlaying != null) playingState = NotifArt.lastPlaying;
             aaWaitTitle = null;
             h.removeCallbacks(aaWait);
@@ -6278,9 +6380,13 @@ public class Main extends Activity {
             return;
         }
         boolean own = "aa".equals(curOrigin);
-        if (art == null && !own) return;
         // Al quitar el cable Open Headunit manda una última notificación: sin Android Auto no se pone su carátula.
         if (!aaRunning()) return;
+        if (art == null && !own) {
+            // sin carátula no cambia la etiqueta ni la carátula, pero el tiempo sí se corrige
+            if (fresh && aaFixPos(now)) renderTrack();
+            return;
+        }
         if (aaWaitTitle != null && sameTitle(aaWaitTitle, curTitle)) { aaWaitTitle = null; h.removeCallbacks(aaWait); }
         if (art != null) curArt = art;
         curSource = "Android Auto";
@@ -6288,16 +6394,47 @@ public class Main extends Activity {
             // Sin Bluetooth, el tiempo y el estado también salen de la notificación.
             if (curArtist == null && NotifArt.lastArtist != null) curArtist = NotifArt.lastArtist;
             if (NotifArt.lastDurMs > 0) durMs = NotifArt.lastDurMs;
-            if (NotifArt.lastPosMs >= 0) { posBaseMs = NotifArt.lastPosMs; posBaseAt = now; posKnown = true; }
+            if (NotifArt.lastPosMs >= 0) { posBaseMs = NotifArt.lastPosMs; posBaseAt = now; posKnown = true; posSrc = "Android Auto"; }
             if (NotifArt.lastPlaying != null) playingState = NotifArt.lastPlaying;
+        } else if (fresh) {
+            aaFixPos(now);
         }
         renderTrack();
+    }
+
+    /**
+     * La canción llega por otra fuente (el control remoto de Open Headunit, «rcc», o Bluetooth), que no trae el
+     * tiempo o no lo corrige al adelantar desde el celular (Andrés, 18 nov.: adelantó de 0:46 a 2:34 y StradaOS
+     * siguió en 1:11). La notificación de Open Headunit sí lo trae cada segundo: si se aleja más de 3 s de lo que
+     * cuenta StradaOS, manda la notificación. Con 3 s de margen no se mueve por el redondeo. Devuelve si corrigió.
+     */
+    private boolean aaFixPos(long now) {
+        if (NotifArt.lastPosMs < 0) return false;
+        if (durMs <= 0 && NotifArt.lastDurMs > 0) durMs = NotifArt.lastDurMs;
+        if (posKnown && Math.abs(currentPos() - NotifArt.lastPosMs) <= 3000) return false;
+        posBaseMs = NotifArt.lastPosMs;
+        posBaseAt = now;
+        posKnown = true;
+        posSrc = "Android Auto (corregido)";
+        return true;
+    }
+
+    /** Tiempo de la notificación de Open Headunit si es de la canción actual y de hace 5 s o menos; si no, -1. */
+    private long aaPosNow() {
+        if (NotifArt.lastPosMs < 0 || NotifArt.lastAt == 0 || curTitle == null) return -1;
+        long age = SystemClock.elapsedRealtime() - NotifArt.lastAt;
+        if (age > 5000 || !aaRunning()) return -1;
+        if (!sameTitle(NotifArt.lastTitle, curTitle) && !textsMatch(NotifArt.lastTexts, curTitle)) return -1;
+        return NotifArt.lastPosMs + (Boolean.FALSE.equals(NotifArt.lastPlaying) ? 0 : age);
     }
 
     private void showPlayerDiag() {
         String msg = "Fuente: " + (curOrigin != null ? curOrigin : "—") + " / " + (curSource != null ? curSource : "—")
                 + "\nPista: " + curTitle + " — " + curArtist
                 + "\nCarátula: " + (curArt != null ? curArt.getWidth() + "x" + curArt.getHeight() : "no")
+                + "\nTiempo en StradaOS: " + (currentPos() / 1000) + "/" + (durMs / 1000) + " s · " + posSrc
+                + "\nÚltimo tiempo por Bluetooth: " + (btPosMs < 0 ? "ninguno"
+                    : (btPosMs / 1000) + " s, hace " + ((SystemClock.elapsedRealtime() - btPosAt) / 1000) + " s")
                 + "\n\nLector de notificaciones (accesibilidad): " + (NotifArt.running ? "ACTIVO" : "apagado")
                 + "\nÚltima notificación de Open Headunit: " + (NotifArt.lastAt == 0 ? "ninguna"
                     : ((SystemClock.elapsedRealtime() - NotifArt.lastAt) / 1000) + " s, carátula "
@@ -7119,6 +7256,19 @@ public class Main extends Activity {
 
     /** Modo automático: ¿estamos en el horario oscuro? (por defecto de 6 p. m. a 6 a. m., como siempre). */
     private boolean darkHours() {
+        // #36 (RGalindo2004): pantallas que bajan el brillo al prender las luces → oscuro con poco brillo.
+        // Si la pantalla no informa su brillo, siguen las horas fijas.
+        if (prefs.getBoolean("auto_bright", false)) {
+            int b = brightnessPct();
+            if (b >= 0) {
+                int thr = prefs.getInt("bright_dark", 40);
+                // 5 puntos de margen para volver a claro: el brillo automático de algunas pantallas oscila
+                if (brightDark == null) brightDark = b < thr;
+                else if (brightDark && b >= thr + 5) brightDark = false;
+                else if (!brightDark && b < thr) brightDark = true;
+                return brightDark;
+            }
+        }
         Calendar c = Calendar.getInstance();
         int m = c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE);
         int a = prefs.getInt("dark_start", 18 * 60), b = prefs.getInt("dark_end", 6 * 60);
@@ -7127,6 +7277,37 @@ public class Main extends Activity {
         if (a == b) return false;
         return a < b ? (m >= a && m < b) : (m >= a || m < b);
     }
+
+    private Boolean brightDark;
+
+    /** Brillo de la pantalla en % (0–100), o -1 si la pantalla no lo informa. */
+    private int brightnessPct() {
+        try {
+            int v = android.provider.Settings.System.getInt(getContentResolver(), android.provider.Settings.System.SCREEN_BRIGHTNESS, -1);
+            if (v < 0) return -1;
+            return Math.min(100, Math.round(v * 100f / 255f));
+        } catch (Throwable e) { return -1; }
+    }
+
+    /** Cambió el brillo: en «Auto · Brillo de la pantalla» se revisa el tema enseguida (con 0,8 s de espera). */
+    private final android.database.ContentObserver brightObs = new android.database.ContentObserver(new Handler(android.os.Looper.getMainLooper())) {
+        @Override public void onChange(boolean selfChange) {
+            try {
+                if (prefs == null || root == null || !"auto".equals(prefs.getString(modernDesign() ? "opel_theme" : "theme", "dark")) || !prefs.getBoolean("auto_bright", false)) return;
+                h.removeCallbacks(brightApply);
+                h.postDelayed(brightApply, 800);
+            } catch (Throwable ignored) { }
+        }
+    };
+
+    private final Runnable brightApply = new Runnable() { public void run() {
+        try {
+            boolean was = LIGHT;
+            applyTheme();
+            if (was != LIGHT) { applyAccent(); rebuild(); }
+            else if (settingsView != null && settingsCat == C_LOOK) showSettings(settingsCat);   // «Brillo actual» al día
+        } catch (Throwable e) { Guard.log("Tema por brillo: " + e); }
+    }};
 
     /** Modo «Sistema»: sigue el modo oscuro de la pantalla (algunas lo activan al encender las luces del carro). */
     private boolean systemNight() {
@@ -7948,17 +8129,33 @@ public class Main extends Activity {
             }});
         if ("auto".equals(t)) {
             final boolean sunOn = prefs.getBoolean("auto_sun", false);
-            segmented(c, "Horario", "Amanecer y atardecer: se calcula con el GPS, sin internet", new String[]{"Horas fijas", "Amanecer y atardecer"},
-                sunOn ? 1 : 0, new IntCb() { public void on(int i) {
-                    prefs.edit().putBoolean("auto_sun", i == 1).apply();
+            final boolean brOn = prefs.getBoolean("auto_bright", false);
+            choice(c, "Horario", "Amanecer y atardecer: se calcula con el GPS, sin internet. Brillo: para pantallas que bajan el brillo al encender las luces",
+                new String[]{"Horas fijas", "Amanecer y atardecer", "Brillo de la pantalla"},
+                brOn ? 2 : sunOn ? 1 : 0, new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("auto_sun", i == 1).putBoolean("auto_bright", i == 2).apply();
+                    brightDark = null;
                     applyTheme(); applyAccent(); rebuild(); showSettings(settingsCat);
                 }});
             int[] sun = sunToday();
-            if (sunOn && sun != null) {
+            final int bright = brOn ? brightnessPct() : -1;
+            if (brOn && bright >= 0) {
+                row(c, "Brillo actual", "Prende y apaga las luces del carro para ver cuánto cambia", bright + " %", null);
+                final int[] lv = {10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90};
+                String[] lo = new String[lv.length];
+                int cur = prefs.getInt("bright_dark", 40), sel = 6;
+                for (int i = 0; i < lv.length; i++) { lo[i] = lv[i] + " %"; if (lv[i] == cur) sel = i; }
+                choice(c, "Oscuro con brillo menor a", "Elige un nivel entre el brillo de día y el de noche", lo, sel, new IntCb() { public void on(int i) {
+                    prefs.edit().putInt("bright_dark", lv[i]).apply();
+                    brightDark = null;
+                    applyTheme(); applyAccent(); rebuild(); showSettings(settingsCat);
+                }});
+            } else if (!brOn && sunOn && sun != null) {
                 row(c, "Hoy", I18n.t("Amanecer") + " " + fmtMinutes(sun[0]) + " · " + I18n.t("Atardecer") + " " + fmtMinutes(sun[1])
                     + " · " + I18n.t("oscuro desde el atardecer hasta el amanecer"), null, null);
             } else {
-                if (sunOn) row(c, "Esperando la ubicación del GPS", "Mientras tanto usa las horas fijas", "", null);
+                if (brOn) row(c, "Esta pantalla no informa su brillo", "Mientras tanto usa las horas fijas", "", null);
+                else if (sunOn) row(c, "Esperando la ubicación del GPS", "Mientras tanto usa las horas fijas", "", null);
                 row(c, "Oscuro desde", null, fmtMinutes(prefs.getInt("dark_start", 18 * 60)), new Runnable() { public void run() {
                     askDarkTime("dark_start", 18 * 60, "Oscuro desde");
                 }});

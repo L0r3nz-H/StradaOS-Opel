@@ -1157,3 +1157,38 @@ Cobalto	Kobalt
 Azul noche en tres columnas: el mapa se difumina hasta el reproductor de carátula redonda, y tu vehículo muestra el velocímetro arriba, su foto en el medio y el mantenimiento abajo. La temperatura va sobre el mapa.	Nachtblau in drei Spalten: Die Karte blendet zum Player mit rundem Cover aus, dein Fahrzeug zeigt oben den Tacho, in der Mitte sein Foto und unten die Wartung. Die Temperatur steht über der Karte.
 Gratis	Kostenlos
 Gratis para todos. Los próximos temas premium se desbloquearán con una donación.	Für alle kostenlos. Die nächsten Premium-Designs werden mit einer Spende freigeschaltet.
+Radar	Blitzer
++ Añadir parada intermedia	+ Zwischenstopp hinzufügen
+incidente	Störung
+incidentes	Störungen
+incidente en la ruta	Störung auf der Route
+incidentes en la ruta	Störungen auf der Route
+Incidentes en la ruta	Störungen auf der Route
+Consulta cierres o accidentes una sola vez al calcular ruta (TomTom)	Prüft Sperrungen oder Unfälle einmal bei der Routenberechnung (TomTom)
+Límite y alerta de velocidad	Tempolimit und Warnung
+Muestra la señal de límite en el mapa y avisa al excederlo	Zeigt das Tempolimit auf der Karte und warnt beim Überschreiten
+Tolerancia de exceso	Toleranz beim Überschreiten
+Margen sobre el límite antes de activar alerta	Spielraum über dem Limit, bevor gewarnt wird
+Sonido al exceder límite	Ton bei Überschreitung
+Pitido de alerta cuando superas la tolerancia	Signalton, wenn du die Toleranz überschreitest
+Alertas de radares sin conexión	Blitzerwarnungen offline
+Avisa al acercarse a radares del mapa local .map	Warnt vor Blitzern aus der lokalen .map-Karte
+Vía cerrada	Straße gesperrt
+Carril cerrado	Fahrstreifen gesperrt
+Accidente	Unfall
+Obras en la vía	Baustelle
+Tráfico detenido	Stillstand
+Incidente en la vía	Störung auf der Straße
+Radar de velocidad adelante	Blitzer voraus
+Brillo de la pantalla	Bildschirmhelligkeit
+Amanecer y atardecer: se calcula con el GPS, sin internet. Brillo: para pantallas que bajan el brillo al encender las luces	Sonnenauf- und -untergang: per GPS berechnet, ohne Internet. Helligkeit: für Bildschirme, die beim Einschalten des Lichts dunkler werden
+Brillo actual	Aktuelle Helligkeit
+Prende y apaga las luces del carro para ver cuánto cambia	Schalte das Licht am Auto ein und aus, um zu sehen, wie stark sie sich ändert
+Oscuro con brillo menor a	Dunkel bei Helligkeit unter
+Elige un nivel entre el brillo de día y el de noche	Wähle einen Wert zwischen der Helligkeit am Tag und in der Nacht
+Esta pantalla no informa su brillo	Dieser Bildschirm meldet seine Helligkeit nicht
+Países del Golfo	Golfstaaten
+Irlanda del Norte	Nordirland
+Islas Canarias	Kanarische Inseln
+Tiempo en StradaOS: {}	Zeit in StradaOS: {}
+Último tiempo por Bluetooth: {}	Letzte Zeit über Bluetooth: {}

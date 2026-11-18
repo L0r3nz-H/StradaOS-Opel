@@ -214,3 +214,17 @@ projection shortcuts. Standard themes remain stored while Opel Style is active.
 The official update metadata and removed Pages workflow remain unchanged.
 This candidate is not a published release until the hosted build, signature and
 both eight-version emulator matrices succeed and publication completes.
+
+
+## Pending upstream 2.24.1 candidate
+
+Stable upstream `v2.24.1` resolves to `0644024d9a73f27dc055170820e6d290915b7977`.
+The candidate uses version `2.24.1-opel`, versionCode 58, against Opel main
+`5592bd25f826da227a15ffe3fbb86611ff2429a1`. It preserves the Opel layout,
+projection controls, update isolation and stored standard themes. The new
+brightness observer reads the active style's theme setting, preserving independent
+standard and Opel modes. An API 30 check verifies actual Opel background colors
+when system brightness changes, with the standard mode fixed to Light.
+Both full emulator matrices, lint/signature/metadata gates and this additional
+check must pass before integration. The already integrated 2.24.0 publication must
+finish before main can advance to this candidate.
