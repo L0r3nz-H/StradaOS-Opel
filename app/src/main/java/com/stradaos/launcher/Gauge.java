@@ -17,6 +17,8 @@ import android.view.View;
  * fotograma a fotograma hacia la velocidad nueva con una curva suave, así que nunca da tirones. Solo dibuja mientras
  * se mueve; quieta no gasta batería ni procesador. Funciona desde Android 4.1 (postInvalidateOnAnimation es API 16).
  */
+// Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+@android.annotation.SuppressLint("ViewConstructor")
 public class Gauge extends View {
 
     private static final float START = 150f, SWEEP = 240f;   // de las 8 a las 4 del reloj
@@ -41,6 +43,11 @@ public class Gauge extends View {
     private final Paint pGlow = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
     private final Matrix rot = new Matrix();
+    private final int[] gradientColors = new int[4];
+    private final float[] gradientStops = {0f, 0f, 0f, 1f};
+    private SweepGradient gradient;
+    private float gradientX, gradientY, gradientFraction;
+    private int gradientAccent;
 
     public Gauge(Context c, float scale) {
         super(c);
@@ -92,6 +99,9 @@ public class Gauge extends View {
         postInvalidateOnAnimation();
     }
 
+    // SweepGradient is immutable: only rebuild when the animated speed/geometry/accent changes.
+    // Arrays and unchanged gradients are reused, so repainting a stationary gauge does not allocate.
+    @android.annotation.SuppressLint("DrawAllocation")
     @Override
     protected void onDraw(Canvas c) {
         // ── animación: acercamiento exponencial, independiente de los fotogramas por segundo ──
@@ -134,9 +144,15 @@ public class Gauge extends View {
         if (sweepNow > 0.6f) {
             float f = sweepNow / 360f;
             int a0 = (accent & 0x00FFFFFF) | 0x10000000, a1 = (accent & 0x00FFFFFF) | 0x80000000, a2 = (accent & 0x00FFFFFF) | 0xF2000000;
-            SweepGradient sg = new SweepGradient(cx, cy, new int[]{a0, a1, a2, a2}, new float[]{0f, f * 0.55f, f, 1f});
-            rot.setRotate(START, cx, cy);
-            sg.setLocalMatrix(rot);
+            if (gradient == null || gradientX != cx || gradientY != cy || gradientFraction != f || gradientAccent != accent) {
+                gradientColors[0] = a0; gradientColors[1] = a1; gradientColors[2] = a2; gradientColors[3] = a2;
+                gradientStops[1] = f * 0.55f; gradientStops[2] = f;
+                gradient = new SweepGradient(cx, cy, gradientColors, gradientStops);
+                gradientX = cx; gradientY = cy; gradientFraction = f; gradientAccent = accent;
+                rot.setRotate(START, cx, cy);
+                gradient.setLocalMatrix(rot);
+            }
+            SweepGradient sg = gradient;
             pFill.setColor(0xFF000000);   // opaco: el color de la pista (casi transparente) atenuaba el degradado
             pFill.setShader(sg);
             c.drawArc(rect, START, sweepNow, false, pFill);

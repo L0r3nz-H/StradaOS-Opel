@@ -1,4 +1,4 @@
-"""Check actual lint findings and Opel APK metadata; Gradle ignores lint errors."""
+"""Check lint regressions and Opel APK metadata in addition to Gradle checks."""
 from collections import Counter
 import json
 import os

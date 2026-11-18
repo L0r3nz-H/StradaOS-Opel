@@ -12,7 +12,9 @@ import android.provider.Settings;
 public class Modern {
 
     /** Pide los permisos que el launcher necesita (Android 6+). Devuelve true si ya estaban todos. */
+    @android.annotation.TargetApi(23)
     public static boolean ensurePermissions(Activity a, int req) {
+        if (android.os.Build.VERSION.SDK_INT < 23) return true;
         java.util.ArrayList<String> need = new java.util.ArrayList<String>();
         String[] all = android.os.Build.VERSION.SDK_INT >= 33
                 ? new String[]{Manifest.permission.ACCESS_FINE_LOCATION, "android.permission.READ_MEDIA_IMAGES"}

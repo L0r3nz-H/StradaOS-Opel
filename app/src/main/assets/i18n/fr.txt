@@ -1166,3 +1166,5 @@ Irlanda del Norte	Irlande du Nord
 Islas Canarias	Îles Canaries
 Tiempo en StradaOS: {}	Temps dans StradaOS : {}
 Último tiempo por Bluetooth: {}	Dernier temps via Bluetooth : {}
+Subir	Augmenter
+Bajar	Diminuer

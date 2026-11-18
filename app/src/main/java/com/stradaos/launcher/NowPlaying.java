@@ -191,7 +191,7 @@ public class NowPlaying {
     }
 
     private String sourceFromAction(String a) {
-        String l = a.toLowerCase();
+        String l = a.toLowerCase(java.util.Locale.ROOT);
         if (l.contains("bluetooth") || l.contains(".bt") || l.contains("avrcp") || l.contains("a2dp")) return "Bluetooth";
         if (l.contains("spotify")) return "Spotify";
         if (l.contains("playerpro")) return "PlayerPro";
@@ -202,7 +202,7 @@ public class NowPlaying {
         String s = a.substring(0, a.lastIndexOf('.'));
         String[] p = s.split("\\.");
         String n = p.length > 1 ? p[1] : p[0];
-        return n.substring(0, 1).toUpperCase() + n.substring(1);
+        return n.substring(0, 1).toUpperCase(java.util.Locale.getDefault()) + n.substring(1);
     }
 
     private static String str(Bundle x, String... keys) {
@@ -235,8 +235,10 @@ public class NowPlaying {
     }
 
     // ── pantalla de control remoto del sistema ──
+    // Hidden remote-control API is used only on Android 4.x and guarded with reflection/fallbacks.
+    @android.annotation.SuppressLint("PrivateApi")
     private void registerDisplay() {
-        if (android.os.Build.VERSION.SDK_INT < 14 || android.os.Build.VERSION.SDK_INT > 18) return;
+        if (android.os.Build.VERSION.SDK_INT > 18) return;
         try {
             Class<?> rcd = Class.forName("android.media.IRemoteControlDisplay");
             display = Class.forName("com.stradaos.launcher.RcDisplay").getConstructor(RcCallback.class).newInstance(new Display());
@@ -256,6 +258,8 @@ public class NowPlaying {
         }
     }
 
+    // Hidden remote-control API is used only on Android 4.x and guarded with reflection/fallbacks.
+    @android.annotation.SuppressLint("PrivateApi")
     private void unregisterDisplay() {
         if (display == null) return;
         try {

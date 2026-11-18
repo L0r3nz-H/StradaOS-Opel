@@ -21,17 +21,18 @@ See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/
 
 ## Current Opel edition
 
-The current Opel code is maintained on **`main`**, based on upstream **2.23.0**
-(commit `42ecf12`, 2026-11-16). The port was prepared on
-`feature/opel-latest-2.21.2`, which remains available. The current app version is **2.23.0-opel**,
-versionCode **56**, with package `com.stradaos.launcher.opel` and app name
-**StradaOS Opel**. The previous Opel branch remains available. The upstream version/download-count badges
-describe the original project. Opel release downloads use this fork.
+The current Opel code is maintained on **`main`**, based on upstream **2.24.1**
+(commit `0644024`, merged as `69688ad` on 2026-11-18). The current app version is
+**2.24.1-opel**, versionCode **58**, with package `com.stradaos.launcher.opel`
+and app name **StradaOS Opel**. Earlier Opel branches and releases remain available.
+The upstream version/download-count badges describe the original project;
+Opel release downloads use this fork.
 
-[Opel 2.23.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.23.0-preview.1)
-is available with a signed APK and checksum. The stable Latest release remains
-2.22.0. The preview passed build, lint regression, signing-certificate and Android
-11 startup checks; API 17 and head-unit hardware compatibility remain untested.
+Local Android 11/API 30 tests cover dashboard/settings smoke checks, style and theme
+preservation across restarts, automatic brightness changes, and simulated Android Auto
+playback seeks. This does not verify a published, production-signed 2.24.1 APK.
+Android 4.2/API 17 and head-unit hardware compatibility still require testing.
+See [testing](docs/PRUEBAS.md) for checks and compatibility exceptions.
 
 | Option | StradaOS | Opel Style |
 | --- | --- | --- |
@@ -163,9 +164,10 @@ migration passed. **API 17 runtime and proprietary radio/Bluetooth/CarPlay behav
 still need testing on the actual head unit.** Upstream hardware reports do not
 replace testing this fork.
 
-Build and signing checks passed. Lint still reports existing findings (72 errors,
-1 fatal issue, 81 warnings); no finding is on the Java lines changed for the
-style menu. Full validation history is in [OPEL_APK.md](docs/OPEL_APK.md).
+Builds and automated checks are described in [testing](docs/PRUEBAS.md).
+Lint errors fail the build. The intentionally retained target SDK 28 produces a visible
+informational Google Play policy finding; changing it requires a separate compatibility
+migration for legacy head units.
 
 Report additional devices through the [issue tracker](https://github.com/L0r3nz-H/StradaOS-Opel/issues).
 

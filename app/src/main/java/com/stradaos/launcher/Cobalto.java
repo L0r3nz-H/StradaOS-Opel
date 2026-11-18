@@ -182,6 +182,8 @@ final class Cobalto {
      * siempre, con una sombra suave en el piso. Se quita el margen transparente de la foto para que el auto llene el
      * recuadro sin cortarse. Se compone una vez en un Bitmap.
      */
+    // Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+    @android.annotation.SuppressLint("ViewConstructor")
     static final class CarFit extends View {
         private final Bitmap car;
         private Bitmap out;
@@ -217,6 +219,8 @@ final class Cobalto {
     }
 
     /** Miniatura para la galería (mismas proporciones que buildCobalto en Main). */
+    // Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+    @android.annotation.SuppressLint("ViewConstructor")
     static final class Thumb extends View {
         final boolean portrait, light;
         boolean selected;
@@ -224,12 +228,25 @@ final class Cobalto {
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final RectF r = new RectF();
         private Bitmap bg;
+        private android.graphics.BitmapShader bgShader;
 
         Thumb(Context c, float s, boolean portrait, boolean light) {
             super(c);
             this.s = s;
             this.portrait = portrait;
             this.light = light;
+        }
+
+        @Override protected void onSizeChanged(int w, int h, int oldW, int oldH) {
+            bg = null;
+            bgShader = null;
+            if (w <= 0 || h <= 0) return;
+            try {
+                bg = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                paint(new Canvas(bg), w, h, light, Main.RED);
+                Aurora.grain(bg, light);
+                bgShader = new android.graphics.BitmapShader(bg, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            } catch (Throwable e) { bg = null; bgShader = null; }
         }
 
         @Override protected void onMeasure(int wSpec, int hSpec) {
@@ -262,17 +279,10 @@ final class Cobalto {
             int w = getWidth(), h = getHeight();
             if (w <= 0 || h <= 0) return;
             float u = portrait ? w : h, rad = u * 0.06f, crad = u * 0.04f;
-            if (bg == null || bg.getWidth() != w || bg.getHeight() != h) {
-                try {
-                    bg = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-                    paint(new Canvas(bg), w, h, light, Main.RED);
-                    Aurora.grain(bg, light);
-                } catch (Throwable e) { bg = null; }
-            }
             r.set(0, 0, w, h);
             if (bg != null) {
                 p.setStyle(Paint.Style.FILL);
-                p.setShader(new android.graphics.BitmapShader(bg, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+                p.setShader(bgShader);
                 c.drawRoundRect(r, rad, rad, p);
                 p.setShader(null);
             } else rr(c, 0, 0, w, h, rad, base(light));

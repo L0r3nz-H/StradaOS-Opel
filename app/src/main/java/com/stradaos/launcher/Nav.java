@@ -942,16 +942,7 @@ public class Nav {
             }
             if (bunTmp == null) return null;
             final X509TrustManager bundled = bunTmp;
-            X509TrustManager both = new X509TrustManager() {
-                public void checkClientTrusted(X509Certificate[] chain, String auth) throws java.security.cert.CertificateException {
-                    system.checkClientTrusted(chain, auth);
-                }
-                public void checkServerTrusted(X509Certificate[] chain, String auth) throws java.security.cert.CertificateException {
-                    try { system.checkServerTrusted(chain, auth); }
-                    catch (java.security.cert.CertificateException e) { bundled.checkServerTrusted(chain, auth); }
-                }
-                public X509Certificate[] getAcceptedIssuers() { return system.getAcceptedIssuers(); }
-            };
+            X509TrustManager both = new CertificateTrust(system, bundled);
             SSLContext ctx = SSLContext.getInstance("TLS");
             ctx.init(null, new TrustManager[]{both}, null);
             navTlsFactory = Build.VERSION.SDK_INT >= 21 ? ctx.getSocketFactory() : new NavTlsFactory(ctx.getSocketFactory());

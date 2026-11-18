@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- Sideloaded/F-Droid head-unit launcher, intentionally targeting 28 for legacy hardware.
+         This is a Google Play submission policy, not a runtime/API compatibility check.
+         Keep the finding visible as information; all other lint errors still fail the build. -->
+    <issue id="ExpiredTargetSdkVersion" severity="informational" />
+</lint>

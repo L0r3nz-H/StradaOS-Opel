@@ -111,6 +111,8 @@ final class Aurora {
     private static int clamp(int v) { return v < 0 ? 0 : v > 255 ? 255 : v; }
 
     /** Botón «Solo mapa»: cuatro esquinas hacia afuera (agrandar el mapa) o hacia adentro (volver a mostrar todo). */
+    // Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+    @android.annotation.SuppressLint("ViewConstructor")
     static final class Corners extends View {
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Path path = new Path();
@@ -151,6 +153,8 @@ final class Aurora {
      * Miniatura del tema para la galería, en horizontal o vertical y en su versión clara u oscura (no depende del
      * modo actual: se muestran las dos). Sigue las mismas proporciones que buildPremium() en Main.
      */
+    // Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+    @android.annotation.SuppressLint("ViewConstructor")
     static final class Thumb extends View {
         final boolean portrait, light;
         boolean selected;
@@ -159,12 +163,25 @@ final class Aurora {
         private final RectF r = new RectF();
         private final Path path = new Path();
         private Bitmap bg;
+        private android.graphics.BitmapShader bgShader;
 
         Thumb(Context c, float s, boolean portrait, boolean light) {
             super(c);
             this.s = s;
             this.portrait = portrait;
             this.light = light;
+        }
+
+        @Override protected void onSizeChanged(int w, int h, int oldW, int oldH) {
+            bg = null;
+            bgShader = null;
+            if (w <= 0 || h <= 0) return;
+            try {
+                bg = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                paint(new Canvas(bg), w, h, light, Main.RED);
+                grain(bg, light);
+                bgShader = new android.graphics.BitmapShader(bg, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            } catch (Throwable e) { bg = null; bgShader = null; }
         }
 
         @Override protected void onMeasure(int wSpec, int hSpec) {
@@ -193,18 +210,11 @@ final class Aurora {
             int w = getWidth(), h = getHeight();
             if (w <= 0 || h <= 0) return;
             float u = portrait ? w : h, rad = u * 0.06f;
-            if (bg == null || bg.getWidth() != w || bg.getHeight() != h) {
-                try {
-                    bg = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-                    paint(new Canvas(bg), w, h, light, Main.RED);
-                    grain(bg, light);
-                } catch (Throwable e) { bg = null; }
-            }
             // esquinas redondas sin clipPath (en Android 4.1/4.2 con aceleración por GPU no funciona)
             r.set(0, 0, w, h);
             if (bg != null) {
                 p.setStyle(Paint.Style.FILL);
-                p.setShader(new android.graphics.BitmapShader(bg, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+                p.setShader(bgShader);
                 c.drawRoundRect(r, rad, rad, p);
                 p.setShader(null);
             } else rr(c, 0, 0, w, h, rad, base(light));

@@ -57,16 +57,7 @@ public class Net {
                 } catch (Throwable t) { bad++; }
             }
             final X509TrustManager bundled = defaultTm(ks);
-            X509TrustManager both = new X509TrustManager() {
-                public void checkClientTrusted(X509Certificate[] chain, String auth) throws java.security.cert.CertificateException {
-                    system.checkClientTrusted(chain, auth);
-                }
-                public void checkServerTrusted(X509Certificate[] chain, String auth) throws java.security.cert.CertificateException {
-                    try { system.checkServerTrusted(chain, auth); }
-                    catch (java.security.cert.CertificateException e) { bundled.checkServerTrusted(chain, auth); }
-                }
-                public X509Certificate[] getAcceptedIssuers() { return system.getAcceptedIssuers(); }
-            };
+            X509TrustManager both = new CertificateTrust(system, bundled);
             SSLContext ctx;
             try { ctx = SSLContext.getInstance("TLSv1.2"); } catch (Throwable e) { ctx = SSLContext.getInstance("TLS"); }
             ctx.init(null, new TrustManager[]{both}, null);

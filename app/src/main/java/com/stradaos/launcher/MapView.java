@@ -9,6 +9,8 @@ import android.graphics.RectF;
 import android.view.View;
 
 /** Tarjeta central: mapa estilizado con ruta roja (decorativo). */
+// Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+@android.annotation.SuppressLint("ViewConstructor")
 public class MapView extends View {
     private final float s;
     private final float radius;
@@ -17,6 +19,7 @@ public class MapView extends View {
     private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path clip = new Path();
     private final Path line = new Path();
+    private final RectF bounds = new RectF();
 
     // carreteras en coordenadas normalizadas: x1,y1,x2,y2,ancho(px de diseño)
     private static final float[][] ROADS = {
@@ -45,7 +48,8 @@ public class MapView extends View {
     protected void onDraw(Canvas cv) {
         float w = getWidth(), h = getHeight();
         clip.reset();
-        clip.addRoundRect(new RectF(0, 0, w, h), radius, radius, Path.Direction.CW);
+        bounds.set(0, 0, w, h);
+        clip.addRoundRect(bounds, radius, radius, Path.Direction.CW);
         cv.save();
         cv.clipPath(clip);
         cv.drawColor(Main.LIGHT ? 0xFFEDF0F4 : 0xFF1A1D23);

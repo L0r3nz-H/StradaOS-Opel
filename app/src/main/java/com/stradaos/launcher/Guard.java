@@ -24,7 +24,7 @@ import java.util.Locale;
 public class Guard {
     static final String FILE = "fallos.txt";
     static final long MAX = 64 * 1024;
-    private static Context app;
+    private static android.app.Application app;
     private static volatile long pong;
     private static volatile boolean running;
     private static Thread watchdog;
@@ -32,7 +32,7 @@ public class Guard {
     /** Instala el registro de cierres inesperados (una vez por proceso). */
     static void install(Context c) {
         if (app != null) return;
-        app = c.getApplicationContext();
+        app = (android.app.Application) c.getApplicationContext();
         final Thread.UncaughtExceptionHandler prev = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             public void uncaughtException(Thread t, Throwable e) {

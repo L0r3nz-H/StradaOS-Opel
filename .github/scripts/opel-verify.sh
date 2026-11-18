@@ -9,5 +9,5 @@ trap 'rm -rf "$BASE_DIR"' EXIT
 git archive "$BASE" | tar -x -C "$BASE_DIR"
 (cd "$BASE_DIR" && bash ./gradlew --no-daemon --max-workers=2 lintOpel)
 cp "$BASE_DIR/app/build/reports/lint-results-opel.xml" verification/baseline-lint.xml
-bash ./gradlew --no-daemon --max-workers=2 assembleDebug assembleOpel lintOpel
+bash ./gradlew --no-daemon --max-workers=2 assembleDebug assembleOpel test lintDebug lintOpel lintRelease
 python3 .github/scripts/opel-verify.py "$BASE_DIR"

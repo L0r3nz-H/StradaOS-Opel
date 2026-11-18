@@ -12,6 +12,7 @@ case "$TEST_MODE" in
     bash .github/scripts/smoke.sh "$TEST_API" "${APKS[0]}" "$OUT"
     if [ "$TEST_API" = 30 ]; then
       bash .github/scripts/opel-theme-compat.sh "$OUT"
+      python3 .github/scripts/opel-controls-check.py "$OUT/controls"
     fi
     ;;
   opel) bash .github/scripts/opel-smoke.sh "$TEST_API" "${APKS[0]}" "$OUT" ;;

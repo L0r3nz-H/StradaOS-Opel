@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -25,10 +26,10 @@
     <application android:label="${appLabel}" android:icon="@drawable/ic_launcher"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
         android:hardwareAccelerated="true" android:largeHeap="true"
-        android:usesCleartextTraffic="true">
-        <activity android:name="com.stradaos.launcher.Main" android:label="${appLabel}"
+        android:usesCleartextTraffic="true" tools:targetApi="m">
+        <activity android:name="com.stradaos.launcher.Main" android:exported="true"
             android:launchMode="singleTask" android:stateNotNeeded="true" android:clearTaskOnLaunch="true"
-            android:excludeFromRecents="true" android:screenOrientation="unspecified"
+            android:excludeFromRecents="true"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:windowSoftInputMode="adjustNothing">
             <intent-filter>
@@ -53,14 +54,14 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
-        <service android:name="com.stradaos.launcher.NotifArt" android:label="@string/acc_label"
+        <service android:name="com.stradaos.launcher.NotifArt" android:exported="true" android:label="@string/acc_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService"/>
             </intent-filter>
             <meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibility_service"/>
         </service>
-        <service android:name="com.stradaos.launcher.MediaListener" android:label="StradaOS · música"
+        <service android:name="com.stradaos.launcher.MediaListener" android:exported="true" android:label="StradaOS · música"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService"/>

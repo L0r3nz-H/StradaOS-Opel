@@ -9,6 +9,7 @@ import android.view.WindowInsetsController;
  * navegación (y la barra de tareas de las pantallas grandes en Android 12L+) se oculta con WindowInsetsController;
  * las banderas viejas de setSystemUiVisibility ya no alcanzan para la barra de tareas.
  */
+@android.annotation.TargetApi(30)
 class Bars {
     static void navigation(Window w, boolean hide) {
         WindowInsetsController c = w.getInsetsController();

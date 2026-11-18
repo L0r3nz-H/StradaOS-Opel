@@ -11,6 +11,8 @@ import android.graphics.Shader;
 import android.view.View;
 
 /** Carátula circular con anillo de progreso (estilo de la referencia). */
+// Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+@android.annotation.SuppressLint("ViewConstructor")
 public class PlayerArt extends View {
     private final float s;
     private final Paint ring = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -18,7 +20,12 @@ public class PlayerArt extends View {
     private final Paint knob = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint art = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final RectF box = new RectF();
+    private final RectF box = new RectF(), placeholderBox = new RectF();
+    private final Matrix artMatrix = new Matrix();
+    private final Paint placeholderPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+    private final android.graphics.PathMeasure pathMeasure = new android.graphics.PathMeasure();
+    private BitmapShader artShader;
+    private int placeholderTint;
     private Bitmap bitmap, placeholder;
     private float progress = -1f; // -1 = sin duración
     /** Tema Aurora: carátula cuadrada con esquinas redondas y el avance alrededor, con la misma forma. */
@@ -50,7 +57,10 @@ public class PlayerArt extends View {
     }
 
     public void setArt(Bitmap b) {
-        bitmap = b;
+        if (bitmap != b) {
+            bitmap = b;
+            artShader = b == null || b.isRecycled() ? null : new BitmapShader(b, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        }
         invalidate();
     }
 
@@ -86,7 +96,8 @@ public class PlayerArt extends View {
         prog.setStrokeWidth(3 * s);
         c.drawPath(sqPath, ring);
         if (progress >= 0) {
-            android.graphics.PathMeasure pm = new android.graphics.PathMeasure(sqPath, false);
+            android.graphics.PathMeasure pm = pathMeasure;
+            pm.setPath(sqPath, false);
             float len = pm.getLength() * Math.max(0f, Math.min(1f, progress));
             sqSeg.reset();
             pm.getSegment(0, len, sqSeg, true);
@@ -97,9 +108,9 @@ public class PlayerArt extends View {
         float g = 6 * s, ik = Math.max(2 * s, k - g);
         box.set(l + g, t + g, r - g, b - g);
         if (bitmap != null && !bitmap.isRecycled()) {
-            BitmapShader sh = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            BitmapShader sh = artShader;
             float scale = Math.max(box.width() / bitmap.getWidth(), box.height() / bitmap.getHeight());
-            Matrix m = new Matrix();
+            Matrix m = artMatrix;
             m.setScale(scale, scale);
             m.postTranslate(box.centerX() - bitmap.getWidth() * scale / 2f, box.centerY() - bitmap.getHeight() * scale / 2f);
             sh.setLocalMatrix(m);
@@ -109,13 +120,21 @@ public class PlayerArt extends View {
             c.drawRoundRect(box, ik, ik, bg);
             if (placeholder != null) {
                 float sz = box.width() * 0.4f;
-                RectF d = new RectF(box.centerX() - sz / 2, box.centerY() - sz / 2, box.centerX() + sz / 2, box.centerY() + sz / 2);
-                Paint p = new Paint(Paint.FILTER_BITMAP_FLAG);
+                RectF d = placeholderBox;
+                d.set(box.centerX() - sz / 2, box.centerY() - sz / 2, box.centerX() + sz / 2, box.centerY() + sz / 2);
+                Paint p = placeholderPaint;
                 p.setAlpha(150);
-                if (Main.LIGHT) p.setColorFilter(new android.graphics.PorterDuffColorFilter(Main.MUTED, android.graphics.PorterDuff.Mode.SRC_IN));
+                updatePlaceholderTint();
                 c.drawBitmap(placeholder, null, d, p);
             }
         }
+    }
+
+    private void updatePlaceholderTint() {
+        int tint = Main.LIGHT ? Main.MUTED : 0;
+        if (placeholderTint == tint) return;
+        placeholderTint = tint;
+        placeholderPaint.setColorFilter(tint == 0 ? null : new android.graphics.PorterDuffColorFilter(tint, android.graphics.PorterDuff.Mode.SRC_IN));
     }
 
     @Override
@@ -136,9 +155,9 @@ public class PlayerArt extends View {
         }
 
         if (bitmap != null && !bitmap.isRecycled()) {
-            BitmapShader sh = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            BitmapShader sh = artShader;
             float scale = Math.max(2 * ra / bitmap.getWidth(), 2 * ra / bitmap.getHeight());
-            Matrix m = new Matrix();
+            Matrix m = artMatrix;
             m.setScale(scale, scale);
             m.postTranslate(cx - bitmap.getWidth() * scale / 2f, cy - bitmap.getHeight() * scale / 2f);
             sh.setLocalMatrix(m);
@@ -148,10 +167,11 @@ public class PlayerArt extends View {
             c.drawCircle(cx, cy, ra, bg);
             if (placeholder != null) {
                 float sz = ra * 0.8f;
-                RectF d = new RectF(cx - sz / 2, cy - sz / 2, cx + sz / 2, cy + sz / 2);
-                Paint p = new Paint(Paint.FILTER_BITMAP_FLAG);
+                RectF d = placeholderBox;
+                d.set(cx - sz / 2, cy - sz / 2, cx + sz / 2, cy + sz / 2);
+                Paint p = placeholderPaint;
                 p.setAlpha(150);
-                if (Main.LIGHT) p.setColorFilter(new android.graphics.PorterDuffColorFilter(Main.MUTED, android.graphics.PorterDuff.Mode.SRC_IN));
+                updatePlaceholderTint();
                 c.drawBitmap(placeholder, null, d, p);
             }
         }
