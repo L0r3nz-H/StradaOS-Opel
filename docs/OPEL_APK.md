@@ -201,3 +201,16 @@ interaction or head-unit hardware compatibility. The separate inherited
 `pruebas.yml` uses the same reusable emulator workflow, retains its screenshot
 branch, and explicitly depends on both build and emulator results when publishing
 that report. The preview release depends on both emulator matrices succeeding.
+
+
+## Pending upstream 2.24.0 candidate
+
+The stable upstream tag resolves to `858e2a5c4e958076ee47c489caff9752d8f57af2`.
+The candidate uses version `2.24.0-opel`, versionCode 57, and compares against
+Opel main `20ccfb869964b82e4f656b339c2d583793faa370`.
+Personalization/Aurora/Cobalto apply only in the standard layout. Opel Style keeps
+its fixed dashboard, red accent, per-style theme settings, Astra fallback and
+projection shortcuts. Standard themes remain stored while Opel Style is active.
+The official update metadata and removed Pages workflow remain unchanged.
+This candidate is not a published release until the hosted build, signature and
+both eight-version emulator matrices succeed and publication completes.

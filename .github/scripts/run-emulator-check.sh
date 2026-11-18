@@ -8,7 +8,12 @@ APKS=(emulator-apk/*.apk)
 OUT="capturas/api$TEST_API"
 mkdir -p "$OUT"
 case "$TEST_MODE" in
-  debug) bash .github/scripts/smoke.sh "$TEST_API" "${APKS[0]}" "$OUT" ;;
+  debug)
+    bash .github/scripts/smoke.sh "$TEST_API" "${APKS[0]}" "$OUT"
+    if [ "$TEST_API" = 30 ]; then
+      bash .github/scripts/opel-theme-compat.sh "$OUT"
+    fi
+    ;;
   opel) bash .github/scripts/opel-smoke.sh "$TEST_API" "${APKS[0]}" "$OUT" ;;
   *) echo "Unknown test mode: $TEST_MODE"; exit 1 ;;
 esac

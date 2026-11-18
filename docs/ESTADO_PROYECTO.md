@@ -1,3 +1,11 @@
+## Pending upstream 2.24.0 sync
+
+Stable upstream `v2.24.0`, commit `858e2a5c4e958076ee47c489caff9752d8f57af2`,
+adds standard-layout personalization and Aurora/Cobalto themes. The Opel candidate
+keeps these in the standard layout; Opel Style retains its dashboard and settings,
+and stored standard themes resume when switching back. Build, lint, signing and
+both full emulator matrices must pass before integration/publication.
+
 ## Upstream 2.23.0 sync — published preview
 
 Upstream release `v2.23.0`, commit `42ecf12c4a42b7d43024f8adfc9e720f99322d20`,
