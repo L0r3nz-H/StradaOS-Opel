@@ -12,8 +12,16 @@ go() {
   adb shell pidof "$PKG" >/dev/null
 }
 dump() {
-  adb shell uiautomator dump /data/local/tmp/opel-theme.xml > /dev/null
-  adb pull /data/local/tmp/opel-theme.xml "$OUT/$1.xml" > /dev/null
+  # A live clock/map never becomes accessibility-idle. Snapshot real visible
+  # app views on the UI thread through the package-restricted debug hook.
+  adb shell run-as "$PKG" rm -f files/test-view-tree.xml
+  go ui-snapshot
+  adb shell run-as "$PKG" cat files/test-view-tree.xml > "$OUT/$1.xml"
+  python3 - "$OUT/$1.xml" <<'PYXML'
+import sys,xml.etree.ElementTree as ET
+root=ET.parse(sys.argv[1]).getroot()
+assert root.tag=='hierarchy' and root.find('node') is not None, 'Missing UI snapshot'
+PYXML
   adb exec-out screencap -p > "$OUT/$1.png"
 }
 read_prefs() {

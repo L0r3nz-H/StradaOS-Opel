@@ -663,6 +663,36 @@ public class Main extends Activity {
      * salir-fabrica (abre el launcher de fábrica), desactivar (apaga StradaOS; solo lo usa salida.yml),
      * diseno:izq|der|sinauto|conauto|normal|compacta|lateral|plegar|base (diseño del inicio), sim:5 (1280x480).
      */
+    /** Snapshot real de las vistas para pruebas: no espera a que el mapa/reloj deje de animarse. */
+    private void testViewSnapshot() throws Exception {
+        if (!getPackageName().endsWith(".debug")) return;
+        File target = new File(getFilesDir(), "test-view-tree.xml");
+        java.io.FileOutputStream out = new java.io.FileOutputStream(target);
+        try {
+            org.xmlpull.v1.XmlSerializer xml = android.util.Xml.newSerializer();
+            xml.setOutput(out, "UTF-8");
+            xml.startDocument("UTF-8", true);
+            xml.startTag(null, "hierarchy");
+            testViewNode(xml, root);
+            xml.endTag(null, "hierarchy");
+            xml.endDocument();
+            xml.flush();
+        } finally { out.close(); }
+    }
+
+    private void testViewNode(org.xmlpull.v1.XmlSerializer xml, View view) throws Exception {
+        if (view == null || view.getVisibility() != View.VISIBLE) return;
+        xml.startTag(null, "node");
+        xml.attribute(null, "class", view.getClass().getName());
+        if (view instanceof TextView) xml.attribute(null, "text", ((TextView) view).getText().toString());
+        if (view.getContentDescription() != null) xml.attribute(null, "content-desc", view.getContentDescription().toString());
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int n = 0; n < group.getChildCount(); n++) testViewNode(xml, group.getChildAt(n));
+        }
+        xml.endTag(null, "node");
+    }
+
     private void testHook(Intent i) {
         if (i == null || !getPackageName().endsWith(".debug")) return;
         final String v = i.getStringExtra("prueba");
@@ -673,6 +703,7 @@ public class Main extends Activity {
         }
         h.postDelayed(new Runnable() { public void run() {
             try {
+                if ("ui-snapshot".equals(v)) { testViewSnapshot(); return; }
                 if (settingsView != null) closeSettings();
                 closeDrawer();
                 if (v.startsWith("ajustes:")) showSettings(Integer.parseInt(v.substring(8)));
