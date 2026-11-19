@@ -135,7 +135,7 @@ PYFYT
 read_prefs
 python3 - "$OUT/opel-theme-prefs.xml" <<'PYFYT_PREFS'
 import sys,xml.etree.ElementTree as ET
-prefs={e.get('name'):e.text for e in ET.parse(sys.argv[1]).getroot()}
+prefs={e.get('name'):e.get('value', e.text) for e in ET.parse(sys.argv[1]).getroot()}
 assert prefs.get('theme')=='light' and prefs.get('opel_theme')=='system', 'FYT changed per-style theme modes'
 assert prefs.get('opel_theme_last_dark')=='false', 'Settled Opel color was not saved independently'
 PYFYT_PREFS
