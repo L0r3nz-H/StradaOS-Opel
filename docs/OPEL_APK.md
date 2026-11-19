@@ -256,3 +256,28 @@ strict lint/test gates, certificate-trust fixes, update separation and removed P
 The new media/notif hints retain null-safe Opel widget updates and the conditional
 Android Auto settings. Existing MediaWatcher resource cleanup is retained alongside
 new HCN cleanup. Build/signing/lint and both emulator matrices remain pending.
+
+
+## Completed 2.25.0 and pending 2.25.2 sync — 2026-11-19
+
+[Opel 2.25.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.25.0-preview.1)
+was published from `b76afbdcad7de81ec7d59c3364b272fedd9c978a` by successful
+[workflow 44571516199](https://github.com/L0r3nz-H/StradaOS-Opel/actions/runs/44571516199).
+Builds, unit tests, strict lint, metadata/signature/certificate checks and both
+complete eight-API emulator matrices passed. Lint had no Error/Fatal findings
+(baseline: one information; preview: 17 warnings and one information).
+The signed APK SHA-256 is
+`b6ae897e900580fcb2ebace2065962ea5f04b2b1fbad582bc03579704b7cd654`.
+Stable Latest remains Opel 2.22.0.
+
+The new candidate merges only published upstream `v2.25.2`, release ID 451869164,
+commit `5ed05a3537c575d58da440f0c68a29b034d9b0f2`, against that Opel baseline.
+Version `2.25.2-opel`, versionCode 61, includes the released 2.25.1 FYT support
+and Hungarian translation. The Opel palette, independent style modes and layout
+controls remain; FYT light observation reads the active style, and the delayed
+color cache/persisted state is isolated between standard and Opel styles.
+API 30 debug checks additionally exercise FYT light changes and delayed colors.
+FYT defaults to Generic and needs explicit selection; proprietary hardware data
+and API 17 remain untested. Signing, lint and both full emulator matrices must
+pass on GitHub runners before main integration/publication. No local Android
+builds or signing are used. Pages and official release/update guards remain.

@@ -21,17 +21,19 @@ See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/
 
 ## Current Opel edition
 
-The current Opel code is maintained on **`main`**, based on upstream **2.24.1**
-(commit `0644024`, merged as `69688ad` on 2026-11-18). The current app version is
-**2.24.1-opel**, versionCode **58**, with package `com.stradaos.launcher.opel`
-and app name **StradaOS Opel**. Earlier Opel branches and releases remain available.
-The upstream version/download-count badges describe the original project;
-Opel release downloads use this fork.
+The Opel sync candidate tracks published upstream **2.25.2**
+(commit `5ed05a3`), version **2.25.2-opel**, versionCode **61**, with package
+`com.stradaos.launcher.opel` and app name **StradaOS Opel**.
+The latest published preview is [2.25.0](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.25.0-preview.1);
+stable Latest remains 2.22.0. A candidate is published only after all hosted checks pass.
+Earlier Opel branches and releases remain available. The upstream badges describe
+the original project; Opel downloads use this fork.
 
-Local Android 11/API 30 tests cover dashboard/settings smoke checks, style and theme
-preservation across restarts, automatic brightness changes, and simulated Android Auto
-playback seeks. This does not verify a published, production-signed 2.24.1 APK.
-Android 4.2/API 17 and head-unit hardware compatibility still require testing.
+Hosted verification covers builds, unit tests, strict lint, metadata/signatures,
+original debug UI tests and signed Opel installation/three cold starts on APIs
+16, 19, 21, 23, 24, 28, 30 and 34. Additional API 30 checks cover gallery,
+controls and per-style themes. API 17 and proprietary head-unit hardware remain
+untested; the 2.25.2 candidate is pending these checks.
 See [testing](docs/PRUEBAS.md) for checks and compatibility exceptions.
 
 | Option | StradaOS | Opel Style |
@@ -110,7 +112,7 @@ See the [screenshot index](docs/screenshots/compact/README.md) for historical ca
 ### Personalization
 
 - Assign installed apps or functions to shortcuts and hide unused apps from the drawer.
-- Ten app languages: Spanish, English, Portuguese, French, Italian, German, Malay, Arabic, Turkish, and Chinese. Speed in km/h or mph.
+- Eleven app languages: Spanish, English, Portuguese, French, Italian, German, Malay, Arabic, Turkish, Chinese, and Hungarian. Speed in km/h or mph.
 - App drawer sorting, an optional idle screen, and GPS-based sunrise/sunset themes are also available.
 - Standard upstream releases offer update notifications and a QR download link. The Opel edition uses separately signed APKs instead.
 

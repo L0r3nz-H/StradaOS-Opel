@@ -107,6 +107,41 @@ prefs={e.get('name'):e.text for e in ET.parse(sys.argv[1]).getroot()}
 assert prefs.get('theme')=='light' and prefs.get('opel_theme')=='auto', 'Per-style theme modes changed'
 PYPREFS
 go pref:auto_bright=false
+# FYT light events must follow the active Opel mode while standard stays Light.
+go pref:hw=fyt
+adb shell settings put system car_mode 0
+go pref:opel_theme=system
+go inicio
+dump opel-fyt-light
+adb shell settings put system car_mode 1
+sleep 2
+dump opel-fyt-dark
+# The optional delay holds the previous color, then applies the requested color.
+go pref:theme_delay_dark=5
+go pref:theme_delay_light=5
+go pref:theme_delay_on=true
+adb shell settings put system car_mode 0
+dump opel-fyt-delay-held
+sleep 3
+dump opel-fyt-delay-settled
+python3 - "$OUT" <<'PYFYT'
+from pathlib import Path
+import sys,xml.etree.ElementTree as ET
+p=Path(sys.argv[1])
+for name,color in [('opel-fyt-light','ffe9edf1'),('opel-fyt-dark','ff17191d'),('opel-fyt-delay-held','ff17191d'),('opel-fyt-delay-settled','ffe9edf1')]:
+ root=ET.parse(p/(name+'.xml')).getroot()
+ assert root.find('node').get('background-color')==color, name+': FYT light/delay did not update the Opel view'
+PYFYT
+read_prefs
+python3 - "$OUT/opel-theme-prefs.xml" <<'PYFYT_PREFS'
+import sys,xml.etree.ElementTree as ET
+prefs={e.get('name'):e.text for e in ET.parse(sys.argv[1]).getroot()}
+assert prefs.get('theme')=='light' and prefs.get('opel_theme')=='system', 'FYT changed per-style theme modes'
+assert prefs.get('opel_theme_last_dark')=='false', 'Settled Opel color was not saved independently'
+PYFYT_PREFS
+go pref:theme_delay_on=false
+go pref:hw=generic
+adb shell settings delete system car_mode
 go pref:opel_theme=light
 go pref:home_layout=standard
 go pref:design=stradaos
@@ -114,4 +149,4 @@ adb logcat -b crash -d > "$OUT/opel-theme-crashes.txt"
 if grep -q "$PKG" "$OUT/opel-theme-crashes.txt"; then
   echo '::error::Opel/standard theme transition crashed'; exit 1
 fi
-printf 'Aurora/Cobalto: Opel layout, projection, theme settings and restart preservation and brightness-observer isolation passed.\n' > "$OUT/opel-theme-result.txt"
+printf 'Aurora/Cobalto: Opel layout, projection, theme settings, restart preservation, brightness isolation and FYT light/delay checks passed.\n' > "$OUT/opel-theme-result.txt"
