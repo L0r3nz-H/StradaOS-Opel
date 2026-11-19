@@ -1179,3 +1179,24 @@ Tiempo en StradaOS: {}	Tempo in StradaOS: {}
 Último tiempo por Bluetooth: {}	Ultimo tempo via Bluetooth: {}
 Subir	Aumenta
 Bajar	Diminuisci
+# Bloque 16 (2.25): tema premium Faro
+Fondo carbón (o perla en claro) con un haz de luz diagonal. A la izquierda, el velocímetro y un carro visto desde arriba que enciende los faros de noche; en el centro, el mapa integrado al fondo; a la derecha, el clima por horas y tus próximos mantenimientos, con el reproductor y la barra de apps debajo.	Sfondo antracite (o perla in modalità chiara) con un fascio di luce diagonale. A sinistra, il tachimetro e un'auto vista dall'alto che accende i fari di notte; al centro, la mappa integrata nello sfondo; a destra, il meteo ora per ora e le prossime manutenzioni, con il lettore e la barra delle app sotto.
+Color del carro	Colore dell'auto
+El carro del tema Faro, visto desde arriba. También se cambia con una presión larga sobre el carro.	L'auto del tema Faro, vista dall'alto. Si cambia anche tenendo premuto sull'auto.
+Intensidad del mapa	Intensità della mappa
+Qué tan visible es el mapa sobre el fondo. Auto lo pone más fuerte en las pantallas sencillas de los radios y suave en las de alta gama. Súbela si al sol no se ve bien.	Quanto si vede la mappa sullo sfondo. Auto la rende più marcata sugli schermi semplici delle autoradio e più delicata su quelli di fascia alta. Aumentala se al sole non si vede bene.
+Baja	Bassa
+Media	Media
+Alta	Alta
+Negro	Nero
+Sin mantenimientos programados	Nessuna manutenzione programmata
+Toca para agregar uno	Tocca per aggiungerne una
+Navegar	Naviga
+# 2.25: canción de las apps (acceso a notificaciones)
+Música sonando	Musica in riproduzione
+Toca para ver la canción	Tocca per vedere il brano
+Ver la canción de tus apps	Vedi il brano delle tue app
+Para mostrar la canción, el artista y la carátula de Spotify, YouTube Music y otras apps, StradaOS necesita «Acceso a notificaciones». Solo lo usa para leer lo que suena: no guarda ni envía nada.	Per mostrare brano, artista e copertina di Spotify, YouTube Music e altre app, StradaOS ha bisogno dell'«Accesso alle notifiche». Lo usa solo per leggere cosa suona: non salva né invia nulla.
+No volver a mostrar	Non mostrare più
+Esta pantalla no tiene el ajuste de «Acceso a notificaciones». Se puede activar una sola vez desde una computadora con ADB:	Questo schermo non ha l'impostazione «Accesso alle notifiche». Si può attivare una sola volta da un computer con ADB:
+Spotify, YouTube Music y otras apps de la pantalla (acceso a notificaciones)	Spotify, YouTube Music e altre app dello schermo (accesso alle notifiche)

@@ -210,7 +210,7 @@ branch, and explicitly depends on both build and emulator results when publishin
 that report. The preview release depends on both emulator matrices succeeding.
 
 
-## Pending upstream 2.24.0 candidate
+## Published upstream 2.24.0 preview (historical candidate notes)
 
 The stable upstream tag resolves to `858e2a5c4e958076ee47c489caff9752d8f57af2`.
 The candidate uses version `2.24.0-opel`, versionCode 57, and compares against
@@ -223,7 +223,7 @@ This candidate is not a published release until the hosted build, signature and
 both eight-version emulator matrices succeed and publication completes.
 
 
-## Pending upstream 2.24.1 candidate
+## Published upstream 2.24.1 preview (historical candidate notes)
 
 Stable upstream `v2.24.1` resolves to `0644024d9a73f27dc055170820e6d290915b7977`.
 The candidate uses version `2.24.1-opel`, versionCode 58, against Opel main
@@ -235,3 +235,24 @@ when system brightness changes, with the standard mode fixed to Light.
 Both full emulator matrices, lint/signature/metadata gates and this additional
 check must pass before integration. The already integrated 2.24.0 publication must
 finish before main can advance to this candidate.
+
+
+## Completed 2.24 publications and pending 2.25.0 sync
+
+[Opel 2.24.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.24.0-preview.1)
+was published from `5592bd25f826da227a15ffe3fbb86611ff2429a1` by successful
+workflow run `44345847474`.
+[Opel 2.24.1 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.24.1-preview.1)
+was published from `69688ad59854c071c294f635b8ca1dcf95082f6b` by successful
+workflow run `44351427891`. Both completed signing and both eight-version
+emulator matrices. The historical candidate notes above describe their preparation.
+Stable Latest remains 2.22.0; existing release assets/tags are unchanged.
+
+The next stable upstream tag is `v2.25.0`, release ID 451430222, resolved commit
+`6d092e6830d19a30c36e2ffe030536a809be727b`. The candidate is `2.25.0-opel`,
+versionCode 59, based on Opel main `cdc6b13aa351789c404820d22695a6099137134b`.
+It preserves the integrated Opel Personalization gallery, its controls and tests,
+strict lint/test gates, certificate-trust fixes, update separation and removed Pages.
+The new media/notif hints retain null-safe Opel widget updates and the conditional
+Android Auto settings. Existing MediaWatcher resource cleanup is retained alongside
+new HCN cleanup. Build/signing/lint and both emulator matrices remain pending.

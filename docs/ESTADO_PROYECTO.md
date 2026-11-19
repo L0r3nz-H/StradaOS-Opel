@@ -1,3 +1,11 @@
+## Pending upstream 2.25.0 sync
+
+Stable upstream release `v2.25.0` resolves to
+`6d092e6830d19a30c36e2ffe030536a809be727b`. Candidate versionCode 59 preserves
+the Opel Personalization gallery and stricter lint/tests from main `cdc6b13`.
+Published Opel previews 2.24.0 and 2.24.1 are complete; the older candidate notes
+below are historical. No 2.25.0 release is published until all hosted gates pass.
+
 ## Pending upstream 2.24.1 sync
 
 Stable tag `v2.24.1` resolves to `0644024d9a73f27dc055170820e6d290915b7977`.

@@ -1179,3 +1179,24 @@ Tiempo en StradaOS: {}	Masa dalam StradaOS: {}
 Último tiempo por Bluetooth: {}	Masa terakhir melalui Bluetooth: {}
 Subir	Tambah
 Bajar	Kurangkan
+# Bloque 16 (2.25): tema premium Faro
+Fondo carbón (o perla en claro) con un haz de luz diagonal. A la izquierda, el velocímetro y un carro visto desde arriba que enciende los faros de noche; en el centro, el mapa integrado al fondo; a la derecha, el clima por horas y tus próximos mantenimientos, con el reproductor y la barra de apps debajo.	Latar arang (atau mutiara dalam mod cerah) dengan alur cahaya pepenjuru. Di kiri, meter laju dan kereta dilihat dari atas yang menyalakan lampu hadapan pada waktu malam; di tengah, peta yang menyatu dengan latar; di kanan, cuaca setiap jam dan penyelenggaraan anda yang akan datang, dengan pemain dan bar aplikasi di bawah.
+Color del carro	Warna kereta
+El carro del tema Faro, visto desde arriba. También se cambia con una presión larga sobre el carro.	Kereta dalam tema Faro, dilihat dari atas. Boleh juga ditukar dengan tekan lama pada kereta.
+Intensidad del mapa	Keamatan peta
+Qué tan visible es el mapa sobre el fondo. Auto lo pone más fuerte en las pantallas sencillas de los radios y suave en las de alta gama. Súbela si al sol no se ve bien.	Sejauh mana peta kelihatan di atas latar. Auto menjadikannya lebih jelas pada skrin ringkas radio kereta dan lebih lembut pada skrin mewah. Naikkan jika sukar dilihat di bawah cahaya matahari.
+Baja	Rendah
+Media	Sederhana
+Alta	Tinggi
+Negro	Hitam
+Sin mantenimientos programados	Tiada penyelenggaraan dijadualkan
+Toca para agregar uno	Ketik untuk menambah
+Navegar	Navigasi
+# 2.25: canción de las apps (acceso a notificaciones)
+Música sonando	Muzik dimainkan
+Toca para ver la canción	Ketik untuk melihat lagu
+Ver la canción de tus apps	Lihat lagu dari aplikasi anda
+Para mostrar la canción, el artista y la carátula de Spotify, YouTube Music y otras apps, StradaOS necesita «Acceso a notificaciones». Solo lo usa para leer lo que suena: no guarda ni envía nada.	Untuk menunjukkan lagu, artis dan kulit album daripada Spotify, YouTube Music dan aplikasi lain, StradaOS memerlukan «Akses pemberitahuan». Ia hanya digunakan untuk membaca apa yang dimainkan: tiada apa yang disimpan atau dihantar.
+No volver a mostrar	Jangan tunjukkan lagi
+Esta pantalla no tiene el ajuste de «Acceso a notificaciones». Se puede activar una sola vez desde una computadora con ADB:	Skrin ini tiada tetapan «Akses pemberitahuan». Anda boleh mengaktifkannya sekali sahaja dari komputer dengan ADB:
+Spotify, YouTube Music y otras apps de la pantalla (acceso a notificaciones)	Spotify, YouTube Music dan aplikasi lain pada skrin (akses pemberitahuan)
