@@ -695,6 +695,11 @@ public class Main extends Activity {
         if (view == null || view.getVisibility() != View.VISIBLE) return;
         xml.startTag(null, "node");
         xml.attribute(null, "class", view.getClass().getName());
+        int[] position = new int[2];
+        view.getLocationOnScreen(position);
+        xml.attribute(null, "bounds", "[" + position[0] + "," + position[1] + "]["
+                + (position[0] + view.getWidth()) + "," + (position[1] + view.getHeight()) + "]");
+        xml.attribute(null, "clickable", String.valueOf(view.isClickable()));
         if (view.getBackground() instanceof ColorDrawable) {
             xml.attribute(null, "background-color", Integer.toHexString(((ColorDrawable) view.getBackground()).getColor()));
         }
@@ -1220,7 +1225,7 @@ public class Main extends Activity {
             root.setPadding(0, 0, 0, 0);
             root.setBackgroundColor(BG);
         }
-        // Diseño del inicio (Ajustes → Apariencia → Diseño del inicio)
+        // Diseño del inicio (Ajustes → Personalización → Horizontal)
         String dm = prefs.getString("dock_mode", "normal");
         sideDock = !compactLayout() && "side".equals(dm);
         compactDock = !compactLayout() && "compact".equals(dm);
@@ -4953,11 +4958,13 @@ public class Main extends Activity {
 
     /** id del tema premium o null para quitarlo. */
     private void applyPremium(String id) {
-        if (opelSettings()) return;
-        if (id != null && !Prem.known(id)) id = null;
-        SharedPreferences.Editor e = prefs.edit();
+        if (id != null && !Prem.known(id)) return;
+        if (opelSettings() && id == null) return;
+        SharedPreferences.Editor e = prefs.edit()
+            .putString("design", "stradaos").putString("home_layout", "standard");
         if (id != null) e.putString("premium_theme", id); else e.remove("premium_theme");
         e.apply();
+        applyTheme(); applyAccent();
         rebuild();
         showSettings(C_STYLE);
         if (id != null) toast(I18n.t("Tema aplicado:") + " " + I18n.t(Prem.name(id)));
@@ -7587,7 +7594,6 @@ public class Main extends Activity {
     }
 
     private void showSettings0(int cat) {
-        if (opelSettings() && cat == C_STYLE) cat = C_LOOK;
         // A dialog callback can arrive after its settings page was closed/rebuilt.
         // Treat a missing/invalid category as closed instead of indexing CAT_NAMES[-1].
         if (cat <= 0 || cat >= CAT_NAMES.length) { closeSettings(); return; }
@@ -7632,7 +7638,6 @@ public class Main extends Activity {
         side.addView(brand);
         for (int k = 0; k < CAT_ORDER.length; k++) {
             final int i = CAT_ORDER[k];
-            if (opelSettings() && i == C_STYLE) continue;
             final int idx = i;
             boolean sel = i == cat;
             LinearLayout it = new LinearLayout(this);
@@ -7711,7 +7716,6 @@ public class Main extends Activity {
         final View[] chosen = new View[1];
         for (int k = 0; k < CAT_ORDER.length; k++) {
             final int i = CAT_ORDER[k];
-            if (opelSettings() && i == C_STYLE) continue;
             final int idx = i;
             boolean sel = i == cat;
             LinearLayout it = new LinearLayout(this);
@@ -7794,7 +7798,7 @@ public class Main extends Activity {
 
     // El panel de conexión se abre y se pliega a mano desde el mapa: no cuenta para marcar el tema «en uso».
     private boolean themeInUse(FreeTheme t) {
-        return !premiumActive() && prefs.getBoolean("show_car", true) == t.car && prefs.getBoolean("show_player", true)
+        return !opelSettings() && !premiumActive() && prefs.getBoolean("show_car", true) == t.car && prefs.getBoolean("show_player", true)
             && "left".equals(prefs.getString("player_side", "right")) == t.left
             && "auto".equals(prefs.getString("nav_btn_side", "auto"))
             && (t.car || (prefs.getBoolean("map_gauge", false) == t.gauge && prefs.getBoolean("car_speed", true)
@@ -7803,8 +7807,8 @@ public class Main extends Activity {
     }
 
     private void applyFreeTheme(FreeTheme t) {
-        if (opelSettings()) return;
         SharedPreferences.Editor e = prefs.edit()
+            .putString("design", "stradaos").putString("home_layout", "standard")
             .putBoolean("show_car", t.car).putBoolean("show_player", true)
             .putString("player_side", t.left ? "left" : "right")
             .putString("nav_btn_side", "auto")
@@ -7813,6 +7817,7 @@ public class Main extends Activity {
             .remove("premium_theme");   // un tema gratis quita el premium
         if (!t.car) e.putBoolean("map_gauge", t.gauge).putBoolean("car_speed", true).putString("map_gauge_corner", t.corner);
         e.apply();
+        applyTheme(); applyAccent();
         rebuild();
         showSettings(C_STYLE);
         toast(I18n.t("Tema aplicado:") + " " + I18n.t(t.name));
@@ -7871,8 +7876,11 @@ public class Main extends Activity {
         int perRow = portrait ? 4 : 2;
         float cellGap = portrait ? 10 : 12;
         LinearLayout rowL = null;
-        for (int i = 0; i < FREE_THEMES.length; i++) {
-            final FreeTheme t = FREE_THEMES[i];
+        final int opelCount = portrait ? 0 : 1;
+        final int themeCount = FREE_THEMES.length + opelCount;
+        for (int i = 0; i < themeCount; i++) {
+            final boolean opel = opelCount == 1 && i == 0;
+            final FreeTheme t = opel ? null : FREE_THEMES[i - opelCount];
             if (i % perRow == 0) {
                 rowL = new LinearLayout(this);
                 rowL.setOrientation(LinearLayout.HORIZONTAL);
@@ -7880,20 +7888,28 @@ public class Main extends Activity {
                 rlp.bottomMargin = (int) (cellGap * s);
                 body.addView(rowL, rlp);
             }
-            boolean inUse = themeInUse(t);
+            boolean inUse = opel ? opelSettings() : themeInUse(t);
             LinearLayout cell = new LinearLayout(this);
             cell.setOrientation(LinearLayout.VERTICAL);
             cell.setBackground(round(inUse ? RED_DARK : CARD, 16));
             int cp = (int) ((portrait ? 8 : 10) * s);
             cell.setPadding(cp, cp, cp, (int) (12 * s));
-            ThemeThumb th = new ThemeThumb(this, s, portrait, t.car, t.left, t.gauge, "bl".equals(t.corner),
-                t.compact || forceCompact, t.left, navShown, labels, t.panel && hasPanel);
-            th.selected = inUse;
-            cell.addView(th, new LinearLayout.LayoutParams(-1, -2));
+            View preview;
+            if (opel) {
+                OpelThumb th = new OpelThumb(this, asset("opel_astra_j.png"));
+                th.selected = inUse;
+                preview = th;
+            } else {
+                ThemeThumb th = new ThemeThumb(this, s, portrait, t.car, t.left, t.gauge, "bl".equals(t.corner),
+                    t.compact || forceCompact, t.left, navShown, labels, t.panel && hasPanel);
+                th.selected = inUse;
+                preview = th;
+            }
+            cell.addView(preview, new LinearLayout.LayoutParams(-1, -2));
             LinearLayout nameRow = new LinearLayout(this);
             nameRow.setGravity(Gravity.CENTER_VERTICAL);
             nameRow.setPadding((int) (4 * s), (int) (10 * s), (int) (4 * s), 0);
-            TextView nm = tv(t.name, portrait ? 14 : 15, TEXT, true);
+            TextView nm = tv(opel ? "Opel Style" : t.name, portrait ? 14 : 15, TEXT, true);
             multiLine(nm);
             nameRow.addView(nm, new LinearLayout.LayoutParams(0, -2, 1));
             if (inUse && !portrait) {
@@ -7914,7 +7930,7 @@ public class Main extends Activity {
                 cell.addView(badge, blp);
             }
             // la descripción completa, sin cortar: dice exactamente lo que cambia al aplicar el tema
-            TextView ds = tv(portrait ? t.descV : t.descH, 12, MUTED, false);
+            TextView ds = tv(opel ? "Opel Style: diseño compacto con acento rojo fijo." : portrait ? t.descV : t.descH, 12, MUTED, false);
             multiLine(ds);
             ds.setLineSpacing(2 * s, 1f);
             ds.setPadding((int) (4 * s), (int) (3 * s), (int) (4 * s), 0);
@@ -7923,8 +7939,16 @@ public class Main extends Activity {
             if (i % perRow != perRow - 1) clp.rightMargin = (int) (cellGap * s);
             rowL.addView(cell, clp);
             cell.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) { applyFreeTheme(t); }
+                public void onClick(View v) {
+                    if (opel) {
+                        setDesign(true);
+                        showSettings(C_STYLE);
+                    } else applyFreeTheme(t);
+                }
             });
+        }
+        if (themeCount % perRow != 0 && rowL != null) {
+            rowL.addView(new View(this), new LinearLayout.LayoutParams(0, 1, perRow - themeCount % perRow));
         }
         premiumGallery(body, portrait);
     }
@@ -8147,13 +8171,8 @@ public class Main extends Activity {
     }
 
     private void catLook(LinearLayout body) {
-        LinearLayout design = section(body, "Diseño");
-        segmented(design, "Diseño de inicio", "Opel Style: diseño compacto con acento rojo fijo.",
-            new String[]{"StradaOS", "Opel Style"}, modernDesign() ? 1 : 0,
-            new IntCb() { public void on(int i) {
-                setDesign(i == 1);
-            }});
         if (compactLayout()) {
+            LinearLayout design = section(body, "Diseño");
             segmented(design, "Panel principal", null, new String[]{"Vehículo", "Mapa"},
                 "map".equals(prefs.getString("compact_main_panel", "vehicle")) ? 1 : 0,
                 new IntCb() { public void on(int i) {

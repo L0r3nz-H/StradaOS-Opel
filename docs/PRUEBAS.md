@@ -35,8 +35,8 @@ Radio, reverse camera, factory Bluetooth, and USB projection must be checked on 
 
 ## Opel Style checks
 
-- Select *Settings → Appearance → Home screen design → Opel Style*. It must activate the compact Opel layout directly, without a second layout selector.
-- Check that the accent-color section is absent. Switch back to StradaOS: the regular layout and saved custom accent must return.
+- Select *Settings → Personalization → Landscape → Opel Style*. It must be the first card, activate the compact Opel layout directly, and remain available in Personalization while selected. The Portrait gallery must not offer Opel Style.
+- Check that Appearance no longer contains a home-design selector, and that the accent-color section is absent in Opel Style. Select a standard or premium theme from Personalization: the regular layout and saved custom accent must return.
 - Verify Dark, Light, Auto, and System modes; vehicle/map choice; optional speed; four large shortcuts; restart persistence; and migration from older separate design/layout settings.
 - Check Android 4.2 / API 17 on the target head unit. Android-11 screenshots are not a substitute for that test.
 
@@ -85,7 +85,10 @@ are documented at their source instead of applying a blanket lint baseline:
 API contracts: [TargetApi](https://developer.android.com/reference/android/annotation/TargetApi)
 and [BluetoothAdapter](https://developer.android.com/reference/android/bluetooth/BluetoothAdapter).
 
-The API 30 debug-emulator job also runs `.github/scripts/opel-controls-check.py`.
+The API 30 debug-emulator job also runs `.github/scripts/opel-controls-check.py`
+and `.github/scripts/opel-gallery-check.py`. The gallery check verifies Opel is first
+in Landscape, absent from Portrait and Appearance, selectable through actual card
+taps, and compatible with switching to standard/premium themes and restarting.
 It checks single-step time changes and saving with no settings page open, maintenance
 radio-button IDs/selection, theme previews, artwork in three layouts, and startup after
 revoking location access. It restores location permissions afterwards. Run it only on a

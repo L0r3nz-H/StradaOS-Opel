@@ -15,7 +15,7 @@
 
 **StradaOS** is a **free, ad-free, open-source launcher** for Android car head units. Install it like any other app, **without flashing firmware or replacing Android**. Uninstall it to return to the previous setup. It was created for older radios advertised as Android 6 or newer that actually run Android 4.x, and also supports modern devices.
 
-This fork of [lordnordic-debug/StradaOS](https://github.com/lordnordic-debug/StradaOS) adds **Opel Style**, a compact dashboard for 7-inch 1024 × 600 displays. It includes a transparent Astra J photo, two large content areas, centered clock, optional GPS speed, and four large shortcuts: **Radio, CarPlay or Android Auto, Phone, All apps**. Select it under **Settings → Appearance → Home screen design**. The other choice is the standard **StradaOS** layout; there is no separate compact-layout selector. Opel Style uses a fixed red accent, so accent-color controls are hidden there. Dark, Light, Auto, and System modes remain available.
+This fork of [lordnordic-debug/StradaOS](https://github.com/lordnordic-debug/StradaOS) adds **Opel Style**, a compact dashboard for 7-inch 1024 × 600 displays. It includes a transparent Astra J photo, two large content areas, centered clock, optional GPS speed, and four large shortcuts: **Radio, CarPlay or Android Auto, Phone, All apps**. Select the first card under **Settings → Personalization → Landscape**. Select a standard or premium theme in the same gallery to return to a regular StradaOS layout. Opel Style uses a fixed red accent, so accent-color controls are hidden there. Dark, Light, Auto, and System modes remain available.
 
 See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/COMPACT_7_INCH_PLAN.md), and [Opel design history](docs/OPEL_NAVI_900_MODERN.md). The separate app is named **StradaOS Opel** and uses `com.stradaos.launcher.opel`.
 
@@ -42,8 +42,9 @@ See [testing](docs/PRUEBAS.md) for checks and compatibility exceptions.
 | Main content | Vehicle, map/projection, and media options | Vehicle photo or map, plus large media controls |
 | Shortcuts | Existing configurable dock | Radio · CarPlay or Android Auto · Phone · All apps, or the existing dock |
 
-Switching styles preserves standard colors, theme modes, photos, and app
-assignments. Older separate Opel/compact selections migrate to Opel Style.
+Selecting Opel Style preserves standard colors, theme modes, photos, app assignments
+and the saved premium theme. Selecting another gallery card applies that standard or
+premium layout. Personalization stays available while Opel Style is active. Older separate Opel/compact selections migrate to Opel Style.
 The Opel edition starts in Opel Style on first installation.
 
 Choose **CarPlay** or **Android Auto** for the second large shortcut during
@@ -78,10 +79,11 @@ exposed interface has not been confirmed.
 
 <p align="center">
 <img src="docs/screenshots/compact/07-opel-style-light-1024x600.png" width="49%" alt="Opel Style light dashboard with Astra J and four large shortcuts">
-<img src="docs/screenshots/compact/06-opel-style-menu-dark-1024x600.png" width="49%" alt="Current Appearance menu with StradaOS and Opel Style choices">
+<img src="docs/screenshots/compact/08-opel-personalization-landscape-1024x600.png" width="49%" alt="Personalization landscape gallery with Opel Style as the first option">
 </p>
 
-Actual Android 11/API 30 emulator captures at 1024 × 600, taken on 2026-11-16.
+Actual Android 11/API 30 emulator captures at 1024 × 600: dashboard from
+2026-11-16 and the current Personalization gallery from 2026-11-18.
 The app is shown in German; repository documentation is in English.
 See the [screenshot index](docs/screenshots/compact/README.md) for historical captures.
 
@@ -125,7 +127,7 @@ For **StradaOS Opel**:
 2. Copy the APK to the **Android head unit**, open it with the file manager,
    and allow installation from that source if requested.
 3. Open **StradaOS Opel**, complete setup, and select it as the home app if desired.
-   Change styles through **Settings → Appearance → Home screen design**.
+   Change styles through **Settings → Personalization → Landscape**.
 
 It installs alongside standard StradaOS and does not automatically import its
 settings. Updates must use the same Opel package and signing key; standard
