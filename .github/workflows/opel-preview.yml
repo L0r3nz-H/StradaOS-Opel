@@ -28,11 +28,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Ensure GitHub Pages stays removed
         run: |
-          test ! -e .github/workflows/pages.yml
-          if rg -l 'actions/(configure-pages|deploy-pages|upload-pages-artifact)@' .github/workflows; then
-            echo '::error::GitHub Pages deployment must remain removed from the Opel fork.'
-            exit 1
-          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          workflows = Path('.github/workflows')
+          if (workflows / 'pages.yml').exists():
+              raise SystemExit('GitHub Pages workflow must remain removed from the Opel fork.')
+          for path in workflows.iterdir():
+              if path.suffix in ('.yml', '.yaml') and re.search(r'actions/(configure-pages|deploy-pages|upload-pages-artifact)@', path.read_text()):
+                  raise SystemExit(f'GitHub Pages deployment action found in {path}')
+          PY
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
