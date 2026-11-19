@@ -79,6 +79,8 @@ public class IconPack {
 
     public int size() { return byComponent.size(); }
 
+    // Resource names belong to another package and cannot be compiled into our R class.
+    @android.annotation.SuppressLint("DiscouragedApi")
     private void parse(Context c) throws Exception {
         XmlPullParser x = null;
         InputStream in = null;
@@ -115,6 +117,8 @@ public class IconPack {
     }
 
     /** Dibujo del pack para esa actividad (o, si no está exacta, para su app); null si el pack no la tiene. */
+    // Resource names belong to another package and cannot be compiled into our R class.
+    @android.annotation.SuppressLint("DiscouragedApi")
     public Drawable icon(ComponentName cn) {
         if (cn == null) return null;
         String cls = cn.getClassName();

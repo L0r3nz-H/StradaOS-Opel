@@ -3,7 +3,15 @@
 These are actual Android 11/API 30 ARM64 emulator captures at **1024 × 600**,
 160 dpi. The UI language is German. Images have not been retouched or recreated.
 
-## Current Opel Style menu — 2026-11-16
+## Current Personalization gallery — 2026-11-18
+
+- [Landscape gallery, Opel Style selected](08-opel-personalization-landscape-1024x600.png):
+  Opel Style is first, ahead of Classic and the other standard themes. Personalization
+  stays available while selected. The Portrait gallery does not offer Opel Style,
+  and Appearance no longer contains a design selector. Captured from the current
+  `2.24.1-prueba` debug build.
+
+## Previous Opel Style menu — 2026-11-16
 
 - [Appearance menu, dark](06-opel-style-menu-dark-1024x600.png): one selector for
   StradaOS or Opel Style, followed by compact panel/shortcut/speed options.

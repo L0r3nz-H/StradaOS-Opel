@@ -6,9 +6,10 @@ especially Android 4.2/API 17. The initial compact mode was implemented on
 2026-11-10 and subsequently ported to upstream 2.21.2 (`b2f327d`) on branch
 `feature/opel-latest-2.21.2`.
 
-Appearance now offers **StradaOS** and **Opel Style**. Opel Style activates the
-compact layout directly. This replaces the original independent design/layout
-selectors. Standard StradaOS and its existing layout options remain available.
+Opel Style is now the first card under **Personalization → Landscape** and activates
+the compact layout directly. Appearance has no design selector. Choose any standard
+or premium gallery card to return to a regular StradaOS layout; Personalization stays
+available in Opel Style. The Portrait gallery keeps its existing standard themes.
 Newer upstream maintenance, backup, dialogs, portrait layout, scheduled/system
 themes, and GPS speed correction are reused.
 

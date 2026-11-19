@@ -63,8 +63,8 @@ android {
     }
 
     lint {
-        abortOnError false
-        checkReleaseBuilds false
+        abortOnError true
+        checkReleaseBuilds true
     }
 
     // F-Droid: sin el bloque binario de metadatos de dependencias.
@@ -114,5 +114,6 @@ def legacyJar = tasks.register('legacyRcJar', Jar) {
 tasks.named('preBuild') { dependsOn legacyJar }
 
 dependencies {
+    testImplementation 'junit:junit:4.13.2'
     implementation files(layout.buildDirectory.file('intermediates/hiddenapi/stradaos-legacy-rc.jar')).builtBy(legacyJar)
 }

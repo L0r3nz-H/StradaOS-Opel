@@ -43,7 +43,7 @@ The previous `feature/opel-navi900-theme` branch is retained.
 
 - Application **StradaOS Opel**, package `com.stradaos.launcher.opel`, with a
   separate signing key and installation alongside standard StradaOS.
-- Appearance offers **StradaOS** or **Opel Style**. Opel Style selects the
+- Personalization offers **Opel Style** as its first Landscape card; Appearance no longer has a design selector. Opel Style selects the
   7-inch compact layout directly, replacing independent design/layout selectors.
 - Fixed red Opel accent; custom accent controls are hidden in Appearance/setup.
   Dark, Light, Auto, and System modes remain available with separate per-style

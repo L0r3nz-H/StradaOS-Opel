@@ -59,6 +59,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+// The scaled dashboard keeps physical left/right placement on API 16 head units.
+// Display strings use I18n's translated tables/patterns instead of Android string resources.
+@android.annotation.SuppressLint({"RtlHardcoded", "SetTextI18n"})
 public class Main extends Activity {
 
     static int RED = 0xFFFE3211;   // color de acento (configurable)
@@ -234,12 +237,10 @@ public class Main extends Activity {
         };
         root.setBackgroundColor(BG);
         setContentView(root);
-        try {
-            Location ll = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (!validLoc(ll)) ll = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (!validLoc(ll)) ll = savedLoc();
-            if (validLoc(ll)) { wLat = ll.getLatitude(); wLon = ll.getLongitude(); }
-        } catch (Throwable ignored) { }
+        Location ll = lastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (!validLoc(ll)) ll = lastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        if (!validLoc(ll)) ll = savedLoc();
+        if (validLoc(ll)) { wLat = ll.getLatitude(); wLon = ll.getLongitude(); }
         if (prefs.contains("sun_lat")) { sunLat = prefs.getFloat("sun_lat", 0); sunLon = prefs.getFloat("sun_lon", 0); }
         if (!Double.isNaN(wLat)) sunSpot(wLat, wLon);
         loadApps();
@@ -456,9 +457,10 @@ public class Main extends Activity {
         try { unregisterReceiver(usbOffReceiver); } catch (Throwable ignored) { }
         try { bt.disconnect(); } catch (Throwable ignored) { }
         try { unregisterReceiver(btConnReceiver); } catch (Throwable ignored) { }
+        h.removeCallbacks(brightApply);
         h.removeCallbacks(btTicker);
         h.removeCallbacks(aaWait);
-        try { if (mediaWatcher != null) mediaWatcher.stop(); } catch (Throwable ignored) { }
+        try { if (mediaWatcher != null) mediaWatcher.release(); } catch (Throwable ignored) { }
         try { lm.removeUpdates(odoListener); } catch (Throwable ignored) { }
         odoRunning = false;
         if (odoPending > 0) prefs.edit().putFloat("odo_gps_m", prefs.getFloat("odo_gps_m", 0) + odoPending).apply();
@@ -693,6 +695,11 @@ public class Main extends Activity {
         if (view == null || view.getVisibility() != View.VISIBLE) return;
         xml.startTag(null, "node");
         xml.attribute(null, "class", view.getClass().getName());
+        int[] position = new int[2];
+        view.getLocationOnScreen(position);
+        xml.attribute(null, "bounds", "[" + position[0] + "," + position[1] + "]["
+                + (position[0] + view.getWidth()) + "," + (position[1] + view.getHeight()) + "]");
+        xml.attribute(null, "clickable", String.valueOf(view.isClickable()));
         if (view.getBackground() instanceof ColorDrawable) {
             xml.attribute(null, "background-color", Integer.toHexString(((ColorDrawable) view.getBackground()).getColor()));
         }
@@ -1218,7 +1225,7 @@ public class Main extends Activity {
             root.setPadding(0, 0, 0, 0);
             root.setBackgroundColor(BG);
         }
-        // Diseño del inicio (Ajustes → Apariencia → Diseño del inicio)
+        // Diseño del inicio (Ajustes → Personalización → Horizontal)
         String dm = prefs.getString("dock_mode", "normal");
         sideDock = !compactLayout() && "side".equals(dm);
         compactDock = !compactLayout() && "compact".equals(dm);
@@ -1663,11 +1670,20 @@ public class Main extends Activity {
             if (ad == null) return -1;
             if (!ad.isEnabled()) return 0;
             for (int p : new int[]{2 /* A2DP */, 1 /* HEADSET */, 11 /* A2DP_SINK */, 16 /* HEADSET_CLIENT */}) {
-                try { if (ad.getProfileConnectionState(p) == android.bluetooth.BluetoothProfile.STATE_CONNECTED) return 2; }
+                try { if (profileConnected(ad, p)) return 2; }
                 catch (Throwable ignored) { }
             }
             return 1;
         } catch (Throwable e) { return -1; }
+    }
+
+    // Factory head units also expose hidden A2DP_SINK (11) / HEADSET_CLIENT (16) profiles.
+    // targetSdk 28 uses manifest BLUETOOTH / BLUETOOTH_ADMIN, not the target-31 CONNECT model.
+    // SecurityException still falls back safely on vendor firmware that enforces CONNECT.
+    @android.annotation.SuppressLint({"WrongConstant", "MissingPermission"})
+    private boolean profileConnected(android.bluetooth.BluetoothAdapter adapter, int profile) {
+        try { return adapter.getProfileConnectionState(profile) == android.bluetooth.BluetoothProfile.STATE_CONNECTED; }
+        catch (SecurityException denied) { return false; }
     }
 
     private void toggleWifi() {
@@ -1707,9 +1723,13 @@ public class Main extends Activity {
         } else setBt(ad, !on);
     }
 
+    // With targetSdk 28 the declared legacy BLUETOOTH_ADMIN permission applies (BluetoothAdapter docs).
+    @android.annotation.SuppressLint("MissingPermission")
     private void setBt(android.bluetooth.BluetoothAdapter ad, boolean v) {
         boolean ok = false;
-        try { ok = v ? ad.enable() : ad.disable(); } catch (Throwable ignored) { }
+        try { ok = v ? ad.enable() : ad.disable(); }
+        catch (SecurityException denied) { /* Fall through to the system settings. */ }
+        catch (Throwable ignored) { }
         if (!ok) {
             toast("Esta pantalla no deja cambiar el Bluetooth desde otra app: abre sus ajustes");
             openSettingsPage(Settings.ACTION_BLUETOOTH_SETTINGS, new Runnable() { public void run() { openSlot(1); } });
@@ -2055,7 +2075,8 @@ public class Main extends Activity {
             if (want) lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, odoListener);
             else lm.removeUpdates(odoListener);
             odoRunning = want;
-        } catch (Throwable ignored) { }
+        } catch (SecurityException denied) { odoRunning = false; }
+        catch (Throwable ignored) { }
         odoLast = null;
     }
 
@@ -2810,11 +2831,12 @@ public class Main extends Activity {
         final android.widget.RadioGroup rg = new android.widget.RadioGroup(this);
         rg.setOrientation(LinearLayout.HORIZONTAL);
         final char[] units = {'d', 'w', 'm'};
+        final int[] unitIds = {R.id.interval_days, R.id.interval_weeks, R.id.interval_months};
         String[] names = {"Días", "Semanas", "Meses"};
         for (int i = 0; i < 3; i++) {
             android.widget.RadioButton rb = new android.widget.RadioButton(new android.view.ContextThemeWrapper(this,
                 LIGHT ? android.R.style.Theme_DeviceDefault_Light : android.R.style.Theme_DeviceDefault));
-            rb.setId(1000 + i);
+            rb.setId(unitIds[i]);
             rb.setText(I18n.t(names[i]));
             rb.setTextColor(LIGHT ? 0xFF1A1A1A : Color.WHITE);
             rb.setTextSize(TypedValue.COMPLEX_UNIT_PX, 15 * s * FONT);
@@ -2822,7 +2844,7 @@ public class Main extends Activity {
             rg.addView(rb, new android.widget.RadioGroup.LayoutParams(-2, -2));
             if (units[i] == unit) rb.setChecked(true);
         }
-        if (rg.getCheckedRadioButtonId() == -1) rg.check(1002);
+        if (rg.getCheckedRadioButtonId() == -1) rg.check(R.id.interval_months);
         LinearLayout wrap = new LinearLayout(this);
         wrap.setOrientation(LinearLayout.VERTICAL);
         int pad = (int) (20 * s);
@@ -2837,7 +2859,8 @@ public class Main extends Activity {
             .setPositiveButton("Guardar", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
                 try {
                     long v = Long.parseLong(et.getText().toString().replaceAll("[^0-9]", ""));
-                    int i = Math.max(0, Math.min(2, rg.getCheckedRadioButtonId() - 1000));
+                    int selected = rg.getCheckedRadioButtonId();
+                    int i = selected == R.id.interval_days ? 0 : selected == R.id.interval_weeks ? 1 : 2;
                     char u = units[i];
                     long maxV = u == 'd' ? 3650 : u == 'w' ? 520 : 240;
                     if (v < 1 || v > maxV) throw new NumberFormatException();
@@ -2915,6 +2938,8 @@ public class Main extends Activity {
         buildAaCardRest(card);
     }
 
+    // Swipe listeners consume gestures only; ordinary taps/accessibility use the separate click listeners.
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
     private void buildAaCardRest(FrameLayout card) {
         LinearLayout topRow = new LinearLayout(this);
         topRow.setGravity(Gravity.CENTER_VERTICAL);
@@ -3135,16 +3160,18 @@ public class Main extends Activity {
                 chev.animate().rotation(show ? 90 : -90).setDuration(220);
             }};
         }
+        handle.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { setOpen[prefs.getBoolean("aa_panel_open", true) ? 1 : 0].run(); }
+        });
         handle.setOnTouchListener(new View.OnTouchListener() {
             float y0;
             public boolean onTouch(View v, MotionEvent e) {
                 if (e.getActionMasked() == MotionEvent.ACTION_DOWN) { y0 = e.getRawY(); return true; }
                 if (e.getActionMasked() != MotionEvent.ACTION_UP) return true;
                 float d = e.getRawY() - y0;
-                boolean isOpen = prefs.getBoolean("aa_panel_open", true);
                 if (d < -12 * s) setOpen[0].run();
                 else if (d > 12 * s) setOpen[1].run();
-                else setOpen[isOpen ? 1 : 0].run();
+                else v.performClick();
                 return true;
             }
         });
@@ -3387,11 +3414,17 @@ public class Main extends Activity {
 
     // ── mapa en vivo ──
 
+    private Location lastKnownLocation(String provider) {
+        try { return lm.getLastKnownLocation(provider); }
+        catch (SecurityException denied) { return null; }
+        catch (RuntimeException unavailable) { return null; }
+    }
+
     private void seedLastLocation() {
         Location best = null;
         for (String p : new String[]{LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER, "passive"}) {
             try {
-                Location l = lm.getLastKnownLocation(p);
+                Location l = lastKnownLocation(p);
                 if (validLoc(l) && (best == null || l.getTime() > best.getTime())) best = l;
             } catch (Throwable ignored) { }
         }
@@ -3637,6 +3670,8 @@ public class Main extends Activity {
         }
     }
 
+    // Swipe listeners consume gestures only; ordinary taps/accessibility use the separate click listeners.
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
     private void buildAudioCard() {
         final FrameLayout card = card(audX, rowY, audW, cardH, CARD);
         // contenido centrado: la tarjeta es más ancha sin la del vehículo y más alta con la barra compacta
@@ -4315,6 +4350,8 @@ public class Main extends Activity {
     /** Centro horizontal de una tarjeta inclinada a la altura y (el borde izquierdo se corre hacia la derecha al bajar). */
     private static float cobMid(float w, float hh, float sk, float y) { return (w + sk * Math.max(0, Math.min(1, y / hh))) / 2; }
 
+    // Swipe listeners consume gestures only; ordinary taps/accessibility use the separate click listeners.
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
     private void buildCobMusic(float x, float y, float w, float hh) {
         final FrameLayout card = new FrameLayout(this);
         final float sk = vertical ? 0 : cobSkew(w, hh);   // en vertical, rectas (mismas luces y línea)
@@ -4680,6 +4717,8 @@ public class Main extends Activity {
         if (wxOn) buildPremWeather(x, wy, wW, wh);
     }
 
+    // Swipe listeners consume gestures only; ordinary taps/accessibility use the separate click listeners.
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
     private void buildPremMusic(float x, float y, float w, float hh) {
         final FrameLayout card = new FrameLayout(this);
         card.setBackground(glass(18));
@@ -4919,11 +4958,13 @@ public class Main extends Activity {
 
     /** id del tema premium o null para quitarlo. */
     private void applyPremium(String id) {
-        if (opelSettings()) return;
-        if (id != null && !Prem.known(id)) id = null;
-        SharedPreferences.Editor e = prefs.edit();
+        if (id != null && !Prem.known(id)) return;
+        if (opelSettings() && id == null) return;
+        SharedPreferences.Editor e = prefs.edit()
+            .putString("design", "stradaos").putString("home_layout", "standard");
         if (id != null) e.putString("premium_theme", id); else e.remove("premium_theme");
         e.apply();
+        applyTheme(); applyAccent();
         rebuild();
         showSettings(C_STYLE);
         if (id != null) toast(I18n.t("Tema aplicado:") + " " + I18n.t(Prem.name(id)));
@@ -6025,7 +6066,11 @@ public class Main extends Activity {
         if (gpsStartAt == 0) gpsStartAt = SystemClock.elapsedRealtime();
         try {
             lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, gpsListener);
-            try { lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, netListener); } catch (Throwable ignored) { }
+            try { lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, netListener); }
+            catch (SecurityException denied) { /* GPS can still work with fine permission. */ }
+            catch (Throwable ignored) { }
+        } catch (SecurityException denied) {
+            setGps(false, 0);
         } catch (Exception e) {
             setGps(false, 0);
         }
@@ -7346,6 +7391,8 @@ public class Main extends Activity {
      * Columna «▲ valor ▼» para elegir un número con el dedo (ventanas de hora y fecha, 2.21). Mantener presionado
      * repite. Reemplaza a los selectores del sistema, que cambian con cada versión de Android y no siguen el tema.
      */
+    // FrameLayout inherits performClick; taps and accessibility both invoke its OnClickListener below.
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
     private LinearLayout stepper(final Runnable up, final Runnable down, TextView value, float w) {
         LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
@@ -7354,16 +7401,25 @@ public class Main extends Activity {
             final Runnable act = k == 0 ? up : down;
             final FrameLayout b = circleIcon("chevron_right", 50, 26, BTN);
             b.getChildAt(0).setRotation(k == 0 ? -90 : 90);
+            b.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) { act.run(); }
+            });
+            b.setContentDescription(I18n.t(k == 0 ? "Subir" : "Bajar"));
             b.setOnTouchListener(new View.OnTouchListener() {
+                boolean repeated;
                 final Runnable rep = new Runnable() { public void run() {
                     if (b.getWindowToken() == null) return;   // la ventana se cerró con el dedo puesto
+                    repeated = true;
                     act.run();
                     h.postDelayed(this, 110);
                 }};
                 public boolean onTouch(View v, MotionEvent e) {
                     int a = e.getActionMasked();
-                    if (a == MotionEvent.ACTION_DOWN) { act.run(); h.postDelayed(rep, 450); v.setAlpha(0.6f); }
-                    else if (a == MotionEvent.ACTION_UP || a == MotionEvent.ACTION_CANCEL) { h.removeCallbacks(rep); v.setAlpha(1f); }
+                    if (a == MotionEvent.ACTION_DOWN) { repeated = false; h.postDelayed(rep, 450); v.setAlpha(0.6f); }
+                    else if (a == MotionEvent.ACTION_UP || a == MotionEvent.ACTION_CANCEL) {
+                        h.removeCallbacks(rep); v.setAlpha(1f);
+                        if (a == MotionEvent.ACTION_UP && !repeated) v.performClick();
+                    }
                     return true;
                 }
             });
@@ -7538,8 +7594,9 @@ public class Main extends Activity {
     }
 
     private void showSettings0(int cat) {
-        if (opelSettings() && cat == C_STYLE) cat = C_LOOK;
-        if (cat == 0) { closeSettings(); return; }
+        // A dialog callback can arrive after its settings page was closed/rebuilt.
+        // Treat a missing/invalid category as closed instead of indexing CAT_NAMES[-1].
+        if (cat <= 0 || cat >= CAT_NAMES.length) { closeSettings(); return; }
         // al cambiar un ajuste se redibuja la página: que se quede donde estaba, no que vuelva arriba
         // (algunos ajustes redibujan dos veces seguidas: la segunda vez la página anterior aún no se acomodó y su
         // posición sigue pendiente; se usa esa y no un 0)
@@ -7581,7 +7638,6 @@ public class Main extends Activity {
         side.addView(brand);
         for (int k = 0; k < CAT_ORDER.length; k++) {
             final int i = CAT_ORDER[k];
-            if (opelSettings() && i == C_STYLE) continue;
             final int idx = i;
             boolean sel = i == cat;
             LinearLayout it = new LinearLayout(this);
@@ -7660,7 +7716,6 @@ public class Main extends Activity {
         final View[] chosen = new View[1];
         for (int k = 0; k < CAT_ORDER.length; k++) {
             final int i = CAT_ORDER[k];
-            if (opelSettings() && i == C_STYLE) continue;
             final int idx = i;
             boolean sel = i == cat;
             LinearLayout it = new LinearLayout(this);
@@ -7743,7 +7798,7 @@ public class Main extends Activity {
 
     // El panel de conexión se abre y se pliega a mano desde el mapa: no cuenta para marcar el tema «en uso».
     private boolean themeInUse(FreeTheme t) {
-        return !premiumActive() && prefs.getBoolean("show_car", true) == t.car && prefs.getBoolean("show_player", true)
+        return !opelSettings() && !premiumActive() && prefs.getBoolean("show_car", true) == t.car && prefs.getBoolean("show_player", true)
             && "left".equals(prefs.getString("player_side", "right")) == t.left
             && "auto".equals(prefs.getString("nav_btn_side", "auto"))
             && (t.car || (prefs.getBoolean("map_gauge", false) == t.gauge && prefs.getBoolean("car_speed", true)
@@ -7752,8 +7807,8 @@ public class Main extends Activity {
     }
 
     private void applyFreeTheme(FreeTheme t) {
-        if (opelSettings()) return;
         SharedPreferences.Editor e = prefs.edit()
+            .putString("design", "stradaos").putString("home_layout", "standard")
             .putBoolean("show_car", t.car).putBoolean("show_player", true)
             .putString("player_side", t.left ? "left" : "right")
             .putString("nav_btn_side", "auto")
@@ -7762,6 +7817,7 @@ public class Main extends Activity {
             .remove("premium_theme");   // un tema gratis quita el premium
         if (!t.car) e.putBoolean("map_gauge", t.gauge).putBoolean("car_speed", true).putString("map_gauge_corner", t.corner);
         e.apply();
+        applyTheme(); applyAccent();
         rebuild();
         showSettings(C_STYLE);
         toast(I18n.t("Tema aplicado:") + " " + I18n.t(t.name));
@@ -7820,8 +7876,11 @@ public class Main extends Activity {
         int perRow = portrait ? 4 : 2;
         float cellGap = portrait ? 10 : 12;
         LinearLayout rowL = null;
-        for (int i = 0; i < FREE_THEMES.length; i++) {
-            final FreeTheme t = FREE_THEMES[i];
+        final int opelCount = portrait ? 0 : 1;
+        final int themeCount = FREE_THEMES.length + opelCount;
+        for (int i = 0; i < themeCount; i++) {
+            final boolean opel = opelCount == 1 && i == 0;
+            final FreeTheme t = opel ? null : FREE_THEMES[i - opelCount];
             if (i % perRow == 0) {
                 rowL = new LinearLayout(this);
                 rowL.setOrientation(LinearLayout.HORIZONTAL);
@@ -7829,20 +7888,28 @@ public class Main extends Activity {
                 rlp.bottomMargin = (int) (cellGap * s);
                 body.addView(rowL, rlp);
             }
-            boolean inUse = themeInUse(t);
+            boolean inUse = opel ? opelSettings() : themeInUse(t);
             LinearLayout cell = new LinearLayout(this);
             cell.setOrientation(LinearLayout.VERTICAL);
             cell.setBackground(round(inUse ? RED_DARK : CARD, 16));
             int cp = (int) ((portrait ? 8 : 10) * s);
             cell.setPadding(cp, cp, cp, (int) (12 * s));
-            ThemeThumb th = new ThemeThumb(this, s, portrait, t.car, t.left, t.gauge, "bl".equals(t.corner),
-                t.compact || forceCompact, t.left, navShown, labels, t.panel && hasPanel);
-            th.selected = inUse;
-            cell.addView(th, new LinearLayout.LayoutParams(-1, -2));
+            View preview;
+            if (opel) {
+                OpelThumb th = new OpelThumb(this, asset("opel_astra_j.png"));
+                th.selected = inUse;
+                preview = th;
+            } else {
+                ThemeThumb th = new ThemeThumb(this, s, portrait, t.car, t.left, t.gauge, "bl".equals(t.corner),
+                    t.compact || forceCompact, t.left, navShown, labels, t.panel && hasPanel);
+                th.selected = inUse;
+                preview = th;
+            }
+            cell.addView(preview, new LinearLayout.LayoutParams(-1, -2));
             LinearLayout nameRow = new LinearLayout(this);
             nameRow.setGravity(Gravity.CENTER_VERTICAL);
             nameRow.setPadding((int) (4 * s), (int) (10 * s), (int) (4 * s), 0);
-            TextView nm = tv(t.name, portrait ? 14 : 15, TEXT, true);
+            TextView nm = tv(opel ? "Opel Style" : t.name, portrait ? 14 : 15, TEXT, true);
             multiLine(nm);
             nameRow.addView(nm, new LinearLayout.LayoutParams(0, -2, 1));
             if (inUse && !portrait) {
@@ -7863,7 +7930,7 @@ public class Main extends Activity {
                 cell.addView(badge, blp);
             }
             // la descripción completa, sin cortar: dice exactamente lo que cambia al aplicar el tema
-            TextView ds = tv(portrait ? t.descV : t.descH, 12, MUTED, false);
+            TextView ds = tv(opel ? "Opel Style: diseño compacto con acento rojo fijo." : portrait ? t.descV : t.descH, 12, MUTED, false);
             multiLine(ds);
             ds.setLineSpacing(2 * s, 1f);
             ds.setPadding((int) (4 * s), (int) (3 * s), (int) (4 * s), 0);
@@ -7872,8 +7939,16 @@ public class Main extends Activity {
             if (i % perRow != perRow - 1) clp.rightMargin = (int) (cellGap * s);
             rowL.addView(cell, clp);
             cell.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) { applyFreeTheme(t); }
+                public void onClick(View v) {
+                    if (opel) {
+                        setDesign(true);
+                        showSettings(C_STYLE);
+                    } else applyFreeTheme(t);
+                }
             });
+        }
+        if (themeCount % perRow != 0 && rowL != null) {
+            rowL.addView(new View(this), new LinearLayout.LayoutParams(0, 1, perRow - themeCount % perRow));
         }
         premiumGallery(body, portrait);
     }
@@ -8096,13 +8171,8 @@ public class Main extends Activity {
     }
 
     private void catLook(LinearLayout body) {
-        LinearLayout design = section(body, "Diseño");
-        segmented(design, "Diseño de inicio", "Opel Style: diseño compacto con acento rojo fijo.",
-            new String[]{"StradaOS", "Opel Style"}, modernDesign() ? 1 : 0,
-            new IntCb() { public void on(int i) {
-                setDesign(i == 1);
-            }});
         if (compactLayout()) {
+            LinearLayout design = section(body, "Diseño");
             segmented(design, "Panel principal", null, new String[]{"Vehículo", "Mapa"},
                 "map".equals(prefs.getString("compact_main_panel", "vehicle")) ? 1 : 0,
                 new IntCb() { public void on(int i) {
@@ -9434,7 +9504,6 @@ public class Main extends Activity {
                 java.io.FileOutputStream os = new java.io.FileOutputStream(out);
                 os.write(data);
                 os.close();
-                out.setReadable(true, false);
                 if (!verifyApk(out)) {
                     Guard.log("Actualización rechazada: el APK descargado no es StradaOS firmado con la misma llave.");
                     out.delete();
@@ -10094,8 +10163,6 @@ public class Main extends Activity {
                     while ((n = in.read(buf)) > 0) os.write(buf, 0, n);
                     os.close();
                     in.close();
-                    out.setReadable(true, false);
-                    dir.setExecutable(true, false);
                 } catch (Exception e) {
                     out = null;
                 }
@@ -10134,6 +10201,15 @@ public class Main extends Activity {
         }
     }
 
+    // Android 4.x vendor installers require file:// access. Newer installers get a scoped URI grant.
+    @android.annotation.SuppressLint("SetWorldReadable")
+    private void makeLegacyApkReadable(File file) {
+        if (SDK >= 24) return;
+        File parent = file.getParentFile();
+        if (parent != null) parent.setExecutable(true, false);
+        if (!file.setReadable(true, false)) Guard.log("No se pudo compartir el APK con el instalador antiguo");
+    }
+
     private void installFile(File f, String name) {
         if (!unknownSourcesOk()) return;
         try {
@@ -10142,6 +10218,7 @@ public class Main extends Activity {
                 i.setDataAndType(ApkProvider.share(f), "application/vnd.android.package-archive");
                 i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             } else {
+                makeLegacyApkReadable(f);
                 i.setDataAndType(Uri.fromFile(f), "application/vnd.android.package-archive");
             }
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -10152,7 +10229,7 @@ public class Main extends Activity {
     }
 
     private File findApkOnUsb(String... keys) {
-        String[] roots = {"/storage", "/mnt", "/mnt/media_rw", "/mnt/usb_storage", "/udisk", "/sdcard"};
+        String[] roots = {"/storage", "/mnt", "/mnt/media_rw", "/mnt/usb_storage", "/udisk", android.os.Environment.getExternalStorageDirectory().getPath()};
         File dl = new File(android.os.Environment.getExternalStorageDirectory(), "Download");
         File hit0 = scanDir(dl, keys, 0);
         if (hit0 != null) return hit0;

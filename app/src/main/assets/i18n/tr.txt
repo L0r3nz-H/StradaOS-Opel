@@ -1166,3 +1166,5 @@ Irlanda del Norte	Kuzey İrlanda
 Islas Canarias	Kanarya Adaları
 Tiempo en StradaOS: {}	StradaOS'taki süre: {}
 Último tiempo por Bluetooth: {}	Bluetooth'tan son süre: {}
+Subir	Artır
+Bajar	Azalt

@@ -147,7 +147,7 @@ class Dlg extends AlertDialog {
             boolean brief = !p.diag && msg.length() <= 160 && msg.toString().indexOf('\n') < 0;
             TextView m = text(msg, p.diag ? 14.5f : 16, p.diag ? Main.TEXT : Main.SOFT, false);
             m.setLineSpacing(0, 1.22f);
-            m.setGravity(brief ? Gravity.CENTER_HORIZONTAL : Gravity.LEFT);
+            m.setGravity(brief ? Gravity.CENTER_HORIZONTAL : Gravity.START);
             m.setPadding(px(28), px(4), px(28), px(hasList || p.view != null ? 8 : 12));
             if (!hasList && p.view == null) {
                 ScrollView sv = new ScrollView(c);
@@ -326,6 +326,8 @@ class Dlg extends AlertDialog {
      * La tarjeta: apila sus partes y, si no caben en el alto disponible, solo se encoge la parte «flexible»
      * (el mensaje, la lista o el contenido propio, que se desplazan); el título y los botones siempre se ven.
      */
+    // Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+    @android.annotation.SuppressLint("ViewConstructor")
     static class Card extends ViewGroup {
         private final int maxH;
         View flex;

@@ -1186,3 +1186,5 @@ Irlanda del Norte	北爱尔兰
 Islas Canarias	加那利群岛
 Tiempo en StradaOS: {}	StradaOS 中的时间：{}
 Último tiempo por Bluetooth: {}	蓝牙最后一次的时间：{}
+Subir	增加
+Bajar	减少

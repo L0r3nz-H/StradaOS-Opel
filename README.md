@@ -15,23 +15,24 @@
 
 **StradaOS** is a **free, ad-free, open-source launcher** for Android car head units. Install it like any other app, **without flashing firmware or replacing Android**. Uninstall it to return to the previous setup. It was created for older radios advertised as Android 6 or newer that actually run Android 4.x, and also supports modern devices.
 
-This fork of [lordnordic-debug/StradaOS](https://github.com/lordnordic-debug/StradaOS) adds **Opel Style**, a compact dashboard for 7-inch 1024 × 600 displays. It includes a transparent Astra J photo, two large content areas, centered clock, optional GPS speed, and four large shortcuts: **Radio, CarPlay or Android Auto, Phone, All apps**. Select it under **Settings → Appearance → Home screen design**. The other choice is the standard **StradaOS** layout; there is no separate compact-layout selector. Opel Style uses a fixed red accent, so accent-color controls are hidden there. Dark, Light, Auto, and System modes remain available.
+This fork of [lordnordic-debug/StradaOS](https://github.com/lordnordic-debug/StradaOS) adds **Opel Style**, a compact dashboard for 7-inch 1024 × 600 displays. It includes a transparent Astra J photo, two large content areas, centered clock, optional GPS speed, and four large shortcuts: **Radio, CarPlay or Android Auto, Phone, All apps**. Select the first card under **Settings → Personalization → Landscape**. Select a standard or premium theme in the same gallery to return to a regular StradaOS layout. Opel Style uses a fixed red accent, so accent-color controls are hidden there. Dark, Light, Auto, and System modes remain available.
 
 See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/COMPACT_7_INCH_PLAN.md), and [Opel design history](docs/OPEL_NAVI_900_MODERN.md). The separate app is named **StradaOS Opel** and uses `com.stradaos.launcher.opel`.
 
 ## Current Opel edition
 
-The current Opel code is maintained on **`main`**, based on upstream **2.23.0**
-(commit `42ecf12`, 2026-11-16). The port was prepared on
-`feature/opel-latest-2.21.2`, which remains available. The current app version is **2.23.0-opel**,
-versionCode **56**, with package `com.stradaos.launcher.opel` and app name
-**StradaOS Opel**. The previous Opel branch remains available. The upstream version/download-count badges
-describe the original project. Opel release downloads use this fork.
+The current Opel code is maintained on **`main`**, based on upstream **2.24.1**
+(commit `0644024`, merged as `69688ad` on 2026-11-18). The current app version is
+**2.24.1-opel**, versionCode **58**, with package `com.stradaos.launcher.opel`
+and app name **StradaOS Opel**. Earlier Opel branches and releases remain available.
+The upstream version/download-count badges describe the original project;
+Opel release downloads use this fork.
 
-[Opel 2.23.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.23.0-preview.1)
-is available with a signed APK and checksum. The stable Latest release remains
-2.22.0. The preview passed build, lint regression, signing-certificate and Android
-11 startup checks; API 17 and head-unit hardware compatibility remain untested.
+Local Android 11/API 30 tests cover dashboard/settings smoke checks, style and theme
+preservation across restarts, automatic brightness changes, and simulated Android Auto
+playback seeks. This does not verify a published, production-signed 2.24.1 APK.
+Android 4.2/API 17 and head-unit hardware compatibility still require testing.
+See [testing](docs/PRUEBAS.md) for checks and compatibility exceptions.
 
 | Option | StradaOS | Opel Style |
 | --- | --- | --- |
@@ -41,8 +42,9 @@ is available with a signed APK and checksum. The stable Latest release remains
 | Main content | Vehicle, map/projection, and media options | Vehicle photo or map, plus large media controls |
 | Shortcuts | Existing configurable dock | Radio · CarPlay or Android Auto · Phone · All apps, or the existing dock |
 
-Switching styles preserves standard colors, theme modes, photos, and app
-assignments. Older separate Opel/compact selections migrate to Opel Style.
+Selecting Opel Style preserves standard colors, theme modes, photos, app assignments
+and the saved premium theme. Selecting another gallery card applies that standard or
+premium layout. Personalization stays available while Opel Style is active. Older separate Opel/compact selections migrate to Opel Style.
 The Opel edition starts in Opel Style on first installation.
 
 Choose **CarPlay** or **Android Auto** for the second large shortcut during
@@ -77,10 +79,11 @@ exposed interface has not been confirmed.
 
 <p align="center">
 <img src="docs/screenshots/compact/07-opel-style-light-1024x600.png" width="49%" alt="Opel Style light dashboard with Astra J and four large shortcuts">
-<img src="docs/screenshots/compact/06-opel-style-menu-dark-1024x600.png" width="49%" alt="Current Appearance menu with StradaOS and Opel Style choices">
+<img src="docs/screenshots/compact/08-opel-personalization-landscape-1024x600.png" width="49%" alt="Personalization landscape gallery with Opel Style as the first option">
 </p>
 
-Actual Android 11/API 30 emulator captures at 1024 × 600, taken on 2026-11-16.
+Actual Android 11/API 30 emulator captures at 1024 × 600: dashboard from
+2026-11-16 and the current Personalization gallery from 2026-11-18.
 The app is shown in German; repository documentation is in English.
 See the [screenshot index](docs/screenshots/compact/README.md) for historical captures.
 
@@ -124,7 +127,7 @@ For **StradaOS Opel**:
 2. Copy the APK to the **Android head unit**, open it with the file manager,
    and allow installation from that source if requested.
 3. Open **StradaOS Opel**, complete setup, and select it as the home app if desired.
-   Change styles through **Settings → Appearance → Home screen design**.
+   Change styles through **Settings → Personalization → Landscape**.
 
 It installs alongside standard StradaOS and does not automatically import its
 settings. Updates must use the same Opel package and signing key; standard
@@ -163,9 +166,10 @@ migration passed. **API 17 runtime and proprietary radio/Bluetooth/CarPlay behav
 still need testing on the actual head unit.** Upstream hardware reports do not
 replace testing this fork.
 
-Build and signing checks passed. Lint still reports existing findings (72 errors,
-1 fatal issue, 81 warnings); no finding is on the Java lines changed for the
-style menu. Full validation history is in [OPEL_APK.md](docs/OPEL_APK.md).
+Builds and automated checks are described in [testing](docs/PRUEBAS.md).
+Lint errors fail the build. The intentionally retained target SDK 28 produces a visible
+informational Google Play policy finding; changing it requires a separate compatibility
+migration for legacy head units.
 
 Report additional devices through the [issue tracker](https://github.com/L0r3nz-H/StradaOS-Opel/issues).
 

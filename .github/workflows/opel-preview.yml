@@ -51,7 +51,8 @@ jobs:
         with:
           name: opel-verification
           path: |
-            app/build/reports/lint-results-opel.*
+            app/build/reports/
+            app/build/test-results/
             verification/
             app/build/outputs/apk/opel/*.apk
             app/build/outputs/apk/debug/*.apk

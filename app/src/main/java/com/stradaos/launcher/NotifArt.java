@@ -106,6 +106,8 @@ public class NotifArt extends AccessibilityService {
         } catch (Throwable ignored) { }
     }
 
+    // Resource names belong to another package and cannot be compiled into our R class.
+    @android.annotation.SuppressLint("DiscouragedApi")
     private static int sysId(String name) {
         try { return android.content.res.Resources.getSystem().getIdentifier(name, "id", "android"); }
         catch (Throwable e) { return 0; }

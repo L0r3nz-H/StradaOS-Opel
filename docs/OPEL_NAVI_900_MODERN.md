@@ -2,9 +2,13 @@
 
 ## Current design selection
 
-Since 2026-11-16, Appearance presents one **Home screen design** selector:
-**StradaOS** or **Opel Style**. Opel Style is the 7-inch compact view described
-in [COMPACT_7_INCH_PLAN.md](COMPACT_7_INCH_PLAN.md). There is no separate layout
+Opel Style is the first card in **Settings → Personalization → Landscape**.
+It is not offered in the Portrait gallery. Personalization stays available while
+Opel Style is active; choosing a standard or premium card returns to a regular
+StradaOS layout. Appearance no longer contains a home-design selector.
+
+Opel Style is the 7-inch compact view described in
+[COMPACT_7_INCH_PLAN.md](COMPACT_7_INCH_PLAN.md). There is no separate layout
 selector. The fixed red Opel accent remains part of the design; its custom
 accent controls are hidden in both Appearance and the setup wizard.
 

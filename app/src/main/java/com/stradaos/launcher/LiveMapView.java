@@ -27,6 +27,8 @@ import java.util.LinkedList;
  * Movimiento: el GPS da una posición por segundo; entre una y otra la posición y el rumbo se interpolan y el mapa
  * se redibuja a ~30 cuadros por segundo, para que la flecha avance suave y no a saltos.
  */
+// Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+@android.annotation.SuppressLint("ViewConstructor")
 public class LiveMapView extends View {
     // proveedores en orden: si uno falla en esta pantalla (TLS antiguo, bloqueo), se prueba el siguiente
     // {z} {x} {y}. CARTO ya exige clave (devolvía "API KEY REQUIRED"), así que se usan fuentes sin clave.

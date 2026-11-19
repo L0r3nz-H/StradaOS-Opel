@@ -53,15 +53,12 @@ for theme in aurora cobalto; do
   grep -q 'OPEL · STRADAOS' "$OUT/theme-$theme-opel.xml"
   grep -q 'Android Auto' "$OUT/theme-$theme-opel.xml"
   assert_stored_theme
-  # Standard-only personalization must be absent from the Opel settings UI.
-  go ajustes:11
+  # Personalization remains available in Opel so users can choose another design.
+  # Merely opening it must not change the saved standard theme.
+  go vista-temas:h
   dump "theme-$theme-opel-settings"
-  if grep -Eq 'text="(Personalization|Free themes|Premium themes)"' "$OUT/theme-$theme-opel-settings.xml"; then
-    echo '::error::Standard theme controls exposed in Opel Style'; exit 1
-  fi
-  # Theme commands cannot replace saved standard choices while Opel Style is active.
-  go tema-gratis:1
-  go tema-premium:aurora
+  grep -q 'class="com.stradaos.launcher.OpelThumb"' "$OUT/theme-$theme-opel-settings.xml"
+  grep -q 'text="FREE THEMES"' "$OUT/theme-$theme-opel-settings.xml"
   assert_stored_theme
   adb shell am force-stop "$PKG"
   go inicio

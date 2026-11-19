@@ -14,6 +14,8 @@ import android.view.View;
  * (o la música sola a lo ancho). El velocímetro va en la esquina que fija el tema y el botón del mapa en su lado.
  * Se dibuja en código: no suma imágenes al APK y sigue el modo claro u oscuro. El alto sale del ancho (no se corta).
  */
+// Programmatic-only view; constructor parameters are supplied by the dashboard/dialog builder.
+@android.annotation.SuppressLint("ViewConstructor")
 class ThemeThumb extends View {
     final boolean car, playerLeft, gauge, compact, portrait, gaugeLeft, navLeft, navShown, labels, panel;
     boolean selected;

@@ -37,7 +37,15 @@ jobs:
           STRADAOS_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           STRADAOS_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           STRADAOS_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew --no-daemon assembleDebug
+        run: ./gradlew --no-daemon assembleDebug test lintDebug lintOpel lintRelease
+      - name: Upload test and lint reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-checks
+          path: |
+            app/build/reports/
+            app/build/test-results/
       - uses: actions/upload-artifact@v4
         with:
           name: StradaOS-debug

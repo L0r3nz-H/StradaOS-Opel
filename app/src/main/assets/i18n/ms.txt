@@ -1177,3 +1177,5 @@ Irlanda del Norte	Ireland Utara
 Islas Canarias	Kepulauan Canary
 Tiempo en StradaOS: {}	Masa dalam StradaOS: {}
 Último tiempo por Bluetooth: {}	Masa terakhir melalui Bluetooth: {}
+Subir	Tambah
+Bajar	Kurangkan

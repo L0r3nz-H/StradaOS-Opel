@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Pista en reproducción en Android 5+: cualquier app de música, Android Auto/CarPlay nativos, Bluetooth del sistema. */
+// Loaded by Main only on Android 5+; keep modern framework types out of legacy helpers.
+@android.annotation.TargetApi(21)
 public class MediaWatcher {
     private static MediaWatcher instance;
     private final Context ctx;
@@ -53,6 +55,11 @@ public class MediaWatcher {
         if (current != null) try { current.unregisterCallback(cb); } catch (Throwable ignored) { }
         current = null;
         watchAll(null);
+    }
+
+    public void release() {
+        stop();
+        if (instance == this) instance = null;
     }
 
     private static boolean playing(MediaController m) {

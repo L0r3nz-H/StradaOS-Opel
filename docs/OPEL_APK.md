@@ -1,5 +1,12 @@
 # Installable Opel edition
 
+## Current design selection
+
+Use **Settings → Personalization → Landscape → Opel Style** (the first card).
+Select another standard/premium card in the same gallery to leave Opel Style.
+Personalization stays available in Opel Style; Appearance no longer offers the
+design selector. Earlier selection menus described below are historical.
+
 ## Published preview — 2026-11-17
 
 [StradaOS Opel 2.23.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.23.0-preview.1)
@@ -142,9 +149,9 @@ future compatible updates. This key is independent of official StradaOS releases
 - Device-specific functions and Android 4.2/API 17 runtime compatibility remain
   outside this emulator's coverage.
 
-## Simplified style selection
+## Previous simplified style selection
 
-Appearance now offers **StradaOS** and **Opel Style** through one selector.
+Appearance previously offered **StradaOS** and **Opel Style** through one selector.
 Opel Style always activates the 7-inch compact layout. Switching to StradaOS
 restores its standard layout, stored accent, and separate light/dark preference.
 Legacy installations with either the old Opel design or the compact layout are
