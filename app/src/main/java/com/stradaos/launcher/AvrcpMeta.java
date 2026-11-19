@@ -12,6 +12,7 @@ import android.os.SystemClock;
  * como PlaybackState (no como textos), por eso antes StradaOS lo recibía pero no lo entendía (issue #5: pantallas
  * HCN con el celular por Bluetooth o con Android Auto inalámbrico por ZLink, que manda la canción por AVRCP).
  */
+@android.annotation.TargetApi(21)
 class AvrcpMeta {
     static final String ACTION = "android.bluetooth.avrcp-controller.profile.action.TRACK_EVENT";
     static final String EXTRA_METADATA = "android.bluetooth.avrcp-controller.profile.extra.METADATA";

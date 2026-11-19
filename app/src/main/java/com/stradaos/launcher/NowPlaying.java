@@ -198,6 +198,7 @@ public class NowPlaying {
 
     /** Aviso TRACK_EVENT del Bluetooth del sistema: canción (MediaMetadata) y/o estado (PlaybackState). */
     private boolean handleAvrcp(Bundle x) {
+        if (android.os.Build.VERSION.SDK_INT < 21) return false;
         Track t = new Track();
         t.origin = "bt";
         t.source = "Bluetooth";
