@@ -1218,3 +1218,22 @@ Temperatura exterior	车外温度
 Del sensor del carro; necesita la caja CAN	来自车辆传感器；需要 CAN 盒
 pantalla FYT detectada: elígela en Tu vehículo → Equipo	检测到 FYT 屏幕：请在 你的车辆 → 车机 中选择
 esta pantalla no informa las luces	此屏幕不提供车灯信息
+
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style：固定红色强调色的紧凑布局。
+Panel principal	主面板
+Vehículo	车辆
+Cuatro accesos grandes	四个大快捷方式
+Radio · CarPlay · Teléfono · Todas las apps	收音机 · CarPlay · 电话 · 所有应用
+Mostrar velocidad GPS	显示 GPS 速度
+En la vista compacta del vehículo o del mapa	在紧凑车辆或地图视图中
+Todas las apps	所有应用
+Teléfono	电话
+Tiempo	天气
+Velocidad GPS	GPS 速度
+Anterior	上一首
+Reproducir / pausa	播放 / 暂停
+Foto predeterminada	默认照片
+Proyección en el inicio Opel	Opel 主屏幕投屏
+Elige el acceso de los cuatro botones grandes del inicio.	选择四个大按钮中的投屏快捷方式。
+Radio · Android Auto · Teléfono · Todas las apps	收音机 · Android Auto · 电话 · 所有应用
+Información de Android Auto	Android Auto 信息

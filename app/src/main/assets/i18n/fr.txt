@@ -1218,3 +1218,10 @@ Temperatura exterior	Température extérieure
 Del sensor del carro; necesita la caja CAN	Du capteur de la voiture ; nécessite le boîtier CAN
 pantalla FYT detectada: elígela en Tu vehículo → Equipo	autoradio FYT détecté : choisissez-le dans Votre véhicule → Autoradio
 esta pantalla no informa las luces	cet autoradio ne signale pas les feux
+
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style : disposition compacte avec un accent rouge fixe.
+Foto predeterminada	Photo par défaut
+Proyección en el inicio Opel	Projection sur l’accueil Opel
+Elige el acceso de los cuatro botones grandes del inicio.	Choisissez le raccourci de projection parmi les quatre grands boutons.
+Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Téléphone · Toutes les apps
+Información de Android Auto	Informations Android Auto

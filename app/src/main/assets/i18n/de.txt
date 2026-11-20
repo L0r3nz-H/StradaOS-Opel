@@ -1218,3 +1218,21 @@ Temperatura exterior	Außentemperatur
 Del sensor del carro; necesita la caja CAN	Vom Fahrzeugsensor; CAN-Box nötig
 pantalla FYT detectada: elígela en Tu vehículo → Equipo	FYT-Autoradio erkannt: wähle es unter Dein Fahrzeug → Autoradio
 esta pantalla no informa las luces	dieses Autoradio meldet das Fahrlicht nicht
+
+Panel principal	Hauptansicht
+Vehículo	Fahrzeug
+Teléfono	Telefon
+Todas las apps	Alle Apps
+Cuatro accesos grandes	Vier große Schnellzugriffe
+Radio · CarPlay · Teléfono · Todas las apps	Radio · CarPlay · Telefon · Alle Apps
+Anterior	Zurück
+Reproducir / pausa	Wiedergabe / Pause
+Mostrar velocidad GPS	GPS-Geschwindigkeit anzeigen
+En la vista compacta del vehículo o del mapa	In der kompakten Fahrzeug- oder Kartenansicht
+Velocidad GPS	GPS-Geschwindigkeit
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: kompaktes Layout mit festem rotem Akzent.
+Foto predeterminada	Standardfoto
+Proyección en el inicio Opel	Projektion auf dem Opel-Startbildschirm
+Elige el acceso de los cuatro botones grandes del inicio.	Wähle den Projektionszugriff in den vier großen Startbildschirm-Tasten.
+Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Telefon · Alle Apps
+Información de Android Auto	Android-Auto-Informationen

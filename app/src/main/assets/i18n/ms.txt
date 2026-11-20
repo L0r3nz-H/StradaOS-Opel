@@ -1218,3 +1218,13 @@ Temperatura exterior	Suhu luar
 Del sensor del carro; necesita la caja CAN	Daripada sensor kereta; perlu kotak CAN
 pantalla FYT detectada: elígela en Tu vehículo → Equipo	skrin FYT dikesan: pilihnya dalam Kenderaan anda → Unit utama
 esta pantalla no informa las luces	skrin ini tidak melaporkan lampu
+
+Mostrar velocidad GPS	Tunjukkan kelajuan GPS
+En la vista compacta del vehículo o del mapa	Dalam paparan kompak kenderaan atau peta
+Velocidad GPS	Kelajuan GPS
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: susun atur kompak dengan aksen merah tetap.
+Foto predeterminada	Foto lalai
+Proyección en el inicio Opel	Unjuran pada laman utama Opel
+Elige el acceso de los cuatro botones grandes del inicio.	Pilih pintasan unjuran dalam empat butang utama yang besar.
+Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Telefon · Semua aplikasi
+Información de Android Auto	Maklumat Android Auto

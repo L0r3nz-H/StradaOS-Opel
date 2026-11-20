@@ -1218,3 +1218,13 @@ Temperatura exterior	Temperatura exterior
 Del sensor del carro; necesita la caja CAN	Do sensor do carro; precisa da caixa CAN
 pantalla FYT detectada: elígela en Tu vehículo → Equipo	tela FYT detectada: escolha-a em Seu veículo → Equipamento
 esta pantalla no informa las luces	esta tela não informa as luzes
+
+Mostrar velocidad GPS	Mostrar velocidade GPS
+En la vista compacta del vehículo o del mapa	Na vista compacta do veículo ou do mapa
+Velocidad GPS	Velocidade GPS
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: layout compacto com destaque vermelho fixo.
+Foto predeterminada	Foto padrão
+Proyección en el inicio Opel	Projeção no início Opel
+Elige el acceso de los cuatro botones grandes del inicio.	Escolha o atalho de projeção nos quatro botões grandes.
+Radio · Android Auto · Teléfono · Todas las apps	Rádio · Android Auto · Telefone · Todas as apps
+Información de Android Auto	Informações do Android Auto

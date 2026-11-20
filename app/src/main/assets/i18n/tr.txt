@@ -1218,3 +1218,10 @@ Temperatura exterior	Dış sıcaklık
 Del sensor del carro; necesita la caja CAN	Araç sensöründen; CAN kutusu gerekir
 pantalla FYT detectada: elígela en Tu vehículo → Equipo	FYT ekran algılandı: Aracınız → Ünite bölümünden seçin
 esta pantalla no informa las luces	bu ekran far bilgisini vermiyor
+
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: sabit kırmızı vurgulu kompakt düzen.
+Foto predeterminada	Varsayılan fotoğraf
+Proyección en el inicio Opel	Opel ana ekran yansıtması
+Elige el acceso de los cuatro botones grandes del inicio.	Dört büyük ana ekran düğmesindeki yansıtma kısayolunu seçin.
+Radio · Android Auto · Teléfono · Todas las apps	Radyo · Android Auto · Telefon · Tüm uygulamalar
+Información de Android Auto	Android Auto bilgileri

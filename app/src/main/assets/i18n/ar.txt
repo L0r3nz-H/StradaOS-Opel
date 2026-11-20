@@ -1218,3 +1218,10 @@ Temperatura exterior	درجة الحرارة الخارجية
 Del sensor del carro; necesita la caja CAN	من حساس السيارة؛ يحتاج إلى صندوق CAN
 pantalla FYT detectada: elígela en Tu vehículo → Equipo	تم الكشف عن شاشة FYT: اخترها في مركبتك ← جهاز السيارة
 esta pantalla no informa las luces	هذه الشاشة لا تُبلغ عن الأضواء
+
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: تخطيط مدمج بلمسة حمراء ثابتة.
+Foto predeterminada	الصورة الافتراضية
+Proyección en el inicio Opel	العرض على شاشة أوبل الرئيسية
+Elige el acceso de los cuatro botones grandes del inicio.	اختر اختصار العرض ضمن الأزرار الأربعة الكبيرة.
+Radio · Android Auto · Teléfono · Todas las apps	الراديو · Android Auto · الهاتف · كل التطبيقات
+Información de Android Auto	معلومات Android Auto

@@ -1218,3 +1218,21 @@ Temperatura exterior	Outside temperature
 Del sensor del carro; necesita la caja CAN	From the car's sensor; needs the CAN box
 pantalla FYT detectada: elígela en Tu vehículo → Equipo	FYT screen detected: choose it in Your vehicle → Head unit
 esta pantalla no informa las luces	this screen doesn't report the lights
+
+Panel principal	Main panel
+Vehículo	Vehicle
+Teléfono	Phone
+Todas las apps	All apps
+Cuatro accesos grandes	Four large shortcuts
+Radio · CarPlay · Teléfono · Todas las apps	Radio · CarPlay · Phone · All apps
+Anterior	Previous
+Reproducir / pausa	Play / pause
+Mostrar velocidad GPS	Show GPS speed
+En la vista compacta del vehículo o del mapa	In the compact vehicle or map view
+Velocidad GPS	GPS speed
+Opel Style: diseño compacto con acento rojo fijo.	Opel Style: compact layout with a fixed red accent.
+Foto predeterminada	Default photo
+Proyección en el inicio Opel	Opel home projection
+Elige el acceso de los cuatro botones grandes del inicio.	Choose the projection shortcut in the four large home buttons.
+Radio · Android Auto · Teléfono · Todas las apps	Radio · Android Auto · Phone · All apps
+Información de Android Auto	Android Auto information
