@@ -11,6 +11,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <!-- 2.17: íconos de Wi-Fi y Bluetooth en la barra de arriba (ver el estado y encenderlos o apagarlos) -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!-- OBD scanner: explicit nearby-device permissions on Android 12+. Keep legacy
+         permissions for targetSdk 28 compatibility and Android 4.x head units. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>

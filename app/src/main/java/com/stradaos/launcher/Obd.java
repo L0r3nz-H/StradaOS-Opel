@@ -368,7 +368,7 @@ public class Obd {
             elm = new Elm();
             elm.protocol(prefs(app).getString("obd_protocol", "auto"));
             try {
-                elm.open(addr);
+                elm.open(app, addr);
                 adapterInfo = elm.version + " · " + elm.protocol;
                 log("conectado: " + adapterInfo);
                 status = LIVE;

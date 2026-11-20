@@ -26,7 +26,7 @@ public class Modern {
     }
 
     /** ¿Están dados estos permisos? Antes de Android 6 se dan al instalar: siempre true. */
-    public static boolean hasPermissions(Activity a, String... perms) {
+    public static boolean hasPermissions(android.content.Context a, String... perms) {
         if (android.os.Build.VERSION.SDK_INT < 23) return true;
         for (String p : perms) if (a.checkSelfPermission(p) != PackageManager.PERMISSION_GRANTED) return false;
         return true;

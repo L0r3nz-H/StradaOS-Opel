@@ -1693,3 +1693,4 @@ Apps	Apl
 Guía del escáner	Panduan pengimbas
 Guía	Panduan
 Qué comprar, cómo conectarlo y qué significa cada cosa · sin internet	Apa yang perlu dibeli, cara menyambung dan maksud setiap perkara · tanpa internet
+Bluetooth: permiso denegado	Bluetooth: kebenaran ditolak

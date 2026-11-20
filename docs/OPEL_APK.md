@@ -303,3 +303,14 @@ Hosted build/unit/lint/signature checks and both complete eight-API emulator
 matrices are required before integration and publication. No Android tools run
 on the VPS. API 17 and vehicle hardware, including real OBD-II adapters, remain
 untested; normal startup coverage does not establish full OBD or vehicle UI behavior.
+
+
+### 2.26.0 Bluetooth permission correction
+
+Hosted lint initially blocked the candidate on 16 missing Bluetooth scan/connect
+permission findings in the upstream OBD code. The candidate now declares nearby
+device permissions, checks them before Bluetooth connection/discovery on API 31+,
+and requests them only for Bluetooth actions (Wi-Fi/demo remain independent).
+The engine refuses a Bluetooth connection if permission is absent. Legacy Bluetooth
+permissions and minSdk 16 / targetSdk 28 remain, and all strict lint gates remain
+active. Real adapter pairing/connection still requires vehicle hardware validation.

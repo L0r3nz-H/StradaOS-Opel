@@ -36,6 +36,22 @@ class ObdDialogs {
         this.refresh = refresh;
     }
 
+    private Runnable bluetoothPermissionAction;
+
+    private boolean bluetoothGranted() {
+        return android.os.Build.VERSION.SDK_INT < 31 || Modern.hasPermissions(a,
+            android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_SCAN);
+    }
+
+    /** Request only when the user chooses Bluetooth; Wi-Fi/demo need no nearby access. */
+    private boolean ensureBluetooth(Runnable action) {
+        if (bluetoothGranted()) return true;
+        bluetoothPermissionAction = action;
+        Modern.requestPermissions(a, REQ_BT_SCAN,
+            android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_SCAN);
+        return false;
+    }
+
     private void done() { if (refresh != null) refresh.run(); }
 
     private TB tb() { return new TB(a, Main.dlg()); }
@@ -48,6 +64,8 @@ class ObdDialogs {
     void turnOn() {
         prefs.edit().putBoolean("obd_on", true).apply();
         if (!prefs.contains("obd_addr")) { pickAdapter(); done(); return; }
+        String addr = prefs.getString("obd_addr", "");
+        if (addr.startsWith("bt:") && !ensureBluetooth(new Runnable() { public void run() { turnOn(); } })) return;
         if (!Obd.running()) ObdService.start(a);
         done();
     }
@@ -76,7 +94,7 @@ class ObdDialogs {
         final List<String[]> opts = new ArrayList<String[]>();   // dirección, nombre
         try {
             BluetoothAdapter ad = BluetoothAdapter.getDefaultAdapter();
-            if (ad != null) for (BluetoothDevice d : ad.getBondedDevices()) {
+            if (ad != null && bluetoothGranted()) for (BluetoothDevice d : ad.getBondedDevices()) {
                 String n = d.getName() != null ? d.getName() : d.getAddress();
                 String[] o = {"bt:" + d.getAddress(), n};
                 if (looksObd(n)) opts.add(0, o);   // los escáneres primero
@@ -111,7 +129,8 @@ class ObdDialogs {
         return n != null && n.toUpperCase(Locale.US).matches(".*(OBD|ELM|VLINK|V-LINK|VGATE|ICAR|KONNWEI|VEEPEAK|SCAN|327).*");
     }
 
-    void choose(String addr, String name) {
+    void choose(final String addr, final String name) {
+        if (addr.startsWith("bt:") && !ensureBluetooth(new Runnable() { public void run() { choose(addr, name); } })) return;
         prefs.edit().putString("obd_addr", addr).putString("obd_name", name).putBoolean("obd_on", true).apply();
         if (Obd.running()) ObdService.stop(a);
         ObdService.start(a);
@@ -126,6 +145,7 @@ class ObdDialogs {
     private BluetoothDevice pairing;
 
     void discover() {
+        if (!ensureBluetooth(new Runnable() { public void run() { discover(); } })) return;
         final BluetoothAdapter ad = BluetoothAdapter.getDefaultAdapter();
         if (ad == null) { toast("Este equipo no tiene Bluetooth"); return; }
         if (!ad.isEnabled()) {
@@ -140,6 +160,7 @@ class ObdDialogs {
         found.clear();
         stopDiscovery();
         btRx = new android.content.BroadcastReceiver() { public void onReceive(Context c, android.content.Intent i) {
+            if (!bluetoothGranted()) { stopDiscovery(); return; }
             String act = i.getAction();
             BluetoothDevice d = i.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             if (BluetoothDevice.ACTION_FOUND.equals(act) && d != null) {
@@ -169,6 +190,13 @@ class ObdDialogs {
     }
 
     void onPermission(boolean granted) {
+        if (bluetoothPermissionAction != null) {
+            Runnable action = bluetoothPermissionAction;
+            bluetoothPermissionAction = null;
+            if (bluetoothGranted()) action.run();
+            else toast("Bluetooth: permiso denegado");
+            return;
+        }
         if (granted) discover();
         else toast("Sin el permiso de ubicación Android no deja buscar equipos Bluetooth");
     }
@@ -181,6 +209,7 @@ class ObdDialogs {
 
     private void showFound(boolean finished) {
         if (a.isFinishing()) return;
+        if (!bluetoothGranted()) { stopDiscovery(); return; }
         try { if (btDlg != null) btDlg.dismiss(); } catch (Throwable ignored) { }
         final List<BluetoothDevice> list = new ArrayList<BluetoothDevice>();
         for (BluetoothDevice d : found) {
@@ -216,7 +245,7 @@ class ObdDialogs {
     }
 
     void stopDiscovery() {
-        try { BluetoothAdapter.getDefaultAdapter().cancelDiscovery(); } catch (Throwable ignored) { }
+        try { if (bluetoothGranted()) BluetoothAdapter.getDefaultAdapter().cancelDiscovery(); } catch (Throwable ignored) { }
         if (btRx != null) try { a.unregisterReceiver(btRx); } catch (Throwable ignored) { }
         btRx = null;
     }

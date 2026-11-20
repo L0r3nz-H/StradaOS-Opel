@@ -48,7 +48,7 @@ public class Elm {
     /** PIDs del modo 01 que el auto dice tener (bit i = PID i). */
     private final boolean[] supported = new boolean[0xE1];
 
-    void open(String addr) throws IOException {
+    void open(android.content.Context context, String addr) throws IOException {
         close();
         if ("demo".equals(addr)) {
             demo = new Demo();
@@ -57,6 +57,9 @@ public class Elm {
             int c = hp.lastIndexOf(':');
             openTcp(hp.substring(0, c), Integer.parseInt(hp.substring(c + 1)));
         } else if (addr.startsWith("bt:")) {
+            if (android.os.Build.VERSION.SDK_INT >= 31 && !Modern.hasPermissions(context,
+                    android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_SCAN))
+                throw new IOException("Bluetooth permission denied");
             BluetoothAdapter a = BluetoothAdapter.getDefaultAdapter();
             if (a == null) throw new IOException("Este equipo no tiene Bluetooth");
             if (!a.isEnabled()) throw new IOException("El Bluetooth está apagado");

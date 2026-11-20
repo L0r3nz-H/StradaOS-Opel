@@ -1656,3 +1656,4 @@ Dirección no válida: {}	Érvénytelen cím: {}
 Guía del escáner	Szkenner útmutató
 Guía	Útmutató
 Qué comprar, cómo conectarlo y qué significa cada cosa · sin internet	Mit vegyél, hogyan csatlakoztasd, és mit jelent minden · internet nélkül
+Bluetooth: permiso denegado	Bluetooth: engedély megtagadva

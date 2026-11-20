@@ -1682,3 +1682,4 @@ Apps	التطبيقات
 Guía del escáner	دليل الماسح
 Guía	الدليل
 Qué comprar, cómo conectarlo y qué significa cada cosa · sin internet	ماذا تشتري وكيف توصله وماذا يعني كل شيء · دون إنترنت
+Bluetooth: permiso denegado	بلوتوث: تم رفض الإذن
