@@ -10,12 +10,14 @@ StradaOS has **no accounts, advertising, trackers, or analytics**, and does not 
 | Now-playing track | Display the song in the player. | No. It is read locally from Android and the Open Headunit notification. |
 | Vehicle photo | Display it on the home screen. | No. It is processed and stored on the device. |
 | Installed application list | Shortcuts and app drawer. | No. |
+| OBD-II engine data, VIN and fault codes | Vehicle panel and voice alerts when a scanner is connected. | Local unless optional AI is configured: requesting a code explanation sends the code, entered vehicle description and current engine data to your chosen provider (Anthropic or an OpenAI-compatible endpoint), using your own API key. VIN is sent only if explicitly enabled in AI settings. Location is never sent. Responses are stored locally. |
 
 ## Network connections
 
 - **Maps:** OpenStreetMap community servers, OpenTopoMap, and Esri.
 - **Weather:** Open-Meteo, with BigDataCloud for city-name lookup.
 - **Offline maps:** only when you choose *Download a map*, a country file is downloaded from `download.mapsforge.org`. The map is then rendered locally without a connection.
+- **Optional fault-code AI:** only after configuring your API key in Vehicle → AI settings, requests go to `api.anthropic.com` or your configured endpoint.
 - **Updates:** GitHub (`api.github.com`, `raw.githubusercontent.com`) and jsDelivr are used to check for new releases. This can be disabled in *Settings → About*. The separate Opel edition does not offer standard StradaOS updates.
 
 ## Permissions

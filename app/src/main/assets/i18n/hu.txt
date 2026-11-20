@@ -1201,3 +1201,458 @@ Del sensor del carro; necesita la caja CAN	Az autó érzékelőjéből; CAN-dobo
 pantalla FYT detectada: elígela en Tu vehículo → Equipo	FYT kijelző észlelve: válaszd ki a Járműved → Fejegység menüben
 esta pantalla no informa las luces	ez a kijelző nem jelzi a lámpák állapotát
 Apps	Appok
+# 2.26: escáner OBD-II (panel del vehículo y ajustes)
+Escáner OBD-II	OBD-II szkenner
+Enciende el monitor del motor en «Escáner OBD-II»	Kapcsold be a motorfigyelőt az „OBD-II szkenner” menüben
+Conectando…	Csatlakozás…
+Monitor del motor	Motorfigyelő
+Está apagado: enciéndelo para conectar el escáner	Ki van kapcsolva: kapcsold be a szkenner csatlakoztatásához
+Estado	Állapot
+Abrir el panel del vehículo	A járműpanel megnyitása
+Medidores, alertas y códigos encima del tema que tengas	Műszerek, riasztások és kódok a témád felett
+Diagnóstico	Diagnosztika
+Qué vigila StradaOS y cuándo avisa por voz	Mit figyel a StradaOS, és mikor szól hangosan
+Todo normal	Minden rendben
+Qué significan y qué hacer; borrarlos con el motor apagado	Mit jelentenek és mit tegyél; leállított motornál töröld őket
+Cada dato que entrega tu auto, con gráficos	Minden adat, amit az autód ad, grafikonokkal
+Más	Továbbiak
+Opcional: explica los códigos para tu auto en particular	Opcionális: a kódokat a te autódra szabva magyarázza
+Motor, protocolo, panel y escaneo completo	Motor, protokoll, panel és teljes vizsgálat
+Bluetooth emparejado, Wi-Fi (IP y puerto) o un auto simulado para probar	Párosított Bluetooth, Wi-Fi (IP és port) vagy egy szimulált autó kipróbáláshoz
+Empareja el escáner sin salir de StradaOS (clave 1234 o 0000)	Párosítsd a szkennert a StradaOS elhagyása nélkül (PIN: 1234 vagy 0000)
+Reconectar	Újracsatlakozás
+Conectar al iniciar StradaOS	Csatlakozás a StradaOS indulásakor
+Las alertas funcionan aunque estés en otra app (con una notificación fija)	A riasztások más alkalmazásban is működnek (állandó értesítéssel)
+Cómo conectar el escáner	A szkenner csatlakoztatása
+1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Bluetooth: emparéjalo con la clave 1234 o 0000. Wi-Fi: conecta la pantalla a la red del escáner y escribe su IP y puerto (casi siempre 192.168.0.10:35000).\n3. Elígelo arriba en «Escáner».	1. Dugd a ELM327 szkennert az OBD-aljzatba (a kormány alatt), és kapcsold rá a gyújtást.\n2. Bluetooth: párosítsd 1234 vagy 0000 PIN-nel. Wi-Fi: csatlakoztasd a fejegységet a szkenner hálózatához, és add meg az IP-t és a portot (szinte mindig 192.168.0.10:35000).\n3. Válaszd ki fent a „Szkenner” menüben.
+Lo que respondió el escáner (para reportar un problema)	Mit válaszolt a szkenner (hiba bejelentéséhez)
+Todo normal por ahora	Egyelőre minden rendben
+Alerta	Riasztás
+Aviso	Figyelmeztetés
+Avisos	Figyelmeztetések
+Habla aunque estés en Waze o con música	Akkor is beszél, ha Waze-t használsz vagy zenét hallgatsz
+Abrir el panel con una alerta grave	A panel megnyitása súlyos riasztáskor
+Por ejemplo, el motor muy caliente o la batería que no carga	Például nagyon forró motor vagy nem töltő akkumulátor
+Más de 4 °C por minuto con el motor caliente	Meleg motornál percenként több mint 4 °C
+Cuándo avisa cada dato	Mikor riaszt az egyes adat
+Códigos guardados en el auto	Az autóban tárolt kódok
+El auto no tiene códigos guardados	Az autóban nincs tárolt kód
+Se revisan al conectar y cada 30 segundos	Csatlakozáskor és 30 másodpercenként ellenőrizve
+Luz del motor encendida	Motorhiba-jelzőlámpa ég
+El computador del motor confirmó una falla	A motorvezérlő hibát erősített meg
+Con el motor apagado y el contacto puesto. Anota los códigos antes: no se puede deshacer	Leállított motornál, ráadott gyújtással. Előbb írd fel a kódokat: nem vonható vissza
+Conecta el escáner para ver los datos	Csatlakoztasd a szkennert az adatok megtekintéséhez
+Gráficos	Grafikonok
+Hasta 3 datos a la vez, de 1 a 30 minutos	Egyszerre legfeljebb 3 adat, 1–30 perc
+La tuya: cada consulta la cobra tu proveedor	A sajátod: minden lekérdezést a szolgáltatód számláz
+Privacidad	Adatvédelem
+Qué se envía	Mit küld el
+Solo el código, el vehículo que escribas y los datos del motor de ese momento; nunca tu ubicación. Las respuestas se guardan en la pantalla	Csak a kódot, az általad megadott járművet és a motor akkori adatait; a helyzetedet soha. A válaszok a fejegységen tárolódnak
+Tu vehículo (para la IA)	Járműved (az MI-nek)
+Marca, modelo, año, motor y caja	Márka, típus, évjárat, motor és váltó
+Identifica tu auto de forma única. Apagado por defecto	Egyedileg azonosítja az autódat. Alapból kikapcsolva
+Probar	Kipróbálás
+Pregunta por un código de ejemplo	Egy példakódról kérdez
+Motor	Motor
+Para calcular el consumo en motores sin sensor MAF	MAF-szenzor nélküli motoroknál a fogyasztás kiszámításához
+Automático casi siempre; fuerza uno si el escáner no lo detecta	Szinte mindig automatikus; kényszeríts egyet, ha a szkenner nem ismeri fel
+Panel del vehículo	Járműpanel
+Lado del panel	A panel oldala
+Pestaña en el borde	Fül a szélén
+Toca o desliza la pestaña para abrir el panel. Sin ella, ábrelo con un botón de la barra	Koppints vagy húzd a fület a panel megnyitásához. Nélküle egy sávgombbal nyithatod meg
+Informe de cada dato estándar y los propios de la marca. Solo lee	Jelentés minden szabványos és márkaspecifikus adatról. Csak olvas
+Ver el último informe	Az utolsó jelentés megtekintése
+Con un escáner ELM327 por Wi-Fi o Bluetooth: temperatura, batería, alertas por voz y códigos de falla	Wi-Fi-s vagy Bluetooth-os ELM327 szkennerrel: hőmérséklet, akkumulátor, hangos riasztások és hibakódok
+También con la pestaña del borde o con un botón de la barra	A szélén lévő füllel vagy egy sávgombbal is
+Vehículo (OBD-II)	Jármű (OBD-II)
+Sin elegir	Nincs kiválasztva
+Apagada	Kikapcsolva
+Alerta sobre	Riasztás e felett
+Alerta bajo	Riasztás e alatt
+Alerta sobre ±	Riasztás e felett ±
+No	Nem
+Para que una IA explique los códigos, pon tu API key (Claude, Groq, Gemini u otra) en Ajustes → Tu vehículo → Escáner OBD-II → Inteligencia artificial. Las explicaciones se guardan en el equipo y después funcionan sin internet.	Ahhoz, hogy egy MI elmagyarázza a kódokat, add meg az API-kulcsodat (Claude, Groq, Gemini vagy más) a Beállítások → Járműved → OBD-II szkenner → Mesterséges intelligencia menüben. A magyarázatok az eszközön tárolódnak, és utána internet nélkül is működnek.
+Se apaga la luz del motor y se borran los datos que usa el taller para diagnosticar; también se reinician los monitores de emisiones. No se puede deshacer y, si la falla sigue, el código volverá a aparecer. Anota los códigos antes.	Kialszik a motorhiba-jelzőlámpa, és törlődnek a szerviz által a diagnózishoz használt adatok; a kibocsátásfigyelők is nullázódnak. Nem vonható vissza, és ha a hiba megmarad, a kód visszajön. Előbb írd fel a kódokat.
+Ej.: Kia Picanto 2019 1.2 gasolina mecánico	Pl.: Kia Picanto 2019 1.2 benzines kézi váltós
+Sin poner	Nincs megadva
+Escaneando… el avance se ve en el estado del escáner	Vizsgálat… az előrehaladás a szkenner állapotában látszik
+Todavía no hay un informe	Még nincs jelentés
+Sin monitor activo	Nincs aktív figyelő
+Sin códigos guardados	Nincs tárolt kód
+Se revisan al conectar	Csatlakozáskor ellenőrizve
+Ver todo	Összes
+1 activa	1 aktív
+{} activas	{} aktív
+Vehículo	Jármű
+Monitor del vehículo	Járműfigyelő
+Batería	Akkumulátor
+Carga del motor	Motorterhelés
+Acelerador	Fojtószelep
+Aire de admisión	Beszívott levegő
+Combustible	Üzemanyag
+Mezcla corta	Rövid távú keverékkorrekció
+Mezcla larga	Hosszú távú keverékkorrekció
+Flujo de aire	Légtömegáram
+Presión del múltiple	Szívócsőnyomás
+Consumo del motor	Motor fogyasztása
+Consumo por hora	Óránkénti fogyasztás
+Aceite del motor	Motorolaj
+Datos del motor	Motoradatok
+Cilindrada del motor	Hengerűrtartalom
+Cilindrada del motor (litros)	Hengerűrtartalom (liter)
+Protocolo	Protokoll
+CAN 11 bits · 500 kbps	CAN 11 bit · 500 kbps
+CAN 29 bits · 500 kbps	CAN 29 bit · 500 kbps
+CAN 11 bits · 250 kbps	CAN 11 bit · 250 kbps
+CAN 29 bits · 250 kbps	CAN 29 bit · 250 kbps
+Escribe un número entre 0,5 y 8	Adj meg egy számot 0,5 és 8 között
+Conectando con el escáner…	Csatlakozás a szkennerhez…
+Conectado	Csatlakoztatva
+Esperando al auto (¿contacto apagado?)	Várakozás az autóra (le van véve a gyújtás?)
+Escáner conectado. Vigilando el motor.	A szkenner csatlakoztatva. A motor figyelése folyamatban.
+Se perdió la conexión con el escáner.	Megszakadt a kapcsolat a szkennerrel.
+Códigos borrados.	Kódok törölve.
+El auto no aceptó borrar los códigos.	Az autó nem fogadta el a kódok törlését.
+El escáner no logra hablar con el auto. ¿Está el contacto puesto?	A szkenner nem tud kommunikálni az autóval. Rá van adva a gyújtás?
+El escáner no responde	A szkenner nem válaszol
+El escáner cerró la conexión	A szkenner bontotta a kapcsolatot
+El Bluetooth está apagado	A Bluetooth ki van kapcsolva
+Este equipo no tiene Bluetooth	Ennek az eszköznek nincs Bluetooth-a
+No se pudo conectar	Nem sikerült csatlakozni
+Motor sobrecalentado: {}	A motor túlmelegedett: {}
+Refrigerante alto: {}	Magas hűtőfolyadék-hőmérséklet: {}
+El refrigerante sube rápido: {} °C	A hűtőfolyadék gyorsan melegszik: {} °C
+Voltaje alto: {}	Magas feszültség: {}
+Voltaje bajo: {}	Alacsony feszültség: {}
+RPM muy altas: {}	Nagyon magas fordulatszám: {}
+Motor muy exigido: {}	A motor nagyon meg van terhelve: {}
+Aire de admisión muy caliente: {}	Nagyon forró beszívott levegő: {}
+Poco combustible: {}	Kevés üzemanyag: {}
+Aceite del motor muy caliente: {}	Nagyon forró motorolaj: {}
+Código de falla {}	Hibakód: {}
+Código pendiente {}	Függő kód: {}
+revisa el detalle en la pantalla	nézd meg a részleteket a képernyőn
+Detente en un lugar seguro y apaga el motor. No abras la tapa del radiador en caliente. Espera que enfríe y revisa el nivel de refrigerante, el electroventilador y la correa.	Állj meg biztonságos helyen, és állítsd le a motort. Forrón ne nyisd ki a hűtősapkát. Hagyd lehűlni, majd ellenőrizd a hűtőfolyadék szintjét, a ventilátort és a szíjat.
+Baja la exigencia: usa una marcha más baja, apaga el aire acondicionado y, si sigue subiendo, pon la calefacción al máximo y busca dónde parar.	Csökkentsd a terhelést: kapcsolj vissza, kapcsold ki a klímát, és ha tovább emelkedik, tedd maximumra a fűtést, és keress helyet a megálláshoz.
+Baja la exigencia: usa una marcha más baja, apaga el aire acondicionado y vigila que el electroventilador encienda.	Csökkentsd a terhelést: kapcsolj vissza, kapcsold ki a klímát, és ellenőrizd, hogy bekapcsol-e a hűtőventilátor.
+El alternador está cargando de más y puede dañar la batería. Revísalo pronto.	A generátor túltölt, és károsíthatja az akkumulátort. Hamarosan ellenőriztesd.
+El alternador no está cargando bien: apaga lo que no necesites (aire, luces extra) y ve a un taller antes de que se descargue la batería. Revisa la correa.	A generátor nem tölt rendesen: kapcsold ki, ami nem kell (klíma, extra lámpák), és menj szervizbe, mielőtt lemerül az akkumulátor. Ellenőrizd a szíjat.
+Baja la velocidad o usa una marcha más alta. En bajadas, frena con motor sin pasar la zona roja.	Lassíts vagy kapcsolj feljebb. Lejtőn motorféket használj a piros tartomány elérése nélkül.
+El motor va al máximo hace rato. En cuestas largas usa una marcha más baja y deja descansar el motor y la caja.	A motor egy ideje teljes terhelésen jár. Hosszú emelkedőn kapcsolj vissza, és pihentesd a motort és a váltót.
+El aire que entra al motor está muy caliente: pierde potencia. Si estás detenido, avanza para que circule aire.	A motorba jutó levegő nagyon forró, ezért veszít a teljesítményéből. Ha állsz, állj olyan helyre, ahol jár a levegő.
+Carga combustible en la próxima estación. En la montaña puede no haber más adelante.	Tankolj a következő kútnál. Hegyekben lehet, hogy nem lesz több.
+El motor recibe menos combustible del que necesita: puede ser una fuga de vacío, el filtro de combustible o el sensor MAF. Puede perder fuerza en subidas.	A motor kevesebb üzemanyagot kap a szükségesnél: vákuumszivárgás, üzemanyagszűrő vagy MAF-szenzor lehet. Emelkedőn veszíthet a teljesítményéből.
+El motor recibe más combustible del necesario: revisa el filtro de aire, el sensor MAF o un inyector que gotee.	A motor több üzemanyagot kap a szükségesnél: ellenőrizd a légszűrőt, a MAF-szenzort vagy egy szivárgó befecskendezőt.
+Baja la exigencia y revisa el nivel de aceite cuando puedas parar.	Csökkentsd a terhelést, és amint megállhatsz, ellenőrizd az olajszintet.
+código	kód
+códigos	kód
+Carrocería (airbag, cinturones, luces, cierre…)	Karosszéria (légzsák, biztonsági öv, lámpák, zárak…)
+Chasis (frenos ABS, dirección, suspensión, 4x4)	Futómű (ABS-fék, kormány, felfüggesztés, 4x4)
+Comunicación entre computadores del auto	Kommunikáció az autó vezérlőegységei között
+Motor: mezcla de aire y combustible	Motor: levegő–üzemanyag keverék
+Motor: encendido y fallas de encendido	Motor: gyújtás és gyújtáskimaradás
+Control de emisiones	Kibocsátás-szabályozás
+Velocidad, ralentí y entradas auxiliares	Sebesség, alapjárat és segédbemenetek
+Computador del motor y sus salidas	A motorvezérlő és kimenetei
+Caja de cambios	Sebességváltó
+Motor o caja (sistema híbrido u otro)	Motor vagy váltó (hibrid vagy egyéb)
+código propio de la marca	gyártóspecifikus kód
+La API key no es válida	Az API-kulcs érvénytelen
+La IA está ocupada o sin saldo. Intenta más tarde.	Az MI foglalt vagy elfogyott a kreditje. Próbáld újra később.
+La IA no quiso responder	Az MI megtagadta a választ
+La IA respondió vacío	Az MI üres választ adott
+Luz del motor	Motorhiba-jelzés
+Conectar	Csatlakozás
+Auto simulado	Szimulált autó
+Apagado	Ki
+En vivo	Élő
+Alertas	Riasztások
+Códigos de falla	Hibakódok
+Pendiente	Függő
+Grave	Súlyos
+Leve	Enyhe
+Revisar	Ellenőrizendő
+Borrar códigos	Kódok törlése
+Qué hacer	Mit tegyél
+Explicación de la IA	Az MI magyarázata
+Este código no está en la tabla sin conexión: suele ser un código propio de la marca. La IA puede explicarlo.	Ez a kód nincs az offline táblázatban: általában gyártóspecifikus kód. Az MI el tudja magyarázni.
+Ojo: los códigos de airbag, ABS y carrocería normalmente no se leen con OBD-II genérico; si aparece aquí es porque el auto lo reporta al computador del motor.	Figyelem: a légzsák-, ABS- és karosszériakódok általános OBD-II-vel többnyire nem olvashatók; ha itt megjelenik, az autó a motorvezérlőnek jelenti.
+Volver a preguntar a la IA	Kérdezd újra az MI-t
+Explicar con IA	Magyarázat MI-vel
+Preguntando a la IA…	Kérdés az MI-nek…
+No se pudo consultar la IA	Nem sikerült elérni az MI-t
+Apaga el motor y deja solo el contacto puesto para borrar los códigos.	A kódok törléséhez állítsd le a motort, és csak a gyújtást hagyd ráadva.
+¿Borrar los códigos de falla?	Törlöd a hibakódokat?
+Escáner	Szkenner
+Inteligencia artificial	Mesterséges intelligencia
+Sin configurar	Nincs beállítva
+Avisos por voz	Hangos riasztások
+Sí	Igen
+Registro de la conexión	Kapcsolatnapló
+Ajustes del vehículo	Jármű beállításai
+Tu vehículo: marca, modelo, año, motor y caja	Járműved: márka, típus, évjárat, motor és váltó
+Escáner Wi-Fi (escribir IP y puerto)	Wi-Fi-s szkenner (IP és port megadása)
+Auto simulado (para probar)	Szimulált autó (kipróbáláshoz)
+No hay escáneres Bluetooth emparejados: emparéjalo en los ajustes del equipo	Nincs párosított Bluetooth-szkenner: párosítsd a fejegység beállításaiban
+Elige tu escáner	Válaszd ki a szkennered
+IP y puerto del escáner Wi-Fi	A Wi-Fi-s szkenner IP-címe és portja
+Escribe IP:puerto, por ejemplo 192.168.0.10:35000	Add meg IP:port formában, például 192.168.0.10:35000
+Proveedor	Szolgáltató
+Modelo	Modell
+Dirección de la API	API-cím
+Borrar la API key	Az API-kulcs törlése
+Aviso sobre	Figyelmeztetés e felett
+Aviso bajo	Figyelmeztetés e alatt
+Aviso sobre ±	Figyelmeztetés e felett ±
+Otra compatible con OpenAI	Más OpenAI-kompatibilis
+elegir…	válassz…
+Probar la IA	Az MI kipróbálása
+Primero escribe la API key	Előbb add meg az API-kulcsot
+Buscando los modelos del proveedor…	A szolgáltató modelljeinek lekérése…
+recomendado	ajánlott
+Escribir otro…	Másik megadása…
+Preguntando por el código de ejemplo P0711…	Kérdés a P0711 példakódról…
+La IA funciona · P0711 de ejemplo	Az MI működik · P0711 példa
+Volver	Vissza
+Elige el modelo de la IA en los ajustes	Válaszd ki az MI-modellt a beállításokban
+Escribe la dirección de la API en los ajustes	Add meg az API-címet a beállításokban
+Escaneando	Vizsgálat
+Escaneo terminado.	A vizsgálat kész.
+El escaneo se cortó	A vizsgálat megszakadt
+Escanear todo lo que entrega el auto	Minden adat vizsgálata, amit az autó ad
+Conecta el escáner con el contacto puesto (mejor con el motor en marcha) y vuelve a intentarlo.	Csatlakoztasd a szkennert ráadott gyújtással (inkább járó motornál), és próbáld újra.
+Pregunta al auto por cada dato estándar y por los datos propios de la marca del motor y la caja. Tarda hasta 2 minutos y mientras tanto las alertas se pausan: hazlo detenido. Solo lee, no cambia nada en el auto.	Megkérdezi az autótól az összes szabványos adatot, valamint a motor és a váltó márkaspecifikus adatait. Legfeljebb 2 percig tart, közben a riasztások szünetelnek: állva csináld. Csak olvas, semmit nem változtat az autón.
+Escanear	Vizsgálat
+Guardado en	Mentve ide
+Lo que entrega tu auto	Amit az autód ad
+Consumo	Fogyasztás
+calculado	számított
+Panel	Műszerfal
+Todos los datos	Összes adat
+Datos en vivo	Élő adatok
+Monitores de emisiones	Kibocsátásfigyelők
+✓ listo · ✗ aún no termina su prueba (normal después de borrar códigos o desconectar la batería).	✓ kész · ✗ a teszt még nem fejeződött be (normális a kódok törlése vagy az akkumulátor lekötése után).
+Catalizador	Katalizátor
+Preguntar a la IA	Kérdezd az MI-t
+Ajustar esta alerta	A riasztás beállítása
+Alertas a vigilar	Figyelendő riasztások
+Subida rápida del refrigerante	A hűtőfolyadék gyors melegedése
+Códigos de falla nuevos (aviso por voz)	Új hibakódok (hangos figyelmeztetés)
+aviso	figyelmeztetés
+alerta	riasztás
+bajo	alacsony
+Vigilar	Figyelés
+Valores de fábrica	Gyári értékek
+Escribe un número	Adj meg egy számot
+Datos del motor cuando se registró la falla	Motoradatok a hiba rögzítésekor
+Buscar escáneres Bluetooth cercanos	Közeli Bluetooth-szkennerek keresése
+Emparejado	Párosítva
+emparejado	párosítva
+No se pudo emparejar. Prueba con la clave 1234 o 0000.	Nem sikerült párosítani. Próbáld az 1234 vagy 0000 PIN-t.
+Sin el permiso de ubicación Android no deja buscar equipos Bluetooth	Helyhozzáférési engedély nélkül az Android nem engedi a Bluetooth-eszközök keresését
+No se encontraron equipos. ¿Está el escáner enchufado y el contacto puesto?	Nem található eszköz. Be van dugva a szkenner, és rá van adva a gyújtás?
+Buscando… (enchufa el escáner y pon el contacto)	Keresés… (dugd be a szkennert, és add rá a gyújtást)
+Emparejando… si pide clave, escribe 1234 o 0000	Párosítás… ha PIN-t kér, írd be: 1234 vagy 0000
+Emparéjalo en los ajustes de Bluetooth del equipo	Párosítsd a fejegység Bluetooth-beállításaiban
+Los escáneres suelen llamarse OBDII, OBD2, V-LINK o Vgate.	A szkennerek neve általában OBDII, OBD2, V-LINK vagy Vgate.
+Buscar de nuevo	Keresés újra
+Gráficos en vivo	Élő grafikonok
+Desliza el dedo sobre un gráfico para ver el valor de cada momento. Toca los datos de arriba para comparar hasta 3.	Húzd az ujjad a grafikonon, hogy lásd az egyes pillanatok értékét. Fent koppints az adatokra, és legfeljebb 3-at összehasonlíthatsz.
+mín	min.
+máx	max.
+prom	átl.
+ahora	most
+hace	ezelőtt
+Esperando datos…	Várakozás az adatokra…
+Monitor apagado · toca para conectar	Figyelő kikapcsolva · koppints a csatlakozáshoz
+monitor apagado	figyelő kikapcsolva
+Monitor apagado	Figyelő kikapcsolva
+Listo	Kész
+límite	határ
+ancho	szélesség
+APPS	APPOK
+normal	normál
+Avance del encendido	Gyújtási előgyújtás
+Sonda O2 banco 1	O2-szenzor 1. hengersor
+Sonda O2 banco 1 sensor 2	O2-szenzor 1. hengersor 2. szenzor
+Tiempo de marcha	Üzemidő
+Distancia con la luz del motor	Megtett út égő hibalámpával
+EGR comandada	EGR-parancs
+Arranques desde borrar códigos	Bemelegedések a törlés óta
+Distancia desde borrar códigos	Megtett út a törlés óta
+Presión barométrica	Légköri nyomás
+Catalizador banco 1	Katalizátor 1. hengersor
+Catalizador banco 1 sensor 2	Katalizátor 1. hengersor 2. szenzor
+Carga absoluta	Abszolút terhelés
+Mezcla comandada	Parancsolt légviszony
+Acelerador relativo	Relatív fojtószelep
+Acelerador B	Fojtószelep B
+Pedal D	Pedál D
+Pedal E	Pedál E
+Acelerador comandado	Parancsolt fojtószelep
+Tiempo con la luz del motor	Idő égő hibalámpával
+Tiempo desde borrar códigos	Idő a törlés óta
+Mezcla O2 banco 1	O2-korrekció 1. hengersor
+Mezcla O2 banco 1 sensor 2	O2-korrekció 1. hengersor 2. szenzor
+API key	API-kulcs
+Enviar el VIN a la IA	A VIN elküldése az MI-nek
+RPM	Fordulatszám
+
+# 2.26: textos del escáner que faltaban
+Parada intermedia	Köztes megálló
+
+# 2.26: alertas de mezcla y explicación de los códigos de falla más comunes (assets/obd/dtc_es.tsv)
+Mezcla pobre ({}): {}	Szegény keverék ({}): {}
+Mezcla rica ({}): {}	Dús keverék ({}): {}
+Árbol de levas de admisión adelantado más de lo esperado (variador CVVT).	A szívóoldali vezérműtengely a vártnál jobban előre állított (CVVT-állító).
+Revisa nivel y estado del aceite: el variador funciona con presión de aceite. Si el aceite está bien, revisar la válvula solenoide OCV.	Ellenőrizd az olajszintet és az olaj állapotát: az állító olajnyomással működik. Ha az olaj rendben van, ellenőrizd az OCV mágnesszelepet.
+Árbol de levas de admisión atrasado más de lo esperado (variador CVVT).	A szívóoldali vezérműtengely a vártnál jobban késleltetett (CVVT-állító).
+Revisa nivel y estado del aceite. Si sigue, revisar la válvula OCV y la cadena de distribución.	Ellenőrizd az olajszintet és az olaj állapotát. Ha megmarad, ellenőrizd az OCV szelepet és a vezérműláncot.
+Árbol de levas de escape adelantado más de lo esperado.	A kipufogóoldali vezérműtengely a vártnál jobban előre állított.
+Revisa nivel y estado del aceite. Si sigue, revisar la válvula OCV de escape.	Ellenőrizd az olajszintet és az olaj állapotát. Ha megmarad, ellenőrizd a kipufogóoldali OCV szelepet.
+La posición del cigüeñal y del árbol de levas no coinciden.	A főtengely és a vezérműtengely helyzete nem egyezik.
+Puede ser la cadena de distribución estirada o saltada. Evita exigir el motor y llévalo al taller pronto.	Megnyúlhatott vagy átugorhatott a vezérműlánc. Ne terheld a motort, és vidd hamar szervizbe.
+El sensor de flujo de aire (MAF) marca fuera de lo esperado.	A légtömegmérő (MAF) a vártól eltérő értéket mutat.
+Revisa el filtro de aire y que no haya mangueras sueltas después del sensor. Limpiar el MAF con limpiador especial.	Ellenőrizd a légszűrőt, és hogy nincs-e laza cső a szenzor után. Tisztítsd meg a MAF-ot speciális tisztítóval.
+Señal baja del sensor de flujo de aire (MAF).	A légtömegmérő (MAF) jele alacsony.
+Revisa el conector y el cableado del MAF.	Ellenőrizd a MAF csatlakozóját és vezetékeit.
+Señal alta del sensor de flujo de aire (MAF).	A légtömegmérő (MAF) jele magas.
+El sensor de presión del múltiple (MAP) marca fuera de lo esperado.	A szívócső-nyomás érzékelő (MAP) a vártól eltérő értéket mutat.
+Revisa mangueras de vacío y el conector del sensor MAP.	Ellenőrizd a vákuumcsöveket és a MAP érzékelő csatlakozóját.
+El sensor de temperatura del aire de admisión marca fuera de lo esperado.	A beszívott levegő hőmérséklet-érzékelője a vártól eltérő értéket mutat.
+Revisa el conector del sensor. No suele dejarte botado.	Ellenőrizd az érzékelő csatlakozóját. Ritkán miatta áll meg az autó.
+Señal baja del sensor de temperatura del aire de admisión.	A beszívott levegő hőmérséklet-érzékelőjének jele alacsony.
+Revisa el conector y el cableado del sensor.	Ellenőrizd az érzékelő csatlakozóját és vezetékeit.
+Señal alta del sensor de temperatura del aire de admisión.	A beszívott levegő hőmérséklet-érzékelőjének jele magas.
+El sensor de temperatura del refrigerante marca fuera de lo esperado.	A hűtőfolyadék-hőmérséklet érzékelő a vártól eltérő értéket mutat.
+No confíes en el indicador de temperatura hasta revisarlo. Vigila que el electroventilador encienda.	Amíg nincs ellenőrizve, ne bízz a hőmérséklet-kijelzőben. Figyeld, hogy bekapcsol-e a hűtőventilátor.
+Señal baja del sensor de temperatura del refrigerante.	A hűtőfolyadék-hőmérséklet érzékelő jele alacsony.
+Sin este dato el motor puede sobrecalentarse sin avisar. Revisa nivel de refrigerante y el conector del sensor.	Enélkül az adat nélkül a motor figyelmeztetés nélkül túlmelegedhet. Ellenőrizd a hűtőfolyadék szintjét és az érzékelő csatlakozóját.
+Señal alta del sensor de temperatura del refrigerante.	A hűtőfolyadék-hőmérséklet érzékelő jele magas.
+El sensor de posición del acelerador marca fuera de lo esperado.	A fojtószelep-helyzet érzékelő a vártól eltérő értéket mutat.
+El motor puede entrar en modo de emergencia (poca potencia). Revisa el cuerpo de aceleración y su conector.	A motor vészüzemmódba kapcsolhat (kevés teljesítmény). Ellenőrizd a fojtószeleptestet és a csatlakozóját.
+Señal baja del sensor de posición del acelerador.	A fojtószelep-helyzet érzékelő jele alacsony.
+Puede entrar en modo de emergencia. Revisa el conector del cuerpo de aceleración.	Vészüzemmódba kapcsolhat. Ellenőrizd a fojtószeleptest csatlakozóját.
+Señal alta del sensor de posición del acelerador.	A fojtószelep-helyzet érzékelő jele magas.
+El motor tarda mucho en llegar a temperatura para el control de mezcla.	A motor túl lassan éri el a keverékszabályozáshoz szükséges hőmérsékletet.
+Suele ser el termostato abierto o el sensor de temperatura. Revisa en el taller.	Általában nyitva ragadt termosztát vagy a hőmérséklet-érzékelő. Nézesd meg szervizben.
+El refrigerante no llega a la temperatura del termostato.	A hűtőfolyadék nem éri el a termosztát hőmérsékletét.
+Casi siempre es el termostato pegado abierto. Gasta más combustible y calienta poco la cabina; cámbialo cuando puedas.	Szinte mindig nyitva ragadt termosztát. Többet fogyaszt és alig fűt az utastérben; cseréld, amikor tudod.
+Falla en el circuito del sensor de oxígeno delantero (banco 1).	Az első oxigénérzékelő áramkörének hibája (1. hengersor).
+Revisa el conector del sensor. Gastarás algo más de combustible.	Ellenőrizd az érzékelő csatlakozóját. Kicsit nőni fog a fogyasztás.
+El sensor de oxígeno delantero responde lento.	Az első oxigénérzékelő lassan reagál.
+El sensor está viejo. Cámbialo cuando puedas.	Az érzékelő elöregedett. Cseréld, amikor tudod.
+Falla en el calentador del sensor de oxígeno delantero.	Az első oxigénérzékelő fűtésének hibája.
+Revisa el fusible y el conector del sensor. Se puede seguir.	Ellenőrizd a biztosítékot és az érzékelő csatlakozóját. Lehet tovább menni.
+Falla en el calentador del sensor de oxígeno trasero.	A hátsó oxigénérzékelő fűtésének hibája.
+Mezcla pobre: entra más aire o llega menos combustible de lo que debería.	Szegény keverék: több levegő jut be vagy kevesebb üzemanyag érkezik a kelleténél.
+Busca fugas de vacío (mangueras, junta de admisión), revisa el MAF, la presión de combustible y el filtro. En subidas largas puede perder fuerza.	Keress vákuumszivárgást (csövek, szívócső-tömítés), ellenőrizd a MAF-ot, az üzemanyagnyomást és a szűrőt. Hosszú emelkedőn veszíthet a teljesítményéből.
+Mezcla rica: llega más combustible del que debería.	Dús keverék: több üzemanyag érkezik a kelleténél.
+Revisa el filtro de aire, el MAF, inyectores que goteen y el regulador de presión.	Ellenőrizd a légszűrőt, a MAF-ot, a csepegő befecskendezőket és a nyomásszabályozót.
+Temperatura del motor excesiva.	Túl magas motorhőmérséklet.
+Detente en un lugar seguro y apaga el motor. No abras la tapa del radiador en caliente. Revisa refrigerante, ventilador y correa.	Állj meg biztonságos helyen, és állítsd le a motort. Melegen ne nyisd ki a hűtősapkát. Ellenőrizd a hűtőfolyadékot, a ventilátort és a szíjat.
+Falla en el circuito del relé de la bomba de combustible.	Az üzemanyag-szivattyú relé áramkörének hibája.
+El motor puede apagarse sin aviso. Revisa relé y fusible de la bomba.	A motor figyelmeztetés nélkül leállhat. Ellenőrizd a szivattyú reléjét és biztosítékát.
+Falla en el inyector del cilindro {}.	A(z) {}. henger befecskendezőjének hibája.
+Puede fallar el cilindro {}. Revisa el conector del inyector.	A(z) {}. henger kihagyhat. Ellenőrizd a befecskendező csatlakozóját.
+Fallas de encendido en varios cilindros.	Gyújtáskimaradás több hengerben.
+Si la luz del motor parpadea, baja la velocidad y no exijas el motor: el catalizador se puede dañar. Revisa bujías, bobinas, combustible y fugas de vacío.	Ha villog a motorhiba-jelző, lassíts, és ne terheld a motort: megsérülhet a katalizátor. Ellenőrizd a gyújtógyertyákat, a gyújtótekercseket, az üzemanyagot és a vákuumszivárgást.
+Falla de encendido en el cilindro {}.	Gyújtáskimaradás a(z) {}. hengerben.
+Si la luz parpadea, no exijas el motor. Intercambia la bobina del cilindro {} con otra para ver si la falla se mueve; revisa la bujía.	Ha villog a jelző, ne terheld a motort. Cseréld fel a(z) {}. henger gyújtótekercsét egy másikkal, és nézd meg, vándorol-e a hiba; ellenőrizd a gyertyát.
+Falla en el circuito del sensor de detonación.	A kopogásérzékelő áramkörének hibája.
+El motor se protege atrasando el encendido: tendrá menos fuerza. Usa el combustible recomendado y revisa el conector del sensor.	A motor késleltetett gyújtással védi magát: kisebb lesz a teljesítménye. Az ajánlott üzemanyagot tankold, és ellenőrizd az érzékelő csatlakozóját.
+Falla en el sensor de posición del cigüeñal.	A főtengely-helyzet érzékelő hibája.
+El motor puede apagarse o no volver a arrancar. Evita lugares aislados y revisa el sensor y su conector.	A motor leállhat vagy nem indul újra. Kerüld az elhagyatott helyeket, és ellenőrizd az érzékelőt és a csatlakozóját.
+El sensor de posición del cigüeñal marca fuera de lo esperado.	A főtengely-helyzet érzékelő a vártól eltérő értéket mutat.
+El motor puede apagarse o no volver a arrancar. Revisa el sensor y su conector.	A motor leállhat vagy nem indul újra. Ellenőrizd az érzékelőt és a csatlakozóját.
+Falla en el sensor de posición del árbol de levas.	A vezérműtengely-helyzet érzékelő hibája.
+Puede costar arrancar o apagarse. Revisa el sensor y su conector.	Nehezen indulhat vagy leállhat. Ellenőrizd az érzékelőt és a csatlakozóját.
+El sensor del árbol de levas marca fuera de lo esperado.	A vezérműtengely-érzékelő a vártól eltérő értéket mutat.
+Revisa el sensor, su conector y la distribución.	Ellenőrizd az érzékelőt, a csatlakozóját és a vezérlést.
+Falla en el circuito de la bobina del cilindro {}.	A(z) {}. henger gyújtótekercs-áramkörének hibája.
+Puede fallar el cilindro {}. Revisa la bobina y su conector.	A(z) {}. henger kihagyhat. Ellenőrizd a gyújtótekercset és a csatlakozóját.
+El catalizador (banco 1) ya no limpia los gases como debería.	A katalizátor (1. hengersor) már nem tisztítja úgy a kipufogógázt, ahogy kellene.
+Se puede seguir manejando. Antes de cambiarlo, descarta fallas de encendido, fugas de escape y sensores de oxígeno.	Lehet tovább vezetni. Cseréje előtt zárd ki a gyújtáskimaradást, a kipufogószivárgást és az oxigénérzékelőket.
+Flujo incorrecto en el sistema de vapores de combustible (EVAP).	Hibás áramlás az üzemanyaggőz-rendszerben (EVAP).
+No afecta cómo maneja. Revisa la válvula de purga.	Nem befolyásolja a vezetést. Ellenőrizd az öblítőszelepet.
+Pequeña fuga en el sistema de vapores de combustible (EVAP).	Kis szivárgás az üzemanyaggőz-rendszerben (EVAP).
+Revisa que la tapa del estanque cierre bien. No afecta cómo maneja.	Ellenőrizd, hogy jól zár-e a tanksapka. Nem befolyásolja a vezetést.
+Fuga grande en el sistema de vapores de combustible (EVAP).	Nagy szivárgás az üzemanyaggőz-rendszerben (EVAP).
+Revisa que la tapa del estanque esté puesta y bien cerrada.	Ellenőrizd, hogy a tanksapka a helyén van-e és jól be van-e zárva.
+Fuga muy pequeña en el sistema de vapores de combustible (EVAP).	Nagyon kis szivárgás az üzemanyaggőz-rendszerben (EVAP).
+Revisa la tapa del estanque. No afecta cómo maneja.	Ellenőrizd a tanksapkát. Nem befolyásolja a vezetést.
+Falla en el sensor de velocidad del vehículo.	A járműsebesség-érzékelő hibája.
+La caja automática puede cambiar mal y el velocímetro fallar. Revisa el sensor y su conector.	Az automata váltó rosszul válthat, és a sebességmérő is kieshet. Ellenőrizd az érzékelőt és a csatlakozóját.
+Falla en el control de ralentí.	Az alapjárat-szabályozás hibája.
+El motor puede quedar acelerado o apagarse en ralentí. Limpia el cuerpo de aceleración.	A motor magas fordulaton maradhat vagy alapjáraton leállhat. Tisztítsd meg a fojtószeleptestet.
+Ralentí más bajo de lo esperado.	A vártnál alacsonyabb alapjárat.
+Limpia el cuerpo de aceleración y revisa fugas de vacío.	Tisztítsd meg a fojtószeleptestet, és keress vákuumszivárgást.
+Ralentí más alto de lo esperado.	A vártnál magasabb alapjárat.
+Suele ser una fuga de vacío o el cuerpo de aceleración sucio.	Általában vákuumszivárgás vagy szennyezett fojtószeleptest.
+Voltaje del sistema bajo.	Alacsony rendszerfeszültség.
+El alternador puede no estar cargando. Revisa la correa, los bornes de la batería y el alternador antes de un viaje largo.	Lehet, hogy nem tölt a generátor. Hosszabb út előtt ellenőrizd a szíjat, az akkumulátor saruit és a generátort.
+Voltaje del sistema alto.	Magas rendszerfeszültség.
+El regulador del alternador puede estar fallando y dañar la batería. Revísalo pronto.	A generátor feszültségszabályozója hibás lehet, és károsíthatja az akkumulátort. Nézesd meg hamar.
+Falla de comunicación interna del computador del motor.	A motorvezérlő belső kommunikációs hibája.
+Revisa masas (tierras) y conectores del computador.	Ellenőrizd a vezérlő testkötéseit és csatlakozóit.
+Falla de memoria del computador del motor.	A motorvezérlő memóriahibája.
+Llévalo al taller.	Vidd szervizbe.
+La caja automática registró una falla (pide leer el computador de la caja).	Az automata váltó hibát rögzített (olvasd ki a váltóvezérlőt).
+Hay otro código guardado en el computador de la caja. Si la caja queda en un solo cambio (modo de emergencia), maneja suave hasta el taller.	A váltóvezérlőben egy másik kód is el van tárolva. Ha a váltó egy fokozatban marad (vészüzem), finoman vezess a szervizig.
+Falla en el sensor de posición de la palanca de cambios.	A váltókar-helyzet érzékelő hibája.
+Puede no arrancar en P o N o mostrar mal el cambio. Revisa el interruptor de rango.	Lehet, hogy P vagy N állásban nem indul, vagy rossz fokozatot mutat. Ellenőrizd a fokozatkapcsolót.
+Falla en el circuito del sensor de temperatura del aceite de la caja automática.	Az automata váltó olajhőmérséklet-érzékelő áramkörének hibája.
+La caja puede cambiar brusco. Revisa el nivel y el color del aceite de la caja y el conector del sensor. Evita remolcar o subir pendientes largas exigiendo la caja.	A váltó rántva válthat. Ellenőrizd a váltóolaj szintjét és színét, valamint az érzékelő csatlakozóját. Kerüld az utánfutózást és a váltót terhelő hosszú emelkedőket.
+El sensor de temperatura del aceite de la caja automática marca fuera de lo esperado.	Az automata váltó olajhőmérséklet-érzékelője a vártól eltérő értéket mutat.
+La caja puede cambiar brusco o quedar en modo de emergencia. Revisa nivel y color del aceite de la caja (oscuro u olor a quemado es mala señal) y el conector del sensor. En subidas largas usa una marcha baja y descansa la caja.	A váltó rántva válthat vagy vészüzembe kapcsolhat. Ellenőrizd a váltóolaj szintjét és színét (a sötét szín vagy az égett szag rossz jel), valamint az érzékelő csatlakozóját. Hosszú emelkedőn használj alacsony fokozatot, és pihentesd a váltót.
+Señal baja del sensor de temperatura del aceite de la caja automática.	Az automata váltó olajhőmérséklet-érzékelőjének jele alacsony.
+Revisa el conector y el cableado del sensor. La caja puede cambiar brusco.	Ellenőrizd az érzékelő csatlakozóját és vezetékeit. A váltó rántva válthat.
+Señal alta del sensor de temperatura del aceite de la caja automática.	Az automata váltó olajhőmérséklet-érzékelőjének jele magas.
+Falla en el sensor de velocidad de entrada de la caja.	A váltó bemenő fordulatszám-érzékelőjének hibája.
+La caja puede cambiar brusco o quedar en modo de emergencia. Revisa el sensor y su conector.	A váltó rántva válthat vagy vészüzembe kapcsolhat. Ellenőrizd az érzékelőt és a csatlakozóját.
+Falla en el sensor de velocidad de salida de la caja.	A váltó kimenő fordulatszám-érzékelőjének hibája.
+La caja puede cambiar brusco y el velocímetro fallar. Revisa el sensor y su conector.	A váltó rántva válthat, és a sebességmérő is kieshet. Ellenőrizd az érzékelőt és a csatlakozóját.
+La relación de cambios no es la correcta (la caja patina).	Nem megfelelő az áttétel (a váltó csúszik).
+Revisa el nivel del aceite de la caja de inmediato. Maneja suave: seguir exigiéndola puede dañarla.	Azonnal ellenőrizd a váltóolaj szintjét. Vezess finoman: a további terhelés tönkreteheti.
+Relación incorrecta en 1ª: la caja patina en primera.	Hibás áttétel 1. fokozatban: a váltó egyesben csúszik.
+Revisa el nivel del aceite de la caja. Maneja suave hasta el taller.	Ellenőrizd a váltóolaj szintjét. Finoman vezess a szervizig.
+Relación incorrecta en 2ª: la caja patina en segunda.	Hibás áttétel 2. fokozatban: a váltó kettesben csúszik.
+Relación incorrecta en 3ª: la caja patina en tercera.	Hibás áttétel 3. fokozatban: a váltó hármasban csúszik.
+Relación incorrecta en 4ª: la caja patina en cuarta.	Hibás áttétel 4. fokozatban: a váltó négyesben csúszik.
+Falla en el circuito del embrague del convertidor de torque.	A nyomatékváltó áthidaló tengelykapcsoló-áramkörének hibája.
+Gastará más combustible y la caja se calentará más. Revisa el aceite de la caja.	Többet fog fogyasztani, és a váltó jobban melegszik. Ellenőrizd a váltóolajat.
+El embrague del convertidor de torque no acopla o patina.	A nyomatékváltó áthidaló tengelykapcsolója nem zár vagy csúszik.
+La caja se calienta más: evita subidas largas exigentes y revisa el aceite de la caja.	A váltó jobban melegszik: kerüld a hosszú, megterhelő emelkedőket, és ellenőrizd a váltóolajat.
+Falla eléctrica en el embrague del convertidor de torque.	A nyomatékváltó áthidaló tengelykapcsolójának elektromos hibája.
+Revisa el conector de la caja. Gastará más combustible.	Ellenőrizd a váltó csatlakozóját. Többet fog fogyasztani.
+Falla en el solenoide de cambio {}.	A(z) {} váltószelep hibája.
+La caja puede quedar en un solo cambio. Maneja suave hasta el taller.	A váltó egy fokozatban maradhat. Finoman vezess a szervizig.
+El sensor de oxígeno trasero ve mezcla pobre después del catalizador.	A hátsó oxigénérzékelő szegény keveréket lát a katalizátor után.
+Revisa fugas de escape antes del sensor.	Keress kipufogószivárgást az érzékelő előtt.
+El sensor de oxígeno trasero ve mezcla rica después del catalizador.	A hátsó oxigénérzékelő dús keveréket lát a katalizátor után.
+Revisa sensores de oxígeno y el catalizador.	Ellenőrizd az oxigénérzékelőket és a katalizátort.
+Mezcla pobre en ralentí.	Szegény keverék alapjáraton.
+Suele ser una fuga de vacío. Revisa mangueras y la válvula PCV.	Általában vákuumszivárgás. Ellenőrizd a csöveket és a PCV szelepet.
+Mezcla rica en ralentí.	Dús keverék alapjáraton.
+Revisa inyectores y la válvula de purga del EVAP.	Ellenőrizd a befecskendezőket és az EVAP öblítőszelepet.
+
+# 2.26: monitores de emisiones y avance del escaneo
+Fallas de encendido	Gyújtáskimaradás
+Sistema de combustible	Üzemanyagrendszer
+Componentes	Alkatrészek
+Catalizador calefaccionado	Fűtött katalizátor
+Vapores de combustible (EVAP)	Üzemanyaggőz (EVAP)
+Aire secundario	Szekunder levegő
+Sensores de oxígeno	Oxigénérzékelők
+Calefactor de sensores de oxígeno	Oxigénérzékelő-fűtés
+Recirculación de gases (EGR)	Kipufogógáz-visszavezetés (EGR)
+Escaneando: {}	Szkennelés: {}
+Datos estándar (modo 01)…	Szabványos adatok (01-es mód)…
+Información del vehículo (modo 09)…	Járműadatok (09-es mód)…
+Modo 01 · PID {}	01-es mód · PID {}
+Sin conexión	Nincs kapcsolat
+Interrumpido	Megszakítva
+Dirección no válida: {}	Érvénytelen cím: {}
+Guía del escáner	Szkenner útmutató
+Guía	Útmutató
+Qué comprar, cómo conectarlo y qué significa cada cosa · sin internet	Mit vegyél, hogyan csatlakoztasd, és mit jelent minden · internet nélkül

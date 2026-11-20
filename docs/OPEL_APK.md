@@ -281,3 +281,25 @@ FYT defaults to Generic and needs explicit selection; proprietary hardware data
 and API 17 remain untested. Signing, lint and both full emulator matrices must
 pass on GitHub runners before main integration/publication. No local Android
 builds or signing are used. Pages and official release/update guards remain.
+
+
+## Completed 2.25.2 and pending 2.26.0 sync — 2026-11-20
+
+[Opel 2.25.2 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.25.2-preview.1)
+was published from `4aee951932ec761f2badae31b94e22f1e270b427` after successful
+hosted workflow `44636762941`, including signing and both full emulator matrices.
+
+The new candidate merges only stable upstream `v2.26.0`, release ID 452770406,
+commit `1d21e7eaef74bd3bde4a767de4a81809f7ad1593`, against that Opel main baseline.
+Version `2.26.0-opel`, versionCode 62, adds the upstream opt-in OBD-II scanner,
+vehicle overlay, fault-code information and offline guide. Opel palette setup
+still runs before building the home view; the new overlay attaches afterward.
+Settings retain Opel category labels and defensive bounds checks, alongside OBD
+subpages and listener cleanup. Backup excludes both per-style delayed theme state
+and the optional AI key. The Opel gallery, Astra fallback, projection controls,
+migrations, package identity, official-update isolation and Pages removal remain.
+
+Hosted build/unit/lint/signature checks and both complete eight-API emulator
+matrices are required before integration and publication. No Android tools run
+on the VPS. API 17 and vehicle hardware, including real OBD-II adapters, remain
+untested; normal startup coverage does not establish full OBD or vehicle UI behavior.
