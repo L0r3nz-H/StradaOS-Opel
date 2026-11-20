@@ -95,11 +95,13 @@ class ObdDialogs {
         try {
             BluetoothAdapter ad = BluetoothAdapter.getDefaultAdapter();
             if (ad != null && bluetoothGranted()) for (BluetoothDevice d : ad.getBondedDevices()) {
-                String n = d.getName() != null ? d.getName() : d.getAddress();
+                String n = name(d);
                 String[] o = {"bt:" + d.getAddress(), n};
                 if (looksObd(n)) opts.add(0, o);   // los escáneres primero
                 else opts.add(o);
             }
+        } catch (SecurityException denied) {
+            opts.clear(); // Permission revoked while listing: retain Wi-Fi/demo and discovery choices.
         } catch (Throwable ignored) { }
         final int nBt = opts.size();
         String[] labels = new String[nBt + 3];
@@ -149,7 +151,9 @@ class ObdDialogs {
         final BluetoothAdapter ad = BluetoothAdapter.getDefaultAdapter();
         if (ad == null) { toast("Este equipo no tiene Bluetooth"); return; }
         if (!ad.isEnabled()) {
-            try { a.startActivity(new android.content.Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)); } catch (Throwable e) { toast("El Bluetooth está apagado"); }
+            try { a.startActivity(new android.content.Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)); }
+            catch (SecurityException denied) { toast("Bluetooth: permiso denegado"); }
+            catch (Throwable e) { toast("El Bluetooth está apagado"); }
             return;
         }
         // Android 6+: buscar equipos Bluetooth pide el permiso de ubicación
@@ -170,12 +174,12 @@ class ObdDialogs {
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(act)) {
                 showFound(true);
             } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(act) && d != null && pairing != null && d.getAddress().equals(pairing.getAddress())) {
-                if (d.getBondState() == BluetoothDevice.BOND_BONDED) {
+                if (bondState(d) == BluetoothDevice.BOND_BONDED) {
                     toast(I18n.t("Emparejado") + ": " + name(d));
                     pairing = null;
                     stopDiscovery();
                     choose("bt:" + d.getAddress(), name(d));
-                } else if (d.getBondState() == BluetoothDevice.BOND_NONE) {
+                } else if (bondState(d) == BluetoothDevice.BOND_NONE) {
                     pairing = null;
                     toast("No se pudo emparejar. Prueba con la clave 1234 o 0000.");
                 }
@@ -185,7 +189,12 @@ class ObdDialogs {
         f.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         f.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         a.registerReceiver(btRx, f);
-        ad.startDiscovery();
+        try { ad.startDiscovery(); }
+        catch (SecurityException denied) {
+            stopDiscovery();
+            toast("Bluetooth: permiso denegado");
+            return;
+        }
         showFound(false);
     }
 
@@ -203,8 +212,22 @@ class ObdDialogs {
 
     private static String name(BluetoothDevice d) {
         String n = null;
-        try { n = d.getName(); } catch (Throwable ignored) { }
+        try { n = d.getName(); }
+        catch (SecurityException denied) { return d.getAddress(); }
+        catch (Throwable ignored) { }
         return n != null && n.length() > 0 ? n : d.getAddress();
+    }
+
+    private static int bondState(BluetoothDevice device) {
+        try { return device.getBondState(); }
+        catch (SecurityException denied) { return BluetoothDevice.BOND_NONE; }
+    }
+
+    /** Revoked permissions must not prevent receiver/socket cleanup. */
+    private static void cancelDiscovery(BluetoothAdapter adapter) {
+        if (adapter == null) return;
+        try { adapter.cancelDiscovery(); }
+        catch (SecurityException denied) { /* Already forbidden: nothing to cancel. */ }
     }
 
     private void showFound(boolean finished) {
@@ -219,16 +242,16 @@ class ObdDialogs {
         String[] labels = new String[list.size()];
         for (int i = 0; i < list.size(); i++) {
             BluetoothDevice d = list.get(i);
-            labels[i] = (looksObd(name(d)) ? "★ " : "") + name(d) + (d.getBondState() == BluetoothDevice.BOND_BONDED ? "  · " + I18n.t("emparejado") : "");
+            labels[i] = (looksObd(name(d)) ? "★ " : "") + name(d) + (bondState(d) == BluetoothDevice.BOND_BONDED ? "  · " + I18n.t("emparejado") : "");
         }
         TB b = (TB) tb().raw().wide()
             .setTitle(I18n.t(finished ? (list.isEmpty() ? "No se encontraron equipos. ¿Está el escáner enchufado y el contacto puesto?" : "Elige tu escáner")
                 : "Buscando… (enchufa el escáner y pon el contacto)"));
         if (labels.length > 0) b.setItems(labels, new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
             BluetoothDevice dev = list.get(w);
-            if (dev.getBondState() == BluetoothDevice.BOND_BONDED) { stopDiscovery(); choose("bt:" + dev.getAddress(), name(dev)); return; }
+            if (bondState(dev) == BluetoothDevice.BOND_BONDED) { stopDiscovery(); choose("bt:" + dev.getAddress(), name(dev)); return; }
             pairing = dev;
-            try { BluetoothAdapter.getDefaultAdapter().cancelDiscovery(); } catch (Throwable ignored) { }
+            try { cancelDiscovery(BluetoothAdapter.getDefaultAdapter()); } catch (Throwable ignored) { }
             boolean ok = false;
             try { ok = (Boolean) dev.getClass().getMethod("createBond").invoke(dev); } catch (Throwable ignored) { }   // API 19 (en 4.x por reflexión)
             if (ok) toast("Emparejando… si pide clave, escribe 1234 o 0000");
@@ -245,7 +268,7 @@ class ObdDialogs {
     }
 
     void stopDiscovery() {
-        try { if (bluetoothGranted()) BluetoothAdapter.getDefaultAdapter().cancelDiscovery(); } catch (Throwable ignored) { }
+        try { if (bluetoothGranted()) cancelDiscovery(BluetoothAdapter.getDefaultAdapter()); } catch (Throwable ignored) { }
         if (btRx != null) try { a.unregisterReceiver(btRx); } catch (Throwable ignored) { }
         btRx = null;
     }

@@ -64,7 +64,9 @@ public class Elm {
             if (a == null) throw new IOException("Este equipo no tiene Bluetooth");
             if (!a.isEnabled()) throw new IOException("El Bluetooth está apagado");
             BluetoothDevice d = a.getRemoteDevice(addr.substring(3));
-            try { a.cancelDiscovery(); } catch (Throwable ignored) { }
+            try { a.cancelDiscovery(); }
+            catch (SecurityException denied) { throw new IOException("Bluetooth permission denied", denied); }
+            catch (Throwable ignored) { }
             IOException last = null;
             // los clones del ELM327 a veces solo aceptan la conexión insegura, otros solo el canal 1 por reflexión
             for (int i = 0; i < 3 && bt == null; i++) {
@@ -75,6 +77,9 @@ public class Elm {
                     else s = (BluetoothSocket) d.getClass().getMethod("createRfcommSocket", int.class).invoke(d, 1);
                     s.connect();
                     bt = s;
+                } catch (SecurityException denied) {
+                    try { if (s != null) s.close(); } catch (Throwable ignored) { }
+                    throw new IOException("Bluetooth permission denied", denied);
                 } catch (Throwable t) {
                     try { if (s != null) s.close(); } catch (Throwable ignored) { }
                     last = t instanceof IOException ? (IOException) t : new IOException(t.toString());
