@@ -1,0 +1,8 @@
+Starting: Intent { cmp=com.stradaos.launcher.debug/com.stradaos.launcher.Main (has extras) }
+Warning: Activity not started, intent has been delivered to currently running top-most instance.
+Status: ok
+LaunchState: UNKNOWN (0)
+Activity: com.stradaos.launcher.debug/com.stradaos.launcher.Main
+TotalTime: 0
+WaitTime: 2
+Complete

@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <int name="map_provider" value="1" />
+    <string name="city_key">39.24,-123.15</string>
+    <float name="oil_interval_km" value="5000.0" />
+    <boolean name="setup_done" value="true" />
+    <boolean name="map_heading" value="false" />
+    <string name="dock_3_name">Mi app</string>
+    <boolean name="theme_last_dark" value="true" />
+    <boolean name="oil_on" value="true" />
+    <string name="dock_3">app:com.android.calendar/com.android.calendar.AllInOneActivity</string>
+    <float name="odo_base_km" value="45100.0" />
+    <string name="dock_2">fn:music</string>
+    <long name="first_use" value="1795194722837" />
+    <string name="speed_unit">auto</string>
+    <boolean name="opel_theme_last_dark" value="false" />
+    <int name="theme_delay_light" value="5" />
+    <string name="home_layout">compact_7</string>
+    <string name="hw">fyt</string>
+    <int name="sim_screen" value="0" />
+    <string name="city_name">Ukiah</string>
+    <float name="sun_lon" value="-123.15003" />
+    <float name="oil_last_km" value="40000.0" />
+    <string name="design">opel_navi_900_modern</string>
+    <string name="theme">light</string>
+    <string name="lang">en</string>
+    <float name="sun_lat" value="39.237255" />
+    <float name="odo_gps_m" value="0.0" />
+    <float name="oil_snooze_km" value="0.0" />
+    <string name="opel_theme">system</string>
+    <int name="theme_delay_dark" value="5" />
+    <boolean name="theme_delay_on" value="true" />
+    <string name="opel_projection">aa</string>
+    <float name="last_lon" value="-123.15003" />
+    <boolean name="layout_mig_222" value="true" />
+    <boolean name="auto_bright" value="false" />
+    <int name="opens" value="48" />
+    <boolean name="home_never" value="true" />
+    <float name="last_lat" value="39.237255" />
+</map>

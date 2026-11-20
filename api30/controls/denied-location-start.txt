@@ -1,0 +1,7 @@
+Starting: Intent { cmp=com.stradaos.launcher.debug/com.stradaos.launcher.Main }
+Status: ok
+LaunchState: COLD
+Activity: com.stradaos.launcher.debug/com.stradaos.launcher.Main
+TotalTime: 432
+WaitTime: 433
+Complete
