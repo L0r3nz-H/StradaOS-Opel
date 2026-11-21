@@ -21,10 +21,10 @@ See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/
 
 ## Current Opel edition
 
-The Opel sync candidate tracks published upstream **2.25.2**
-(commit `5ed05a3`), version **2.25.2-opel**, versionCode **61**, with package
+The Opel sync candidate tracks published upstream **2.29.0**
+(commit `8ac82be`), version **2.29.0-opel**, versionCode **66**, with package
 `com.stradaos.launcher.opel` and app name **StradaOS Opel**.
-The latest published preview is [2.25.0](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.25.0-preview.1);
+The latest published preview is [2.26.0](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.26.0-preview.1);
 stable Latest remains 2.22.0. A candidate is published only after all hosted checks pass.
 Earlier Opel branches and releases remain available. The upstream badges describe
 the original project; Opel downloads use this fork.
@@ -33,7 +33,7 @@ Hosted verification covers builds, unit tests, strict lint, metadata/signatures,
 original debug UI tests and signed Opel installation/three cold starts on APIs
 16, 19, 21, 23, 24, 28, 30 and 34. Additional API 30 checks cover gallery,
 controls and per-style themes. API 17 and proprietary head-unit hardware remain
-untested; the 2.25.2 candidate is pending these checks.
+untested; the 2.29.0 candidate is pending these checks.
 See [testing](docs/PRUEBAS.md) for checks and compatibility exceptions.
 
 | Option | StradaOS | Opel Style |
@@ -112,7 +112,7 @@ See the [screenshot index](docs/screenshots/compact/README.md) for historical ca
 ### Personalization
 
 - Assign installed apps or functions to shortcuts and hide unused apps from the drawer.
-- Eleven app languages: Spanish, English, Portuguese, French, Italian, German, Malay, Arabic, Turkish, Chinese, and Hungarian. Speed in km/h or mph.
+- Twelve app languages: Spanish, English, Portuguese, French, Italian, German, Malay, Arabic, Turkish, Chinese, Hungarian, and Polish. Speed in km/h or mph.
 - App drawer sorting, an optional idle screen, and GPS-based sunrise/sunset themes are also available.
 - Standard upstream releases offer update notifications and a QR download link. The Opel edition uses separately signed APKs instead.
 

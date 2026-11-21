@@ -314,3 +314,29 @@ and requests them only for Bluetooth actions (Wi-Fi/demo remain independent).
 The engine refuses a Bluetooth connection if permission is absent. Legacy Bluetooth
 permissions and minSdk 16 / targetSdk 28 remain, and all strict lint gates remain
 active. Real adapter pairing/connection still requires vehicle hardware validation.
+
+
+## Completed 2.26.0 and pending 2.29.0 sync — 2026-11-21
+
+[Opel 2.26.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.26.0-preview.1)
+was published from `54bf53c67568f05c48c9a776665d10a43df583c9` by successful
+workflow `44778632417`, including signing and all 16 emulator jobs. APK SHA-256:
+`181a11d5e832e1c38644a502cef62aef1233628f2e7c19039b10ff465d2872d5`.
+
+The next candidate merges only stable upstream `v2.29.0`, release ID 453465498,
+commit `8ac82bec96c7c09cdf9b18d4e6b26bcc2dc0b971`, against that Opel main baseline.
+Version `2.29.0-opel`, versionCode 66, includes the released Polish translation,
+Hungarian corrections, premium-license support and fresh OBD speed with GPS fallback.
+The optional Opel speed field uses fresh OBD samples, identifies them visibly,
+and applies speed correction only to GPS. Opel null-safe widgets, gallery,
+independent theme modes, Astra fallback, projection and migration settings remain.
+A targeted hosted API 30 check exercises the actual demo engine, source selection,
+opt-out and stopped-scanner fallback in Opel Style. API17 and real head-unit/OBD
+hardware, detailed UI behavior and license redemption remain test limitations.
+
+The inherited license-issuing workflow is restricted to the original repository;
+its upstream verifier/key and upstream license download sources are retained.
+Pages remains removed, official APK publishers remain restricted, and update.json
+is unchanged. Both full emulator matrices, build/unit/lint metadata checks and
+existing-key signature/certificate verification remain prerequisites for integration
+and publication. No SDK/JDK/Gradle/emulator is used on the VPS.
