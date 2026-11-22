@@ -36,7 +36,7 @@ def main():
     errors, summary = [], []
 
     for name in sorted(os.listdir(folder)):
-        if not name.endswith('.txt') or name == 'en.txt':
+        if not name.endswith('.txt'):
             continue
         rel = '%s/%s' % (BASE, name)
         tr, dup = load(os.path.join(folder, name))

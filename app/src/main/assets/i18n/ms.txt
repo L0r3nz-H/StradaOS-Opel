@@ -480,7 +480,6 @@ Apps ocultas: {}	Aplikasi tersembunyi: {}
 # 2.14: desinstalar desde el cajón
 Desinstalar	Nyahpasang
 
-Diseño	Reka bentuk
 Diseño de inicio	Reka bentuk skrin utama
 Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel mengekalkan aksen merah. Setiap reka bentuk menyimpan mod cerah atau gelap secara berasingan.
 

@@ -937,7 +937,6 @@ Toca la pantalla para volver	点按屏幕返回
 
 Opel Style: diseño compacto con acento rojo fijo.	Opel Style：固定红色强调色的紧凑布局。
 Panel principal	主面板
-Vehículo	车辆
 Cuatro accesos grandes	四个大快捷方式
 Radio · CarPlay · Teléfono · Todas las apps	收音机 · CarPlay · 电话 · 所有应用
 Mostrar velocidad GPS	显示 GPS 速度
@@ -946,7 +945,6 @@ Temperatura exterior del vehículo	车辆外部温度
 Sin interfaz del vehículo detectada; se usa el clima si está disponible.	未检测到车辆接口；如可用则使用天气数据。
 Todas las apps	所有应用
 Teléfono	电话
-Tiempo	天气
 Compacto de 7 pulgadas	7 英寸紧凑模式
 Velocidad GPS	GPS 速度
 Estándar	标准

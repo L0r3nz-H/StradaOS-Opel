@@ -480,7 +480,6 @@ Apps ocultas: {}	App nascoste: {}
 # 2.14: desinstalar desde el cajón
 Desinstalar	Disinstalla
 
-Diseño	Design
 Diseño de inicio	Design della schermata iniziale
 Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel mantiene l’accento rosso. Ogni design salva separatamente la modalità chiara o scura.
 

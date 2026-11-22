@@ -480,7 +480,6 @@ Apps ocultas: {}	Ausgeblendete Apps: {}
 # 2.14: desinstalar desde el cajón
 Desinstalar	Deinstallieren
 
-Diseño	Design
 Diseño de inicio	Startbildschirm-Design
 Opel conserva el acento rojo. Cada diseño guarda su modo claro u oscuro.	Opel behält den roten Akzent. Jedes Design speichert seinen Hell-/Dunkelmodus separat.
 
@@ -489,7 +488,6 @@ Distribución	Layout
 Estándar	Standard
 Compacto de 7 pulgadas	7-Zoll-Kompaktmodus
 Panel principal	Hauptansicht
-Vehículo	Fahrzeug
 Teléfono	Telefon
 Todas las apps	Alle Apps
 Cuatro accesos grandes	Vier große Schnellzugriffe
