@@ -340,3 +340,30 @@ Pages remains removed, official APK publishers remain restricted, and update.jso
 is unchanged. Both full emulator matrices, build/unit/lint metadata checks and
 existing-key signature/certificate verification remain prerequisites for integration
 and publication. No SDK/JDK/Gradle/emulator is used on the VPS.
+
+
+## Completed 2.29.0 and pending 2.32.0 sync — 2026-11-22
+
+[Opel 2.29.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.29.0-preview.1)
+was published from `8a3c7c32a1ab4b59de5426609f9e0b2670c13b3d` by successful
+workflow `44927053289`, including signing and all 16 emulator jobs plus Opel OBD
+source-selection assertions. APK SHA-256:
+`1546d0df1b95bab12ce2d68e560e6e70aa196bbb4a42c47163af53aecc021226`.
+
+The candidate merges only stable `v2.32.0`, release ID 454228338, resolved commit
+`f99f63878972d921bfc2dc8ddcaaeb8962a523f5`, against that Opel main baseline.
+Version `2.32.0-opel`, versionCode 69, includes published weather caching,
+projection notification handling, optional USB OBD and translation improvements.
+Opel current-temperature freshness remains separate from cached forecasts; the
+full weather view retains upstream offline forecasts. Projection notifications
+retain the API21 media-session guard and API18 listener boundary. USB product
+naming is called only on API21+. Existing Bluetooth permission/cleanup fixes,
+Opel speed-source selection, gallery, modes, Astra fallback, settings migrations,
+package/update separation, Pages removal and official publisher/license restrictions
+remain. No prior release or tag is replaced.
+
+The full hosted build/unit/lint/signature and eight debug/eight signed Opel
+emulator gates remain required before integration/publication; the new inherited
+translation check also runs on the PR. No Android tools or builds on the VPS.
+API17, real USB/Bluetooth OBD adapters, vehicle projection hardware, license
+redemption and exhaustive weather/UI behavior remain outside these gates.

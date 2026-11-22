@@ -444,19 +444,29 @@ public class Main extends Activity {
         h.postDelayed(new Runnable() { public void run() {
             // si el usuario ya cambió de app, no lo movemos
             String now = topPackage();
-            if (now != null && !now.equals(BtBridge.PKG) && !now.equals(btMusicApp() != null ? btMusicApp().getPackageName() : "")) {
+            BtBridge.log("revisando la vuelta: al frente " + now + (hasWindowFocus() ? " (inicio con foco)" : ""));
+            // 2.30 (#47): en Android 5+ el sistema solo deja ver las tareas propias y topPackage() responde StradaOS aunque
+            // la app de música esté al frente; antes eso se leía como «el usuario abrió otra app» y nunca se volvía.
+            boolean self = getPackageName().equals(now);
+            if (self && hasWindowFocus()) { BtBridge.log("no se volvió: ya estás en el inicio"); return; }
+            if (now != null && !(self && SDK >= 21) && !now.equals(BtBridge.PKG) && !now.equals(btMusicApp() != null ? btMusicApp().getPackageName() : "")) {
                 BtBridge.log("no se volvió: el usuario abrió " + now); return;
             }
             try {
                 if (back >= 0) {
                     ((android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE)).moveTaskToFront(back, 0);
+                    BtBridge.log("vuelta a " + top);
                     return;
                 }
             } catch (Throwable ignored) { }
+            BtBridge.log("vuelta al inicio");
+            // 2.30: primero se trae al frente la tarea de StradaOS (permiso REORDER_TASKS); el startActivity queda de respaldo
+            try { ((android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE)).moveTaskToFront(getTaskId(), 0); }
+            catch (Throwable e) { BtBridge.log("moveTaskToFront: " + e); }
             try {
                 startActivity(new Intent(Main.this, Main.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
-            } catch (Throwable ignored) { }
+            } catch (Throwable e) { BtBridge.log("no se pudo volver: " + e); }
         }}, prefs.getInt("bt_return_ms", clwBt ? 2000 : 2500));
     }
 
@@ -758,6 +768,9 @@ public class Main extends Activity {
                 else if ("cajon".equals(v)) openDrawer();
                 else if ("obd-demo".equals(v)) obdDialogs().choose("demo", I18n.t("Auto simulado"));
                 else if ("obd-off".equals(v)) obdDialogs().turnOff();
+                else if ("obd-elegir".equals(v)) obdDialogs().pickAdapter();
+                else if ("obd-usb".equals(v)) obdDialogs().pickUsb();
+                else if (v.startsWith("obd-addr:")) obdDialogs().choose(v.substring(9), "Prueba " + v.substring(9));
                 else if (v.startsWith("obd-vel-demo:")) { obdSpeedDemo = v.endsWith("1"); showSpeed(); }
                 else if ("obd-panel".equals(v)) openVehiclePanel();
                 else if (v.startsWith("obd-ajustes:")) { settingsSub = v.substring(12); showSettings(C_VEHICLE); }
@@ -960,6 +973,7 @@ public class Main extends Activity {
                 else if ("fijar-inicio".equals(v)) makeDefaultHome();
                 else if (v.startsWith("sim:")) { prefs.edit().putInt("sim_screen", Integer.parseInt(v.substring(4))).apply(); rebuild(); }
                 else if ("diag-mapa".equals(v)) showMapDiag();
+                else if (v.startsWith("bt-probar:")) { prefs.edit().putString("btaudio", v.substring(10)).apply(); openBtAudioApp(true); }
                 else if ("clima".equals(v)) showWeatherDetail();
                 else if (v.startsWith("vel:")) { float kv = Float.parseFloat(v.substring(4)); setGps(true, kv); }
                 else if (v.startsWith("pack:")) { prefs.edit().putString("icon_pack", v.substring(5)).putString("dock_style", "apps").apply(); rebuild(); }
@@ -3983,7 +3997,14 @@ public class Main extends Activity {
                 if (d != null) return d;
             }
         } catch (Throwable ignored) { }
-        return r.loadIcon(getPackageManager());
+        try {
+            return r.loadIcon(getPackageManager());
+        } catch (OutOfMemoryError e) {
+            // 2.31: pantallas con poca memoria y muchas apps (la regresión lo vio en Android 4.1): un ícono genérico
+            // en vez de cerrar StradaOS
+            System.gc();
+            try { return getResources().getDrawable(android.R.drawable.sym_def_app_icon); } catch (Throwable t) { return null; }
+        }
     }
 
     /**
@@ -7072,6 +7093,9 @@ public class Main extends Activity {
         if (mediaWatcher != null && mediaWatcher.hasSession()) return false;
         final AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
         if (am.isMusicActive()) return false;
+        // 2.30 (#50): con Android Auto o CarPlay conectado la música viene del celular; arrancar la app de la pantalla
+        // hacía sonar dos canciones a la vez. ▶ queda como tecla multimedia normal.
+        if (projectionActive()) { BtBridge.log("▶ no abre la app de música: Android Auto / CarPlay conectado"); return false; }
         String saved = prefs.getString("music_app", null);
         ComponentName cn = saved != null ? ComponentName.unflattenFromString(saved) : null;
         final String pkg = cn != null ? cn.getPackageName() : firstInstalled(MUSIC_PKGS);
@@ -7088,6 +7112,20 @@ public class Main extends Activity {
             if (!launchSaved("music_app")) launchPkg(pkg);
         }}, 2500);
         return true;
+    }
+
+    /**
+     * Android Auto o CarPlay sonando: Open Headunit vivo, celular por USB en modo Android Auto, o una app de proyección
+     * (ZLink, AutoKit…) con notificación multimedia. Una app de proyección solo abierta, esperando el celular, no cuenta.
+     */
+    private boolean projectionActive() {
+        try {
+            if (aaRunning()) return true;
+            if (aaUsbState() == 1) return true;
+            return !Projection.media.isEmpty();
+        } catch (Throwable e) {
+            return false;
+        }
     }
 
     /** Si suena Bluetooth, controla directamente la app Bluetooth de fábrica (com.clw.btmusic). */
@@ -7434,6 +7472,9 @@ public class Main extends Activity {
                 + "\nOpen Headunit corriendo: " + (processRunning(PKG_HUR) ? "sí" : "no")
                 + " · celular por USB en modo Android Auto: " + (aaUsbState() == 1 ? "sí" : aaUsbState() == 0 ? "no" : "no se sabe")
                 + "\nAndroid Auto conectado (para StradaOS): " + (aaRunning() ? "sí" : "no")
+                + "\nApps de Android Auto / CarPlay con notificación: " + Projection.describe(Projection.any)
+                + " · multimedia: " + Projection.describe(Projection.media)
+                + "\n▶ sin nada sonando abre tu app de música: " + (projectionActive() ? "no (Android Auto / CarPlay conectado)" : "sí")
                 + "\n\nMúsica de cualquier app (Android 5+): " + (SDK < 21 ? "no aplica en este Android"
                     : "acceso a notificaciones " + (Modern.notificationAccess(this) ? "SÍ" : "NO") + " · lector conectado " + (MediaListener.connected ? "sí" : "no")
                     + "\nSonido de música en el sistema: " + (((AudioManager) getSystemService(AUDIO_SERVICE)).isMusicActive() ? "sí" : "no")
@@ -8624,8 +8665,13 @@ public class Main extends Activity {
         Weather.fetch(this, wLat, wLon, new Weather.Listener() {
             public void onWeather(final Weather.Now n, String err) {
                 h.post(new Runnable() { public void run() {
-                    if (n != null) { weatherNow = n; weatherReceivedAt = SystemClock.elapsedRealtime(); }
-                    else weatherAt = SystemClock.elapsedRealtime() - 25 * 60 * 1000L; // reintenta en 5 min
+                    if (n != null) {
+                        weatherNow = n;
+                        // Cached forecasts remain available in the full weather view, but
+                        // the Opel current-temperature field must not label them as fresh.
+                        weatherReceivedAt = n.cachedAt == 0 ? SystemClock.elapsedRealtime() : 0;
+                    }
+                    if (n == null || n.cachedAt > 0) weatherAt = SystemClock.elapsedRealtime() - 25 * 60 * 1000L;
                     showWeather();
                 }});
             }
@@ -12007,10 +12053,13 @@ public class Main extends Activity {
             row(mo, "Avanzado", "Motor, protocolo, panel y escaneo completo", null, obdGo("obd_adv"));
         } else if ("obd_conn".equals(sub)) {
             LinearLayout c = section(body, "Escáner");
-            row(c, "Escáner", "Bluetooth emparejado, Wi-Fi (IP y puerto) o un auto simulado para probar", ObdDialogs.deviceName(this),
+            row(c, "Escáner", "Bluetooth emparejado, Wi-Fi (IP y puerto), cable USB o un auto simulado para probar", ObdDialogs.deviceName(this),
                 new Runnable() { public void run() { d.pickAdapter(); } });
             row(c, "Buscar escáneres Bluetooth cercanos", "Empareja el escáner sin salir de StradaOS (clave 1234 o 0000)", null,
                 new Runnable() { public void run() { d.discover(); } });
+            // 2.31 (#51): escáner por cable USB (pantallas cuyo Bluetooth no ve el escáner, como muchas FYT)
+            row(c, "Escáner por cable USB", "Cable ELM327 USB (chips CH340, FTDI, PL2303 o CP2102)", null,
+                new Runnable() { public void run() { d.pickUsb(); } });
             liveRow(c, "Conexión", null, "status", new Runnable() { public void run() { d.reconnect(); } });
             row(c, "Reconectar", null, null, new Runnable() { public void run() { d.reconnect(); } });
             LinearLayout o = section(body, "Al encender");
@@ -12020,7 +12069,7 @@ public class Main extends Activity {
             LinearLayout h2 = section(body, "Ayuda");
             row(h2, "Cómo conectar el escáner", null, null, new Runnable() { public void run() {
                 new TB(Main.this, dlg()).setTitle("Cómo conectar el escáner")
-                    .setMessage("1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Bluetooth: emparéjalo con la clave 1234 o 0000. Wi-Fi: conecta la pantalla a la red del escáner y escribe su IP y puerto (casi siempre 192.168.0.10:35000).\n3. Elígelo arriba en «Escáner».")
+                    .setMessage("1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Bluetooth: emparéjalo con la clave 1234 o 0000. Wi-Fi: conecta la pantalla a la red del escáner y escribe su IP y puerto (casi siempre 192.168.0.10:35000). Cable USB: conéctalo a la pantalla y acepta el permiso que pide Android.\n3. Elígelo arriba en «Escáner».")
                     .setNegativeButton("Cerrar", null).show(); }});
             row(h2, "Registro de la conexión", "Lo que respondió el escáner (para reportar un problema)", null,
                 new Runnable() { public void run() { d.showLog(); } });

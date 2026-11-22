@@ -70,4 +70,10 @@ public class Modern {
         a.startActivityForResult(rm.createRequestRoleIntent(android.app.role.RoleManager.ROLE_HOME), req);
         return true;
     }
+
+    /** 2.31: nombre del producto USB (Android 5+), para mostrar el cable del escáner. */
+    @android.annotation.TargetApi(21)
+    static String usbProductName(android.hardware.usb.UsbDevice d) {
+        return d.getProductName();
+    }
 }
