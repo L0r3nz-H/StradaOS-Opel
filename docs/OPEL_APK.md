@@ -367,3 +367,27 @@ emulator gates remain required before integration/publication; the new inherited
 translation check also runs on the PR. No Android tools or builds on the VPS.
 API17, real USB/Bluetooth OBD adapters, vehicle projection hardware, license
 redemption and exhaustive weather/UI behavior remain outside these gates.
+
+
+## Completed 2.32.0 and pending 2.33.0 sync — 2026-11-23
+
+[Opel 2.32.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.32.0-preview.1)
+was published from `6de80c1c585ca1b842ec0664241f92c21dd53328` by successful
+workflow `45046503404`, with signing and both complete emulator matrices.
+APK SHA-256: `fd7bfb5a556a98216b9509c0a960fee6d7dd514baa196441fb32acfec446c8ff`.
+
+The new candidate merges only stable `v2.33.0`, release ID 454789074, resolved
+commit `2bb92d40b5b9099f4836161c2258ab3ef3f35426`, against that Opel main baseline.
+Version `2.33.0-opel`, versionCode 70, adds upstream premium Carbono in the
+standard gallery. Opel keeps its independent compact dashboard and palette.
+The new Carbono maintenance-widget reference is cleared before either layout
+builds, retaining Opel null-safe callbacks and the existing standard build steps.
+The hosted API30 theme test now covers Carbono → Opel → restart → Carbono,
+including the actual Carbono vehicle view and preserved theme/projection settings.
+
+Pages removal, official release/debug/license workflow restrictions, both full
+emulator matrices, translation checks including English, strict lint, metadata
+checks, existing signing key/certificate and update-channel separation remain.
+All builds and runtime tests run on GitHub-hosted runners; none run on the VPS.
+API17, head-unit/OBD/projection hardware, license redemption and exhaustive
+Carbono/Opel UI interactions remain outside the required checks.

@@ -37,7 +37,7 @@ assert prefs.get('opel_projection')=='aa', 'Opel projection setting lost'
 assert prefs.get('opel_theme')=='light', 'Opel theme setting lost'
 PY
 }
-for theme in aurora cobalto; do
+for theme in aurora cobalto carbono; do
   go idioma:en
   go pref:home_layout=standard
   go pref:design=stradaos
@@ -46,6 +46,9 @@ for theme in aurora cobalto; do
   go "tema-premium:$theme"
   go inicio
   dump "theme-$theme-standard"
+  if [ "$theme" = carbono ]; then
+    grep -Fq 'class="com.stradaos.launcher.Carbono$Car"' "$OUT/theme-$theme-standard.xml"
+  fi
   go pref:home_layout=compact_7
   go pref:design=opel_navi_900_modern
   go inicio
@@ -69,6 +72,9 @@ for theme in aurora cobalto; do
   go pref:design=stradaos
   go inicio
   dump "theme-$theme-standard-restored"
+  if [ "$theme" = carbono ]; then
+    grep -Fq 'class="com.stradaos.launcher.Carbono$Car"' "$OUT/theme-$theme-standard-restored.xml"
+  fi
   if grep -q 'OPEL · STRADAOS' "$OUT/theme-$theme-standard-restored.xml"; then
     echo '::error::Opel layout persisted after returning to standard'; exit 1
   fi
@@ -149,4 +155,4 @@ adb logcat -b crash -d > "$OUT/opel-theme-crashes.txt"
 if grep -q "$PKG" "$OUT/opel-theme-crashes.txt"; then
   echo '::error::Opel/standard theme transition crashed'; exit 1
 fi
-printf 'Aurora/Cobalto: Opel layout, projection, theme settings, restart preservation, brightness isolation and FYT light/delay checks passed.\n' > "$OUT/opel-theme-result.txt"
+printf 'Aurora/Cobalto/Carbono: Opel layout, projection, theme settings, restart preservation, brightness isolation and FYT light/delay checks passed.\n' > "$OUT/opel-theme-result.txt"
