@@ -502,6 +502,7 @@ public class Main extends Activity {
     protected void onResume() {
         super.onResume();
         Obd.addListener(obdWatch);
+        try { odoFromObd(); } catch (Throwable ignored) { }   // lo recorrido con el escáner mientras StradaOS estaba detrás
         if (homeFixing && SDK < 29) h.postDelayed(new Runnable() { public void run() { homeResult(); } }, 700);
         immersive();
         if (SDK >= 23 && !askedPerms) {
@@ -1413,7 +1414,7 @@ public class Main extends Activity {
         tallPlayer = false;
         compactTemperatureTv = null;
         compactSpeedTv = null;
-        carbMaintBox = null;
+        carbMaintBox = null; carbRpm = null;
         if (compactLayout()) {
             // No conservar widgets de una vista anterior en los callbacks de audio/GPS.
             panelWx = panelWxHours = null; panelWxIc = null;
@@ -2151,6 +2152,9 @@ public class Main extends Activity {
     private void odoStep(Location l) {
         if (!validLoc(l)) return;
         if (!odoNeeded()) return;
+        // con el escáner OBD entregando la velocidad, la distancia la pone el escáner (#52): el GPS no suma, pero
+        // sigue la posición para no sumar de golpe el tramo recorrido cuando el escáner se desconecte
+        if (obdDistOn()) { odoLast = l; return; }
         if (l.hasAccuracy() && l.getAccuracy() > 40) return;
         if (odoLast == null) { odoLast = l; return; }
         float d = odoLast.distanceTo(l);
@@ -2158,6 +2162,11 @@ public class Main extends Activity {
         if (d < 20) return;                                 // ruido del GPS con el carro quieto
         if (d / dt > 70) { odoLast = l; return; }           // salto imposible (> 250 km/h): se descarta
         odoLast = l;
+        odoAdd(d);
+    }
+
+    /** Suma metros al kilometraje estimado; se guarda cada 200 m o cada minuto. */
+    private void odoAdd(float d) {
         odoPending += d;
         long now = SystemClock.elapsedRealtime();
         if (odoPending >= 200 || now - odoSavedAt > 60000) {
@@ -2169,6 +2178,44 @@ public class Main extends Activity {
     }
 
     private boolean odoRunning;
+
+    /** El auto simulado no cuenta para el kilometraje ni la velocidad (salvo el ajuste de prueba). */
+    private boolean obdDemoAddr() {
+        return "demo".equals(prefs.getString("obd_addr", "demo")) && !obdSpeedDemo
+            && !(getPackageName().endsWith(".debug") && prefs.getBoolean("obd_speed_demo", false));
+    }
+
+    /** El escáner está entregando la velocidad ahora (lectura de hace menos de 3 s). */
+    private boolean obdDistOn() {
+        return obdOn() && Obd.status == Obd.LIVE && Obd.SPEED.has()
+            && SystemClock.elapsedRealtime() - Obd.SPEED.at <= 3000 && !obdDemoAddr();
+    }
+
+    /** El odómetro del auto llegó por el escáner hace poco (PID A6): el kilometraje es el del tablero, no estimado. */
+    private boolean odoFromCar() {
+        return obdOn() && Obd.ODO.has() && Obd.ODO.value > 0 && SystemClock.elapsedRealtime() - Obd.ODO.at < 120000
+            && !obdDemoAddr();
+    }
+
+    /**
+     * #52: kilometraje con el escáner OBD, sin internet. Si el auto entrega su odómetro (PID A6) se toma tal cual;
+     * si no, se suma lo recorrido con la velocidad del escáner (la misma que usa el tablero, así que se aleja menos
+     * del odómetro real que el GPS). Se llama con cada lectura del escáner y al volver a StradaOS.
+     */
+    private void odoFromObd() {
+        double m = Obd.takeDistance();
+        if (!obdOn() || obdDemoAddr()) return;
+        if (odoFromCar()) {
+            float km = Obd.ODO.value;
+            if (Math.abs(km - prefs.getFloat("odo_base_km", -1)) >= 0.1f || prefs.getFloat("odo_gps_m", 0) != 0 || odoPending != 0) {
+                odoPending = 0;
+                prefs.edit().putFloat("odo_base_km", km).putFloat("odo_gps_m", 0).apply();
+                updateOilBadge();
+            }
+            return;
+        }
+        if (m > 0 && odoNeeded()) odoAdd((float) m);
+    }
 
     /** Solo escucha el GPS en segundo plano si el recordatorio está activo. */
     private void startOdo() {
@@ -2297,7 +2344,8 @@ public class Main extends Activity {
     private void oilMenu() {
         if (!oilOn()) { oilSetup(); return; }
         float left = oilNextKm() - odoKm();
-        String head = I18n.t("Kilometraje estimado") + ": ≈ " + fmtDist(odoKm()) + "\n"
+        String head = (odoFromCar() ? I18n.t("Kilometraje del auto (escáner OBD)") + ": " : I18n.t("Kilometraje estimado") + ": ≈ ")
+            + fmtDist(odoKm()) + "\n"
             + I18n.t("Último cambio") + ": " + fmtDist(prefs.getFloat("oil_last_km", 0)) + "\n"
             + I18n.t("Próximo cambio") + ": " + fmtDist(oilNextKm())
             + "\n" + (Math.round(toUnit(left)) > 0 ? I18n.t("Faltan " + fmtDist(left)) : I18n.t("¡Ya toca!"));
@@ -2436,7 +2484,7 @@ public class Main extends Activity {
         if (now < oilNextKm() || now < prefs.getFloat("oil_snooze_km", 0)) return false;
         oilDlg = new TB(this, dlg())
             .setTitle("Es hora del cambio de aceite")
-            .setMessage(I18n.t("El kilometraje estimado es ≈ " + fmtDist(now) + " y ya toca el cambio de aceite (cada " + fmtDist(prefs.getFloat("oil_interval_km", 5000)) + ").")
+            .setMessage(I18n.t((odoFromCar() ? "El kilometraje del auto es " : "El kilometraje estimado es ≈ ") + fmtDist(now) + " y ya toca el cambio de aceite (cada " + fmtDist(prefs.getFloat("oil_interval_km", 5000)) + ").")
                 + "\n\n" + I18n.t("¿Ya lo hiciste?"))
             .setPositiveButton("Ya lo hice", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) { oilDone(); } })
             .setNegativeButton("Aún no", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
@@ -3165,7 +3213,6 @@ public class Main extends Activity {
         final boolean premGauge = premium && mapOnly && carSpeed;
         if (premGauge || (!premium && !showCar && carSpeed && prefs.getBoolean("map_gauge", false))) {
             FrameLayout gb = new FrameLayout(this);
-            gb.setBackground(round((CARD & 0x00FFFFFF) | 0xE0000000, 66));
             mapGauge = new Gauge(this, s);
             mapGauge.setColors(RED, TEXT, SOFT);
             mapGauge.setUnit(useMph());
@@ -3176,7 +3223,8 @@ public class Main extends Activity {
             int gsz = premGauge ? 1 : prefs.getInt("map_gauge_size", 1);
             float gs = gsz == 0 ? 108 : gsz == 2 ? 160 : 132;
             gs = Math.min(gs, Math.min(mapH * 0.45f, mapW * 0.42f));
-            gb.setBackground(round((CARD & 0x00FFFFFF) | 0xE0000000, gs / 2));
+            // sin círculo de fondo (2.34, Andrés): el velocímetro y las revoluciones van directo sobre el mapa
+            gb.setBackground(null);
             if (premGauge) gb.setBackground(round(LIGHT ? 0xD9FFFFFF : 0xD91B1724, gs / 2));
             // esquina: automático = arriba, en el lado contrario al botón del navegador (como antes)
             String corner = premGauge ? "bl" : prefs.getString("map_gauge_corner", "auto");
@@ -4390,7 +4438,7 @@ public class Main extends Activity {
 
     private void buildPremium() {
         carCard = null; mapGauge = null; mapGaugeBox = null; carGauge = null; chipTv = null; carDataTv = null;
-        faroGauge = null; faroBar = null; faroWxIc = null; faroMaintBox = null; faroPillTv = null; carbMaintBox = null;
+        faroGauge = null; faroBar = null; faroWxIc = null; faroMaintBox = null; faroPillTv = null; carbMaintBox = null; carbRpm = null;
         if (Prem.carb()) { buildCarbono(); setGps(false, 0); return; }
         if (Prem.faro()) { buildFaro(); setGps(false, 0); return; }
         buildPremiumTop();
@@ -5593,6 +5641,13 @@ public class Main extends Activity {
             unit.setPadding((int) (8 * s), 0, 0, (int) (8 * s));
             num.addView(unit);
             place(card, num, sx - 3, sy + 22, sw, 62);
+            // revoluciones del escáner a la derecha de la velocidad (Ajustes → «Revoluciones junto al velocímetro»);
+            // solo si queda ancho para no pisar el número (con 3 cifras y la unidad ocupa ~150)
+            if (sw >= 270) {
+                carbRpm = new Carbono.Rpm(this, s, TEXT, MUTED, LIGHT);
+                place(card, carbRpm, sx + sw - 104, sy + 2, 100, 82);
+                showRpm();
+            }
         } else {
             speedTv = tv("0", 12, TEXT, true);   // no se muestra
             gpsDot = new View(this);
@@ -7653,12 +7708,30 @@ public class Main extends Activity {
     private float obdKmh() {
         if (!obdOn() || !prefs.getBoolean("obd_speed", true) || Obd.status != Obd.LIVE || !Obd.SPEED.has()) return Float.NaN;
         if (SystemClock.elapsedRealtime() - Obd.SPEED.at > 3000) return Float.NaN;
-        if ("demo".equals(prefs.getString("obd_addr", "demo")) && !obdSpeedDemo
-            && !(getPackageName().endsWith(".debug") && prefs.getBoolean("obd_speed_demo", false))) return Float.NaN;
+        if (obdDemoAddr()) return Float.NaN;
         return Obd.SPEED.value;
     }
     private boolean obdSpeedDemo;
     private boolean speedFromObd;
+
+    /** Revoluciones en digital de la tarjeta del vehículo de Carbono (null en los demás temas). */
+    private Carbono.Rpm carbRpm;
+
+    /** RPM del escáner para el cuentarrevoluciones junto al velocímetro; NaN si está apagado o no hay lectura reciente. */
+    private float obdRpm() {
+        if (!prefs.getBoolean("speedo_rpm", false) || !obdOn() || Obd.status != Obd.LIVE || !Obd.RPM.has()) return Float.NaN;
+        if (SystemClock.elapsedRealtime() - Obd.RPM.at > 3000) return Float.NaN;
+        if (obdDemoAddr()) return Float.NaN;   // el auto simulado no cuenta, igual que la velocidad
+        return Obd.RPM.value;
+    }
+
+    private void showRpm() {
+        float r = obdRpm();
+        if (carGauge != null) carGauge.setRpm(r);
+        if (mapGauge != null) mapGauge.setRpm(r);
+        if (faroGauge != null) faroGauge.setRpm(r);
+        if (carbRpm != null) carbRpm.set(r);
+    }
 
     private void showSpeed() {
         float ob = obdKmh();
@@ -10235,6 +10308,12 @@ public class Main extends Activity {
                         prefs.edit().putInt("speedo", i).apply(); rebuild();
                     }});
             }
+            // RPM applies only where the standard/premium layout provides a gauge.
+            if (carSpeed && (carGauge != null || mapGauge != null || faroGauge != null || carbRpm != null))
+                toggle(lay, "Revoluciones junto al velocímetro", "Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)",
+                    prefs.getBoolean("speedo_rpm", false), new IntCb() { public void on(int i) {
+                        prefs.edit().putBoolean("speedo_rpm", i == 1).apply(); rebuild();
+                    }});
             LinearLayout mp = section(body, "Mapa");
             final String[] connKeys = {"both", "aa", "cp", "none"};
             choice(mp, "Botones de conexión", "Con uno o ninguno, el clima ocupa el espacio libre del mapa",
@@ -12570,7 +12649,9 @@ public class Main extends Activity {
     /** Alertas graves: abren el panel aunque se esté en otra cosa (una vez por alerta); también avisa a las ventanas. */
     private final Obd.Listener obdWatch = new Obd.Listener() { public void onObd() {
         if (obdDlg != null) obdDlg.onObd();
+        try { odoFromObd(); } catch (Throwable ignored) { }
         if (speedFromObd || !Float.isNaN(obdKmh())) showSpeed();   // velocímetro del inicio con la velocidad del escáner
+        showRpm();
         java.util.HashSet<String> now = new java.util.HashSet<String>();
         boolean fresh = false;
         synchronized (Obd.alerts) {

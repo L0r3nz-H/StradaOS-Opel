@@ -455,7 +455,7 @@ Orientación del mapa	Orientacja mapy
 El mapa apunta	Mapa wskazuje
 Según tu dirección: gira con el carro mientras te mueves	Zgodnie z kierunkiem jazdy: obraca się wraz z samochodem podczas jazdy
 Norte arriba	Północ u góry
-Según tu dirección	godnie z kierunkiem jazdy
+Según tu dirección	zgodnie z kierunkiem jazdy
 Último cambio	Ostatnia wymiana
 Corregir el último cambio	Popraw ostatnią zmianę
 ¿Tu tablero marca kilómetros o millas?	Czy Twoja deska rozdzielcza pokazuje kilometry czy mile?
@@ -1831,3 +1831,10 @@ Beige moderno	Nowoczesny beż
 Próximo mantenimiento	Następny przegląd
 El carro del tema Carbono, visto desde arriba. También se cambia con una presión larga sobre el carro.	Samochód motywu Carbono widziany z góry. Możesz go też zmienić, przytrzymując samochód.
 Tarjetas limpias sobre un fondo carbón con textura y una luz suave desde abajo (o gris perla en claro). Tu vehículo en grande con el velocímetro y los dos mantenimientos más cercanos, el mapa con el reproductor y el clima flotando encima, y una barra de apps tipo píldora.	Czyste karty na teksturowanym tle z włókna węglowego z miękkim światłem od dołu (lub perłowa szarość w trybie jasnym). Twój pojazd w dużym rozmiarze z prędkościomierzem i dwoma najbliższymi przeglądami, mapa z odtwarzaczem i pogodą nad nią oraz pasek aplikacji w kształcie pigułki.
+# cuentarrevoluciones junto al velocímetro (Tach)
+Revoluciones junto al velocímetro	Obroty obok prędkościomierza
+Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)	Mały obrotomierz obok, z obrotami ze skanera OBD (tylko gdy jest połączony)
+# kilometraje con el escáner OBD (#52)
+Odómetro	Licznik przebiegu
+Kilometraje del auto (escáner OBD)	Przebieg auta (skaner OBD)
+El kilometraje del auto es {} y ya toca el cambio de aceite (cada {}).	Przebieg auta wynosi {} i nadszedł czas na wymianę oleju (co {}).

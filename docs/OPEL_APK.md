@@ -391,3 +391,30 @@ checks, existing signing key/certificate and update-channel separation remain.
 All builds and runtime tests run on GitHub-hosted runners; none run on the VPS.
 API17, head-unit/OBD/projection hardware, license redemption and exhaustive
 Carbono/Opel UI interactions remain outside the required checks.
+
+
+## Pending 2.33.0 publication and 2.34.0 candidate — 2026-11-24
+
+Main remains `fdefd15b34d3c4522db3714f22fc59d83d6a2d1b` while the 2.33.0
+publication is completed. Run `45269362135` initially failed installing the
+Android Emulator package on the signed API23 runner, before app tests; all other
+required jobs passed. Its failed job/dependent publisher were requested again on
+the same commit. No tag/assets are overwritten and no new main commit may be
+integrated until this publication finishes successfully.
+
+The new candidate merges only stable `v2.34.0`, release ID 456288152, resolved
+commit `9ae1398840e8629cb0845cfda213f62a19fca771`, against that main baseline.
+Version `2.34.0-opel`, versionCode 71, includes released grouped CAN OBD queries
+with fallback, OBD-derived distance/odometer readings and optional RPM gauges.
+Opel retains its compact dashboard, settings visibility, Astra fallback, projection
+controls and migrations. New Carbono RPM references are reset before either layout
+builds; the standard RPM setting stays inside standard-layout controls. Gauge
+shader caches are retained alongside the new tachometer. Previous Bluetooth,
+weather freshness, API guards and translation fixes remain.
+
+Pages removal, official release/debug/license restrictions, update.json, strict
+lint, both complete emulator matrices, Opel gallery/theme/OBD assertions and
+existing-key signature/certificate checks remain gates. The signed branch preflight
+runs entirely on hosted GitHub runners. No Android tools/builds run on the VPS.
+API17, physical adapters/vehicle hardware, exhaustive RPM/maintenance UI interactions
+and the separate full ELM simulator regression matrix remain test limitations.
