@@ -15,6 +15,7 @@ case "$TEST_MODE" in
       python3 .github/scripts/opel-controls-check.py "$OUT/controls"
       python3 .github/scripts/opel-gallery-check.py "$OUT/gallery"
       bash .github/scripts/opel-obd-speed-check.sh "$OUT/obd-speed"
+      python3 .github/scripts/opel-center-check.py "$OUT/center-video"
     fi
     ;;
   opel) bash .github/scripts/opel-smoke.sh "$TEST_API" "${APKS[0]}" "$OUT" ;;

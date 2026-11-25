@@ -418,3 +418,36 @@ existing-key signature/certificate checks remain gates. The signed branch prefli
 runs entirely on hosted GitHub runners. No Android tools/builds run on the VPS.
 API17, physical adapters/vehicle hardware, exhaustive RPM/maintenance UI interactions
 and the separate full ELM simulator regression matrix remain test limitations.
+
+## Completed 2.34.0 and pending 2.35.0 sync — 2026-11-25
+
+[Opel 2.34.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.34.0-preview.1)
+was published from `86f67a94f9b17f7fec87b3d6b530c045d0d7b307` by successful
+hosted workflow `45442546623`. Both complete eight-API emulator matrices,
+builds, unit tests, metadata and existing-key signature/certificate checks passed.
+Actual Opel lint XML: baseline 53 warnings/one information; current 48 warnings/
+one information, no Error/Fatal findings. APK SHA-256:
+`7102f6d01e8cc82d213441715e6d7dea1f3ddaab3778e68ccf0604415e6157f0`.
+The immutable tag, signed artifact commit and published asset digests match.
+Stable Latest remains 2.22.0.
+
+The new candidate merges only stable `v2.35.0`, release ID 457560840, resolved
+commit `7b052650bc439d0994ca9ec157d0899e3a48e591`, against that Opel main baseline.
+Version `2.35.0-opel`, versionCode 72, includes the upstream standard-layout
+map/video carousel, explorable map, video diagnostics and ELM327 grouped-query
+timeout fallback. The compact Opel dashboard keeps its photo/map panel and
+existing controls. Standard video settings are preserved but hidden in Opel
+Style because that layout has no carousel. Opel's map retains tap-to-cycle zoom.
+Video resources are released before
+either layout rebuilds and when the activity is destroyed. New video API helpers
+have explicit API-level annotations; their callers retain runtime SDK guards.
+
+The hosted API30 debug gate additionally plays the upstream sample video, checks
+its first rendered frame, switches to Opel's map panel, checks hidden standard
+video controls and stored choices across restart, then restores the standard
+carousel. Pages removal, official release/debug/license restrictions, update
+separation, strict lint, both full emulator matrices, gallery/theme/OBD checks and
+existing-key signing/certificate checks remain required. All candidate build,
+lint, signing and emulator results are pending; no Android tools run on the VPS.
+API17, physical OBD/projection hardware, real head-unit decoders, exhaustive video
+UI/format testing and the separate full ELM simulator regression remain limits.
