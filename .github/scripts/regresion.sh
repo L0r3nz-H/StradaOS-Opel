@@ -65,6 +65,16 @@ if part 1; then
   for t in faro aurora cobalto; do step "premium-$t" "tema-premium:$t" 6; step "premium-$t-pista" pista-demo:Night_Drive 3; done
   for i in 0 1 2 3 4 5; do step "gratis-$i" "tema-gratis:$i" 5; done
   step gratis-1 tema-gratis:1 5
+  # ── 2.36 (#74): íconos «Muy grande» y «Enorme» en la barra lateral (agrupada al centro), abajo y compacta ──
+  step barra-lateral diseno:lateral 4
+  step barra-lateral-4 diseno:botones-4 4
+  step barra-lateral-enorme diseno:iconos-4 4
+  step barra-lateral-muygrande diseno:iconos-3 4
+  step barra-lateral-10 diseno:botones-10 4
+  step barra-abajo-muygrande diseno:normal 4
+  step barra-abajo-enorme diseno:iconos-4 4
+  step barra-compacta-enorme diseno:compacta 4
+  step barra-base diseno:base 4
   # ── ajustes: las 12 secciones, arriba, en medio y abajo ──
   for c in 0 1 2 3 4 5 6 7 8 9 10 11; do
     step "ajustes-$c" "ajustes:$c" 4
@@ -107,6 +117,17 @@ if part 1; then
   adb shell input swipe 520 190 400 260 300; sleep 2; shot "$(printf %03d $N)-nav-explorar-arrastre"
   step nav-seguir explorar:0 2
   step nav-salir-2 nav-salir 3
+  # ── 2.37 (PR #69): carro «Abajo» con ruta, toque largo real sobre el mapa y la ventana «Navegar hasta aquí» ──
+  step carro-abajo carro:abajo 2
+  step nav-demo-abajo nav-demo 8
+  step nav-zoom-suave explorar-zoom:-2 1
+  shot "$(printf %03d $N)-nav-zoom-suave-fin"
+  step nav-volver-carro explorar:0 3
+  adb shell input swipe 520 230 521 231 1500; sleep 3; shot "$(printf %03d $N)-toque-largo"
+  adb shell input keyevent 4; sleep 2
+  step nav-salir-3 nav-salir 3
+  step navegar-aqui navegar-aqui 6 1
+  step carro-centro carro:centro 2
   step video-vel-0 video-vel:0 1
   step centro-video centro:video 9
   step video-solo video-modo:1 5
@@ -168,6 +189,24 @@ if part 2; then
   # ── diálogos y pantallas sueltas ──
   for d in diag-reproductor diag-mapa clima cajon ocultas musica demo-aceite reposo; do step "$d" "$d" 5 1; done
   step inicio inicio 3
+  # ── 2.38 (#80, #48): bienvenida. Ajustes → Sistema con los interruptores, la animación quieta en varios instantes
+  # (la luz de atrás en sus dos pasadas, el final abriéndose y todo iluminado) y la animación completa (al final se quita)
+  step bienvenida-nombre pref:user_name=Andres 2
+  step bienvenida-on pref:welcome_on=true 3
+  step ajustes-sistema-bienvenida ajustes:9 4
+  scroll; shot "$(printf %03d $N)-ajustes-sistema-bienvenida-medio"
+  for ms in 600 1300 1900 2600 3800 4700 5400 6400; do step "bienvenida-$ms" "bienvenida:$ms" 3; done
+  step bienvenida-completa bienvenida 2
+  sleep 3; shot "$(printf %03d $N)-bienvenida-completa-5s"
+  sleep 6; shot "$(printf %03d $N)-bienvenida-completa-fin"
+  step bienvenida-tocar bienvenida 1
+  adb shell input tap 512 300; sleep 2; shot "$(printf %03d $N)-bienvenida-saltada"
+  # ── 2.38 (#79): exportar la app Bluetooth de fábrica (lista y exportar todas a la memoria de la pantalla) ──
+  step exportar-bt exportar-bt 4 1
+  step exportar-bt-todas exportar-bt-todas 30
+  z=$(adb shell ls /sdcard/StradaDiag/ 2>/dev/null | tr -d '\r' | grep apps-bluetooth | tail -1)
+  { echo "archivo: $z"; [ -n "$z" ] && adb pull "/sdcard/StradaDiag/$z" /tmp/exp.zip >/dev/null 2>&1 && unzip -l /tmp/exp.zip && unzip -p /tmp/exp.zip info.txt | head -60; } > $OUT/exportar-bt.txt 2>&1
+  adb shell input keyevent 4; sleep 2
   # ── música: fuentes simuladas y diagnóstico con cada una ──
   MUS="aa-simular:1 aa-notif:Cancion_de_prueba,30,200 aa-rcc:Cancion_de_prueba,200 hcn-sim:/sdcard/Music/prueba.mp3,start,10,200"
   # el aviso del Bluetooth del sistema solo se puede simular hasta Android 7 (después Android lo protege)
@@ -176,14 +215,29 @@ if part 2; then
   step musica-hcn-off "hcn-sim:,stop,0,0" 3
   step musica-aa-off aa-simular:0 3
   step diag-final diag-reproductor 5 1
+  # ── 2.36 (#76): carátula por internet: ajuste, prueba paso a paso (con red real del emulador) y búsqueda con una pista ──
+  step caratulas-on pref:cover_online=true 3
+  step ajustes-musica-caratulas ajustes:8 4
+  scroll; scroll; shot "$(printf %03d $N)-ajustes-musica-caratulas-medio"
+  step caratula-prueba caratula-prueba 40 0
+  adb shell cat /sdcard/StradaDiag/caratulas.txt > $OUT/caratulas.txt 2>/dev/null
+  adb shell input swipe 600 450 600 150 400; sleep 1; shot "$(printf %03d $N)-caratula-prueba-fin"
+  adb shell input keyevent 4; sleep 2
+  # la búsqueda real va sin captura (no se guardan portadas de discos en el repositorio); el diagnóstico dice el resultado
+  adb shell am start -n $ACT --es prueba "pista-sin-caratula:La_Camisa_Negra,Juanes" >/dev/null 2>&1; sleep 14
+  adb shell am start -n $ACT --es prueba pista-demo >/dev/null 2>&1; sleep 2
+  step caratula-diag diag-reproductor 5 1
+  step caratulas-off pref:cover_online=false 3
   # ── idiomas: inicio y ajustes en cada uno ──
   # los diagnósticos también, para que StradaOS Prueba anote las frases sin traducir (sin-traducir.txt)
-  for l in en pt it de ms ar tr fr zh hu pl es; do
+  for l in en pt it de ms ar tr fr zh hu pl ru es; do
     step "idioma-$l" "idioma:$l" 6; step "ajustes-$l" "ajustes:9" 4
+    step "bienvenida-$l" "bienvenida:6400" 3
     [ "$l" != es ] && { step "diagr-$l" diag-reproductor 4 1; step "diagm-$l" diag-mapa 4 1; }
     # 2.35 r7: la ventana de actualización con las notas en el idioma elegido (inglés si no hay sección del idioma)
     case $l in en|pt|es) step "actualizacion-$l" actualizacion-demo 4 1;; esac
   done
+  step bienvenida-off pref:welcome_on=false 2
   step final inicio 4
 fi
 # ════ Parte 3: escáner OBD y temas de pago ════

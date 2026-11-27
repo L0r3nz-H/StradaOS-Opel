@@ -1946,3 +1946,42 @@ Leer varios datos por consulta	每次查询读取多个数据
 Tu escáner no lo entiende: StradaOS lee de a un dato. Actívalo para volver a probar	你的扫描器不支持：StradaOS 逐个读取数据。打开以重新尝试
 Más rápido. Apágalo si tu escáner se desconecta a cada rato	更快。如果扫描器频繁断开，请关闭
 Miniatura tomada del video	从视频截取的缩略图
+Enorme	超大
+«Muy grande» y «Enorme» también agrandan los nombres	“特大”和“超大”也会放大名称
+Buscar carátulas en internet	在网上查找专辑封面
+Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista	如果歌曲没有封面（例如通过蓝牙播放），会在 MusicBrainz 和 Cover Art Archive 中查找，找不到时再到 iTunes 或 Deezer 查找。只发送歌名和歌手
+Borrar carátulas guardadas	删除已保存的封面
+Las que se bajaron de internet y se guardaron en el equipo	从网上下载并保存在设备上的封面
+Carátulas borradas	封面已删除
+Probando…	正在测试…
+Probar la búsqueda de carátulas	测试封面搜索
+Prueba cada servidor con la canción que suena y muestra el error exacto	用正在播放的歌曲测试每个服务器并显示确切错误
+Prueba de carátulas	封面测试
+Se guarda en StradaDiag/caratulas.txt	保存在 StradaDiag/caratulas.txt
+# mapa: navegar hasta aquí y posición del carro (#68)
+Navegar hasta aquí	导航到这里
+Posición del carro	车辆位置
+Abajo: al navegar ves más camino por delante (con el mapa según tu dirección)	底部：导航时可看到前方更多道路（地图按行驶方向显示时）
+Centro	居中
+Abajo	底部
+# 2.38: bienvenida (#80, #48) y exportar la app Bluetooth de fábrica (#79)
+Bienvenida al encender	开机欢迎
+Una luz pasa detrás del logo y del nombre, todo se ilumina y te saluda (unos 7 segundos). Tócala para saltarla	一道光从标志和名称后方缓缓扫过，随后全部点亮并向你问候（约 7 秒）。轻触可跳过
+Saludo por voz	语音问候
+Con la voz de la pantalla, sin internet. Si no hay voz para tu idioma, solo sale el texto	使用屏幕自带的语音，无需联网。如果没有你所用语言的语音，只显示文字
+Ver la bienvenida	查看欢迎动画
+Para que te salude por tu nombre, escríbelo en Tu vehículo → Tu nombre	若想按名字问候你，请在 你的车辆 → 你的名字 中填写
+No se encontró una voz en esta pantalla	此屏幕上未找到语音
+No hay voz para este idioma en esta pantalla: solo se muestra el texto	此屏幕没有该语言的语音：只显示文字
+Exportar la app de Bluetooth de fábrica	导出原厂蓝牙应用
+Si la música Bluetooth no aparece en el inicio: guarda esa app en un archivo .zip (en la pantalla o en una USB) para enviarlo y que StradaOS aprenda a leerla. Sin ADB	如果主屏幕上不显示蓝牙音乐：把该应用保存为 .zip 文件（存到屏幕或 U 盘），发送出去，让 StradaOS 学会读取它。无需 ADB
+Exportar app Bluetooth	导出蓝牙应用
+No se encontraron apps de Bluetooth de fábrica	未找到原厂蓝牙应用
+Todas las de Bluetooth y música de fábrica (recomendado)	所有原厂蓝牙和音乐应用（推荐）
+detectada	已检测到
+¿Qué app exportar?	要导出哪个应用？
+¿Dónde guardar el archivo?	文件保存到哪里？
+No se pudo exportar	导出失败
+No se pudo guardar el archivo	无法保存文件
+Adjunta ese archivo .zip en tu reporte de GitHub (o en el mensaje donde te lo pidieron). Si pesa más de 25 MB, súbelo a Google Drive y comparte el enlace.	请把这个 .zip 文件附加到你的 GitHub 报告中（或附在要求你提供它的消息里）。如果超过 25 MB，请上传到 Google Drive 并分享链接。
+Exportación lista	导出完成

@@ -175,6 +175,14 @@ public class Main extends Activity {
     // estado de la pista
     private String curTitle, curArtist, curSource;
     private Bitmap curArt;
+    /** Canción cuya carátula de internet ya se pidió (clave de CoverFetch): no se pide dos veces. */
+    private String coverAsked;
+    /**
+     * Carátula de internet y su canción. Va aparte de curArt: algunas fuentes (ZLink por MediaSession) mandan «sin
+     * carátula» en cada aviso de tiempo o de play/pausa y borrarían la de internet a cada segundo.
+     */
+    private String coverKey;
+    private Bitmap coverArt;
     private long durMs = -1, posBaseMs = 0, posBaseAt = 0;
     // para el diagnóstico del reproductor: de dónde salió el tiempo y el último que mandó Bluetooth
     private String posSrc = "—";
@@ -215,6 +223,7 @@ public class Main extends Activity {
         }
         I18n.init(this, prefs);
         LiveMapView.headingUp = prefs.getBoolean("map_heading", false);
+        LiveMapView.carLow = prefs.getInt("map_car_pos", 0) == 1;
         lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (getPackageName().endsWith(".debug") && getIntent() != null && "saltar".equals(getIntent().getStringExtra("prueba")))
             prefs.edit().putBoolean("setup_done", true).apply();
@@ -316,6 +325,7 @@ public class Main extends Activity {
             sf.addAction(Intent.ACTION_SCREEN_ON);
             registerReceiver(screenReceiver, sf);
         } catch (Throwable ignored) { }
+        maybeWelcomeAtBoot();
         maybeBootApp();
         bt.onPhoneStarted = new Runnable() { public void run() { onPhoneStartedBt(); } };
         bt.onLost = new Runnable() { public void run() { btRouted = false; } };
@@ -473,6 +483,8 @@ public class Main extends Activity {
     @Override
     protected void onDestroy() {
         if (videoCard != null) { videoCard.release(); videoCard = null; }
+        removeWelcome();
+        try { if (welcomeVoice != null) welcomeVoice.shutdown(); } catch (Throwable ignored) { }
         try { getContentResolver().unregisterContentObserver(brightObs); } catch (Throwable ignored) { }
         try { getContentResolver().unregisterContentObserver(lightsObs); } catch (Throwable ignored) { }
         h.removeCallbacks(themeRecheck);
@@ -647,6 +659,10 @@ public class Main extends Activity {
             obdDialogs().onPermission(res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED);
             return;
         }
+        if (req == REQ_BTEXP_W) {   // 2.38 (#79): con o sin permiso se sigue (sin él, se guarda en la carpeta de la app)
+            h.post(new Runnable() { public void run() { btExport0(); } });
+            return;
+        }
         if (req == REQ_STORAGE_W) {   // con o sin permiso se sigue (sin él, el mapa se guarda en la carpeta de la app)
             h.post(new Runnable() { public void run() { chooseMapToDownload(""); } });
             return;
@@ -769,9 +785,19 @@ public class Main extends Activity {
         h.postDelayed(new Runnable() { public void run() {
             try {
                 if ("ui-snapshot".equals(v)) { testViewSnapshot(); return; }
+                if (!v.startsWith("bienvenida")) removeWelcome();
                 if (settingsView != null) closeSettings();
                 closeDrawer();
                 if (v.startsWith("ajustes:")) showSettings(Integer.parseInt(v.substring(8)));
+                // 2.38: bienvenida completa («bienvenida») o quieta en un instante («bienvenida:3500», en ms)
+                else if ("bienvenida".equals(v)) showWelcome(-1);
+                else if (v.startsWith("bienvenida:")) showWelcome(Long.parseLong(v.substring(11)));
+                // 2.38 (#79): lista de apps para exportar, y exportar todas a la memoria de la pantalla
+                else if ("exportar-bt".equals(v)) btExport0();
+                else if ("exportar-bt-todas".equals(v)) {
+                    ComponentName g = btMusicApp();
+                    btExportRun(BtExport.candidates(Main.this, g != null ? g.getPackageName() : null), Backup.primary());
+                }
                 else if (v.startsWith("boton:")) dockMenu(Integer.parseInt(v.substring(6)), null);
                 else if (v.startsWith("elegir:")) pickDock(Integer.parseInt(v.substring(7)), null);
                 else if ("cajon".equals(v)) openDrawer();
@@ -849,6 +875,14 @@ public class Main extends Activity {
                             a.length > 4 ? Long.parseLong(a[4]) * 1000 : 0));
                 }
                 else if ("diag-reproductor".equals(v)) showPlayerDiag();
+                else if ("caratula-prueba".equals(v)) testCovers();   // 2.36: prueba de la carátula por internet
+                else if (v.startsWith("pista-sin-caratula:")) {
+                    // 2.36: canción por Bluetooth sin carátula, para la búsqueda en internet: «pista-sin-caratula:Título,Artista»
+                    String[] a = v.substring(19).split(",");
+                    curTitle = a[0].replace('_', ' '); curArtist = a.length > 1 ? a[1].replace('_', ' ') : null; curSource = "Bluetooth";
+                    curArt = null; durMs = 215000; posBaseMs = 30000; posBaseAt = SystemClock.elapsedRealtime(); posKnown = true; playingState = true;
+                    renderTrack();
+                }
                 else if (v.startsWith("aa-notif:")) {
                     // notificación de Open Headunit con el tiempo: «aa-notif:Título,posición_s,duración_s»
                     String[] a = v.substring(9).split(",");
@@ -1050,6 +1084,12 @@ public class Main extends Activity {
                     saveHidden(hs); closeDrawer(); openDrawer();
                 }
                 else if ("ocultar-limpiar".equals(v)) { prefs.edit().remove("hidden_apps").apply(); closeDrawer(); }
+                else if ("navegar-aqui".equals(v)) askNavHere(4.6097, -74.0817);   // 2.37: ventana del toque largo (PR #69)
+                else if (v.startsWith("carro:")) {   // carro:abajo | carro:centro (#68)
+                    boolean low = "abajo".equals(v.substring(6));
+                    prefs.edit().putInt("map_car_pos", low ? 1 : 0).apply(); LiveMapView.carLow = low;
+                    if (liveMap != null) liveMap.invalidate();
+                }
                 else if (v.startsWith("rumbo:")) {
                     prefs.edit().putBoolean("map_heading", "1".equals(v.substring(6))).apply(); LiveMapView.headingUp = "1".equals(v.substring(6)); rebuild();
                     h.postDelayed(new Runnable() { public void run() {
@@ -1179,6 +1219,7 @@ public class Main extends Activity {
 
     @Override
     public void onBackPressed() {
+        if (welcome != null) { welcome.skip(); return; }   // 2.38: Atrás salta la bienvenida
         if (videoBig != null && videoCard != null) { videoMode(videoCard, 0); return; }
         if (liveMap != null && liveMap.isExploring()) { liveMap.follow(); return; }
         if (vpanel != null && vpanel.isOpen()) { vpanel.close(); return; }
@@ -3215,10 +3256,13 @@ public class Main extends Activity {
         // Cobalto: el mapa se difumina hasta donde empieza el reproductor (abajo, hacia las tarjetas, en vertical)
         if (premium && Prem.cob() && !mapOnly && premBg != null) liveMap.setFade(vertical ? 2 : 1, (vertical ? 150 : Math.max(260, mapW * 0.5f)) * s);
         liveMap.setVisibility(premium && Prem.faroFam() ? View.VISIBLE : View.INVISIBLE);
-        // 2.35: tocar el mapa entra a «Explorar» (antes cambiaba el zoom); mantener presionado abre el diagnóstico
+        // 2.35: tocar el mapa entra a «Explorar» (antes cambiaba el zoom); mantener presionado: con la navegación
+        // integrada, «Navegar hasta aquí» al punto tocado (también explorando); si no, el diagnóstico de siempre
         liveMap.setOnLongClickListener(new View.OnLongClickListener() {
             public boolean onLongClick(View v) {
-                showMapDiag();
+                double[] p = "internal".equals(prefs.getString("nav_app", null)) && liveMap != null ? liveMap.pressedLatLon() : null;
+                if (p != null) askNavHere(p[0], p[1]);
+                else showMapDiag();
                 return true;
             }
         });
@@ -3494,6 +3538,9 @@ public class Main extends Activity {
         final boolean open0 = prefs.getBoolean("aa_panel_open", true);
         for (View v : moving) v.setTranslationY(open0 ? 0 : shift);
         chev.setRotation(open0 ? 90 : -90);
+        // #68: lo que tapan abajo el panel y su flechita (abierto / plegado), para el carro «Abajo»
+        final float coverOpen = hasPanel ? (mapH - panelY + 28) * s : 0, coverShut = hasPanel ? 28 * s : 0;
+        if (liveMap != null) liveMap.setBottomCover(open0 ? coverOpen : coverShut);
         final Runnable[] setOpen = new Runnable[2];   // [0] mostrar, [1] esconder
         for (int k = 0; k < 2; k++) {
             final boolean show = k == 0;
@@ -3501,6 +3548,7 @@ public class Main extends Activity {
                 prefs.edit().putBoolean("aa_panel_open", show).apply();
                 for (View v : moving) v.animate().translationY(show ? 0 : shift).setDuration(220);
                 chev.animate().rotation(show ? 90 : -90).setDuration(220);
+                if (liveMap != null) liveMap.setBottomCover(show ? coverOpen : coverShut);
             }};
         }
         handle.setOnClickListener(new View.OnClickListener() {
@@ -3909,6 +3957,64 @@ public class Main extends Activity {
         new TB(this, dlg()).diag().setTitle("Diagnóstico del mapa").setMessage(mapDiag()).setPositiveButton("OK", null).show();
     }
 
+    /**
+     * Toque largo en el mapa con la navegación integrada: alfiler en el punto y «Navegar hasta aquí» (solo Navegar y
+     * Cancelar; las paradas siguen en el botón del navegador y el diagnóstico en Ajustes → Mapa).
+     */
+    private void askNavHere(double lat, double lon) {
+        final Nav.Place p = Nav.pointPlace(lat, lon);
+        final TextView where = tv("", 16, SOFT, false);
+        where.setSingleLine(false);
+        where.setMaxLines(4);
+        where.setGravity(Gravity.CENTER_HORIZONTAL);
+        where.setLineSpacing(0, 1.22f);
+        where.setPadding((int) (28 * s), (int) (4 * s), (int) (28 * s), (int) (12 * s));
+        where.setText(p.name + "\n" + p.sub);
+        final boolean[] open = {true};
+        Nav.reverse(this, lat, lon, new Nav.SearchCb() {
+            public void onResult(List<Nav.Place> places, String error) {
+                if (!open[0] || places == null || places.isEmpty()) return;
+                Nav.Place r = places.get(0);   // el nombre de la dirección; las coordenadas siguen siendo las tocadas
+                p.name = r.name;
+                p.sub = r.sub;
+                where.setText(r.sub != null && r.sub.length() > 0 ? r.name + "\n" + r.sub : r.name);
+            }
+        });
+        AlertDialog d = new TB(this, dlg()).setTitle("Navegar hasta aquí").setView(where)
+            .setPositiveButton("Navegar", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface di, int w) { startInternalNav(p); }
+            })
+            .setNegativeButton("Cancelar", null)
+            .create();
+        d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            public void onDismiss(DialogInterface di) {
+                open[0] = false;
+                if (liveMap != null) liveMap.setPin(Double.NaN, 0);
+            }
+        });
+        if (liveMap != null) {
+            liveMap.setPin(lat, lon);
+            // la ventana va al lado contrario del alfiler, para que se vea dónde se tocó
+            int[] at = new int[2];
+            liveMap.getLocationOnScreen(at);
+            float x = at[0] + liveMap.pressX(), y = at[1] + liveMap.pressY();
+            android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+            Window w = d.getWindow();
+            if (w != null) {
+                WindowManager.LayoutParams lp = w.getAttributes();
+                if (dm.widthPixels >= dm.heightPixels) {
+                    w.setGravity((x > dm.widthPixels / 2f ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL);
+                    lp.x = (int) (16 * s);
+                } else {
+                    w.setGravity((y > dm.heightPixels / 2f ? Gravity.TOP : Gravity.BOTTOM) | Gravity.CENTER_HORIZONTAL);
+                    lp.y = (int) (16 * s);
+                }
+                w.setAttributes(lp);
+            }
+        }
+        d.show();
+    }
+
     private void updateMapTag() {
         if (mapTagTv == null) return;
         boolean live = lastFix > 0;
@@ -4286,16 +4392,29 @@ public class Main extends Activity {
         // 2.19: cantidad de botones (4 a 10) y tamaño de los íconos (Tinoyevski #18, MIGSGx #12). 7 y normal = lo de siempre.
         final int n = dockCount;
         int isz = prefs.getInt("dock_icon_size", 1);
-        float ik = isz == 0 ? 0.82f : isz == 2 ? 1.2f : 1f;
-        final float railX = railLeft ? 16 : 1016 + ex, step = (boardH - 24) / (float) n;
+        // 2.36 (#74, shaharyarz): «Muy grande» (3) y «Enorme» (4). Con ellos los nombres también crecen y, en la barra
+        // lateral, los botones se juntan en el centro en vez de repartirse a lo alto. Pequeño/Normal/Grande, como siempre.
+        boolean big = isz >= 3;
+        float ik = isz == 0 ? 0.82f : isz == 2 ? 1.2f : isz == 3 ? 1.5f : isz >= 4 ? 1.8f : 1f;
+        float lk = isz == 3 ? 1.2f : isz >= 4 ? 1.35f : 1f;
+        final float lblSize = (sideDock ? 10 : compactDock ? 12 : 13) * lk, lblPad = sideDock ? 2 : compactDock ? 2 : 8;
+        final float lblH = dockLabels ? lblSize * FONT * 1.3f + lblPad : 0;
+        final float railX = railLeft ? 16 : 1016 + ex, step0 = (boardH - 24) / (float) n;
         float cs0 = (sideDock ? (dockLabels ? 40 : 48) : compactDock ? 50 : 64) * ik;
-        if (sideDock) cs0 = Math.min(cs0, step - (dockLabels ? 18 : 6));          // que quepan en la barra lateral
-        final float lblSize = sideDock ? 10 : compactDock ? 12 : 13, lblPad = sideDock ? 2 : compactDock ? 2 : 8;
+        if (sideDock) cs0 = Math.min(cs0, step0 - (dockLabels ? 18 : 6));          // que quepan en la barra lateral
+        if (sideDock && big) cs0 = Math.min(cs0, Math.min(RAIL - 10, step0 - lblH - 6));
+        if (big && !sideDock) {   // que el círculo y el nombre quepan en su franja
+            float hAvail = compactDock ? boardH - dockTop - 8 : dockLabels ? 110 : 132;
+            cs0 = Math.min(cs0, hAvail - lblH - 4);
+        }
+        // barra lateral agrupada (solo con los tamaños nuevos): cada botón ocupa lo justo y el grupo queda centrado
+        final float step = sideDock && big ? Math.min(step0, cs0 + lblH + 16) : step0;
+        final float railY0 = 12 + ((boardH - 24) - step * n) / 2;
         final boolean appStyle = "apps".equals(prefs.getString("dock_style", "circle"));
         // botones a lo ancho: con 7 se usan las posiciones de siempre; con otra cantidad se reparten parejo
         final float slotW = n == 7 && !vertical ? 138 + ex / 6 : (948 + ex) / (float) n, itemW = Math.min(120, slotW - 4);
         final float x0 = n == 7 && !vertical ? 38 : 38 + (slotW - itemW) / 2;
-        if (vertical) cs0 = Math.min(cs0, slotW - 10);                            // con muchos botones, que no se monten
+        if (vertical || big) cs0 = Math.min(cs0, (big ? itemW : slotW) - 10);     // con muchos botones, que no se monten
         final float cs = cs0;          // círculo
         if (sideDock) {
             View rail = new View(this);
@@ -4337,7 +4456,7 @@ public class Main extends Activity {
             } else {
                 b.setGravity(Gravity.CENTER);   // sin nombres: el círculo queda centrado en la franja
             }
-            if (sideDock) { b.setGravity(Gravity.CENTER); place(board, b, railX, 12 + step * i, RAIL, step); }
+            if (sideDock) { b.setGravity(Gravity.CENTER); place(board, b, railX, railY0 + step * i, RAIL, step); }
             else if (compactDock) { b.setGravity(Gravity.CENTER); place(board, b, x0 + slotW * i, dockTop + 4, itemW, boardH - dockTop - 8); }
             else place(board, b, x0 + slotW * i, dockTop + (dockLabels ? 18 : 6), itemW, dockLabels ? 110 : 132);
             b.setOnClickListener(new View.OnClickListener() {
@@ -5390,7 +5509,7 @@ public class Main extends Activity {
     private void buildFaroDock() {
         final int n = dockCount;
         int isz = prefs.getInt("dock_icon_size", 1);
-        float ik = isz == 0 ? 0.86f : isz == 2 ? 1.12f : 1f;
+        float ik = isz == 0 ? 0.86f : isz >= 2 ? 1.12f : 1f;   // 2.36: Muy grande y Enorme = Grande aquí
         float pillH = premPillH;
         // centrada en el reproductor y sin pasarse de sus bordes: crece desde el centro hacia los lados
         float areaX = faroPlX, areaW = faroPlW;
@@ -5558,6 +5677,9 @@ public class Main extends Activity {
         final boolean open0 = prefs.getBoolean("carb_ov_open", true);
         for (View v : moving) v.setTranslationY(open0 ? 0 : shift);
         chev.setRotation(open0 ? 90 : -90);
+        // #68: lo que tapan abajo el reproductor, el clima y la flechita (abiertos / plegados), para el carro «Abajo»
+        final float coverOpen = (cbOvH + 12 + 32) * s, coverShut = coverOpen - shift;
+        if (liveMap != null) liveMap.setBottomCover(open0 ? coverOpen : coverShut);
         carbSetOpen = new Runnable[2];
         for (int k = 0; k < 2; k++) {
             final boolean show = k == 0;
@@ -5565,6 +5687,7 @@ public class Main extends Activity {
                 prefs.edit().putBoolean("carb_ov_open", show).apply();
                 for (View v : moving) v.animate().translationY(show ? 0 : shift).setDuration(220);
                 chev.animate().rotation(show ? 90 : -90).setDuration(220);
+                if (liveMap != null) liveMap.setBottomCover(show ? coverOpen : coverShut);
             }};
         }
         handle.setOnTouchListener(new View.OnTouchListener() {
@@ -6070,7 +6193,7 @@ public class Main extends Activity {
     private void buildCarbDock() {
         final int n = dockCount;
         int isz = prefs.getInt("dock_icon_size", 1);
-        float ik = isz == 0 ? 0.86f : isz == 2 ? 1.12f : 1f;
+        float ik = isz == 0 ? 0.86f : isz >= 2 ? 1.12f : 1f;   // 2.36: Muy grande y Enorme = Grande aquí
         boolean vert = !vertical;
         float thick = premPillH, item = vert ? 58 : Math.max(60, Math.min(84, (cbDockW - 16) / Math.max(1, n)));
         View bg = new View(this);
@@ -6516,7 +6639,7 @@ public class Main extends Activity {
     private void buildPremiumDock() {
         final int n = dockCount;
         int isz = prefs.getInt("dock_icon_size", 1);
-        float ik = isz == 0 ? 0.82f : isz == 2 ? 1.2f : 1f;
+        float ik = isz == 0 ? 0.82f : isz >= 2 ? 1.2f : 1f;   // 2.36: Muy grande y Enorme = Grande aquí
         float W0 = premW(), avail = W0 - 32, pillH = premPillH;
         float itemW = Math.min(vertical ? 80 : 84, (avail - 24) / n), pillW = itemW * n + 24;
         float px = (W0 - pillW) / 2, py = dockTop;
@@ -7271,7 +7394,7 @@ public class Main extends Activity {
                                 }
                             }
                         })
-                        .setNegativeButton("Cancelar", null)
+                        .setNegativeButton(I18n.t("Cancelar"), null)
                         .show();
                     return true;
                 }
@@ -7362,7 +7485,7 @@ public class Main extends Activity {
                     }
                 }
             })
-            .setNegativeButton("Cerrar", null)
+            .setNegativeButton(I18n.t("Cerrar"), null)
             .show();
     }
 
@@ -7454,7 +7577,7 @@ public class Main extends Activity {
             .setAdapter(ad, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int w) { handlePickedPlace(places.get(w), insertActive, asStop); }
             })
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(I18n.t("Cancelar"), null)
             .show();
     }
 
@@ -7490,12 +7613,25 @@ public class Main extends Activity {
         });
     }
 
-    private void activateChosenRoute(Nav.Route r) {
+    private void activateChosenRoute(final Nav.Route r) {
         Nav.activate(this, r);
         Nav.announceStart(this, r);
         LiveMapView.headingUp = true;
         updateNavHud();
-        if (liveMap != null) liveMap.invalidate();
+        // si se estaba explorando el mapa o tenía zoom a mano (p. ej. alejado para el toque largo), la guía arranca
+        // mirando al carro con el zoom según la velocidad: primero se ve la ruta un momento y luego vuelve a «Seguir»,
+        // deslizándose (si la ruta sigue activa)
+        if (liveMap != null) {
+            liveMap.invalidate();
+            if (!liveMap.isFollowing()) {
+                final LiveMapView lmv = liveMap;
+                lmv.holdLow(true);   // con «Abajo», el carro baja recién cuando la vista vuelve a él
+                h.postDelayed(new Runnable() { public void run() {
+                    if (liveMap == lmv && Nav.active == r) lmv.backToCar();
+                    else lmv.holdLow(false);
+                }}, 700);
+            } else liveMap.holdLow(false);
+        }
         if (!r.incidents.isEmpty()) {
             toast(r.incidents.size() + " " + I18n.t(r.incidents.size() == 1 ? "incidente en la ruta" : "incidentes en la ruta"));
         } else if ("cache".equals(r.source)) {
@@ -7546,7 +7682,7 @@ public class Main extends Activity {
                     activateChosenRoute(routes.get(w));
                 }
             })
-            .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            .setNegativeButton(I18n.t("Cancelar"), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int w) {
                     if (!chosen[0]) {
                         Nav.active = prevActive;
@@ -7700,7 +7836,7 @@ public class Main extends Activity {
                     if (w >= 0 && w < actions.size()) actions.get(w).run();
                 }
             })
-            .setNegativeButton("Cerrar", null)
+            .setNegativeButton(I18n.t("Cerrar"), null)
             .show();
     }
 
@@ -7824,10 +7960,15 @@ public class Main extends Activity {
         if (compactLayout()) { showCompactTemperature(); return; }
         String d = I18n.sdf(vertical && !(premium && !mapOnly) ? "EEE d MMM" : I18n.datePattern()).format(now);
         dateTv.setText(d.substring(0, 1).toUpperCase(I18n.loc) + d.substring(1));
+        greetTv.setText(greetingText());
+    }
+
+    /** «Buenos días/Buenas tardes/Buenas noches, <nombre>» en el idioma del launcher (inicio y bienvenida). */
+    private String greetingText() {
         int hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         String saludo = I18n.t(hr >= 5 && hr < 12 ? "Buenos días" : (hr >= 12 && hr < 19 ? "Buenas tardes" : "Buenas noches"));
         String nombre = prefs.getString("user_name", "").trim();
-        greetTv.setText(nombre.length() > 0 ? saludo + ", " + nombre : saludo);
+        return nombre.length() > 0 ? saludo + ", " + nombre : saludo;
     }
 
     private final LocationListener gpsListener = new LocationListener() {
@@ -8342,6 +8483,8 @@ public class Main extends Activity {
         String msg = "Fuente: " + (curOrigin != null ? curOrigin : "—") + " / " + (curSource != null ? curSource : "—")
                 + "\nPista: " + curTitle + " — " + curArtist
                 + "\nCarátula: " + (curArt != null ? curArt.getWidth() + "x" + curArt.getHeight() : "no")
+                + "\nCarátula de internet: " + (prefs.getBoolean("cover_online", false) ? CoverFetch.lastInfo
+                    + (coverArt != null ? " · en pantalla " + coverArt.getWidth() + "x" + coverArt.getHeight() : "") : "apagada")
                 + "\nTiempo en StradaOS: " + (currentPos() / 1000) + "/" + (durMs / 1000) + " s · " + posSrc
                 + "\nÚltimo tiempo por Bluetooth: " + (btPosMs < 0 ? "ninguno"
                     : (btPosMs / 1000) + " s, hace " + ((SystemClock.elapsedRealtime() - btPosAt) / 1000) + " s")
@@ -8380,7 +8523,129 @@ public class Main extends Activity {
             .setNeutralButton("Accesibilidad", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int w) { openAccessibility(); }
             })
+            .setNegativeButton("Exportar app Bluetooth", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int w) { btExport(); }
+            })
             .show();
+    }
+
+    // ───────────────────────── exportar la app Bluetooth de fábrica (2.38, #79) ─────────────────────────
+
+    private static final int REQ_BTEXP_W = 85, REQ_BTEXP_CREATE = 86;
+    private List<BtExport.App> btExportPending;
+
+    private void btExport() {
+        // Android 6 a 9: permiso para escribir en la memoria (en Android 10+ se usa el selector de archivos)
+        if (SDK >= 23 && SDK <= 28 && checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQ_BTEXP_W);
+            return;
+        }
+        btExport0();
+    }
+
+    /** Elegir qué apps: todas las de fábrica parecidas (recomendado) o una sola. */
+    private void btExport0() {
+        if (isFinishing()) return;
+        ComponentName g = btMusicApp();
+        final List<BtExport.App> apps = BtExport.candidates(this, clwBt ? BtBridge.PKG : g != null ? g.getPackageName() : null);
+        if (apps.isEmpty()) { toast("No se encontraron apps de Bluetooth de fábrica"); return; }
+        long total = 0;
+        for (BtExport.App a : apps) total += a.size;
+        String[] items = new String[apps.size() + 1];
+        items[0] = I18n.t("Todas las de Bluetooth y música de fábrica (recomendado)") + "\n" + apps.size() + " apps · " + mb(total);
+        for (int i = 0; i < apps.size(); i++) {
+            BtExport.App a = apps.get(i);
+            items[i + 1] = a.label + (a.guessed ? "  ★ " + I18n.t("detectada") : "") + "\n" + a.pkg + " · " + mb(a.size);
+        }
+        new TB(this, dlg()).raw().wide()
+            .setTitle(I18n.t("¿Qué app exportar?"))
+            .setItems(items, new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+                btExportWhere(w == 0 ? apps : java.util.Collections.singletonList(apps.get(w - 1)));
+            }})
+            .setNegativeButton(I18n.t("Cancelar"), null)
+            .show();
+    }
+
+    private static String mb(long b) {
+        return b >= 1024 * 1024 ? String.format(I18n.num, "%.1f MB", b / 1048576f) : Math.max(1, b / 1024) + " KB";
+    }
+
+    /** Elegir dónde: la memoria de la pantalla o una USB conectada. */
+    private void btExportWhere(final List<BtExport.App> apps) {
+        final List<File> roots = new ArrayList<File>();
+        final List<String> items = new ArrayList<String>();
+        roots.add(Backup.primary());
+        items.add(I18n.t("Memoria de la pantalla") + "\n" + new File(Backup.primary(), "StradaDiag").getAbsolutePath());
+        for (File u : Backup.removable(this)) {
+            roots.add(u);
+            items.add(I18n.t("Memoria USB") + "  ·  " + u.getName() + "\n" + new File(u, "StradaDiag").getAbsolutePath());
+        }
+        // selector de archivos de Android (4.4+); en Android 10+ es el único camino a una carpeta a la vista sin permisos
+        Intent doc = null;
+        if (SDK >= 19) {
+            doc = new Intent("android.intent.action.CREATE_DOCUMENT");
+            doc.addCategory(Intent.CATEGORY_OPENABLE);
+            doc.setType("application/zip");
+            doc.putExtra(Intent.EXTRA_TITLE, BtExport.zipName());
+            try { if (getPackageManager().resolveActivity(doc, 0) == null) doc = null; } catch (Throwable e) { doc = null; }
+        }
+        final Intent fdoc = doc;
+        if (fdoc != null && SDK >= 29) { btExportPick(apps, fdoc); return; }
+        if (fdoc != null) items.add(I18n.t("Elegir otra carpeta…"));
+        if (items.size() == 1) { btExportRun(apps, roots.get(0)); return; }
+        new TB(this, dlg()).raw().wide()
+            .setTitle(I18n.t("¿Dónde guardar el archivo?"))
+            .setItems(items.toArray(new String[0]), new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+                if (w < roots.size()) btExportRun(apps, roots.get(w));
+                else btExportPick(apps, fdoc);
+            }})
+            .setNegativeButton(I18n.t("Cancelar"), null)
+            .show();
+    }
+
+    private void btExportPick(List<BtExport.App> apps, Intent doc) {
+        btExportPending = apps;
+        try { startActivityForResult(doc, REQ_BTEXP_CREATE); }
+        catch (Throwable e) { btExportRun(apps, Backup.primary()); }   // sin selector: a la memoria de la pantalla
+    }
+
+    /** El archivo elegido en el selector de Android. */
+    private void btExportDocument(final Uri uri) {
+        final List<BtExport.App> apps = btExportPending;
+        btExportPending = null;
+        if (apps == null) return;
+        toast("Exportando… puede tardar un minuto");
+        new Thread(new Runnable() { public void run() {
+            BtExport.Result r;
+            try { r = BtExport.writeZip(Main.this, apps, getContentResolver().openOutputStream(uri)); }
+            catch (Throwable e) { r = new BtExport.Result(); r.error = String.valueOf(e); }
+            final BtExport.Result fr = r;
+            String name = uri.getLastPathSegment();
+            final String where = name != null ? name : uri.toString();
+            h.post(new Runnable() { public void run() { btExportDone(fr, where, fr.error == null ? fr.bytes : -1); } });
+        }}).start();
+    }
+
+    private void btExportRun(final List<BtExport.App> apps, final File root) {
+        toast("Exportando… puede tardar un minuto");
+        new Thread(new Runnable() { public void run() {
+            final BtExport.Result r = BtExport.export(Main.this, apps, root);
+            h.post(new Runnable() { public void run() {
+                btExportDone(r, r.zip != null ? r.zip.getAbsolutePath() : null, r.zip != null ? r.zip.length() : -1);
+            }});
+        }}).start();
+    }
+
+    private void btExportDone(BtExport.Result r, String where, long size) {
+        if (isFinishing()) return;
+        if (r.error != null || where == null) {
+            new TB(Main.this, dlg()).raw().setTitle(I18n.t("No se pudo exportar"))
+                .setMessage(I18n.t("No se pudo guardar el archivo") + "\n\n" + r.error).setPositiveButton("OK", null).show();
+            return;
+        }
+        String msg = I18n.t("Se guardó en:") + "\n" + where + "\n" + r.apps + " apps · " + mb(size) + "\n\n"
+            + I18n.t("Adjunta ese archivo .zip en tu reporte de GitHub (o en el mensaje donde te lo pidieron). Si pesa más de 25 MB, súbelo a Google Drive y comparte el enlace.");
+        new TB(Main.this, dlg()).raw().setTitle(I18n.t("Exportación lista")).setMessage(msg).setPositiveButton("OK", null).show();
     }
 
     private void openAccessibility() {
@@ -8423,7 +8688,7 @@ public class Main extends Activity {
             trackTv.setText(curTitle != null ? curTitle : (curSource != null ? I18n.t(curSource) : ""));
             artistTv.setText(aaOff ? I18n.t("Activa «Pista actual de AA» en Open Headunit") : (curArtist != null ? curArtist : ""));
             sourceTv.setText(curSource != null ? I18n.t(curSource).toUpperCase(I18n.loc) : "");
-            if (playerArt != null) playerArt.setArt(curArt);
+            if (playerArt != null) playerArt.setArt(curArt != null || aaOff ? curArt : onlineCover());
             updateProgress();
         }
         if (playIc != null) {
@@ -8431,6 +8696,61 @@ public class Main extends Activity {
                     : ((AudioManager) getSystemService(AUDIO_SERVICE)).isMusicActive();
             playIc.setImageBitmap(asset(on ? "ic/pause.png" : "ic/play_arrow.png"));
         }
+    }
+
+    /**
+     * Carátula de internet (Ajustes → Música) para la canción que llegó sin ella. Se espera 3 s: la notificación de
+     * Open Headunit o la app pueden mandar la suya un instante después, y esa siempre manda.
+     */
+    private Bitmap onlineCover() {
+        if (curTitle == null || curArtist == null || !prefs.getBoolean("cover_online", false)) return null;
+        if (curSource != null && curSource.toLowerCase(ES).contains("radio")) return null;   // nombre de la emisora, no una canción
+        final String k = CoverFetch.key(curArtist, curTitle);
+        if (k.equals(coverKey)) return coverArt;
+        if (k.equals(coverAsked)) return null;
+        coverAsked = k;
+        h.postDelayed(new Runnable() { public void run() {
+            if (curArt != null || curTitle == null || curArtist == null || !k.equals(CoverFetch.key(curArtist, curTitle))) return;
+            CoverFetch.fetch(Main.this, curArtist, curTitle, new CoverFetch.Listener() {
+                public void onCover(final String key, final Bitmap art) {
+                    if (art == null) return;
+                    h.post(new Runnable() { public void run() {
+                        // queda con su canción: solo se muestra mientras suene esa y la fuente no traiga carátula
+                        coverKey = key;
+                        coverArt = art;
+                        renderTrack();
+                    }});
+                }
+            });
+        }}, 3000);
+        return null;
+    }
+
+    /**
+     * 2.36: prueba de la carátula por internet, paso a paso (MusicBrainz, Cover Art Archive, iTunes y sus imágenes),
+     * con la canción que suena. También queda en StradaDiag/caratulas.txt para pedírsela a quien no le funcione.
+     */
+    private void testCovers() {
+        toast("Probando…");
+        final String ar = curArtist, ti = curTitle;
+        final String head = "Fuente: " + (curSource != null ? curSource : "—") + "\nPista: " + (ti != null ? ti : "—") + " — " + (ar != null ? ar : "—")
+                + "\nCarátula de la fuente: " + (curArt != null ? curArt.getWidth() + "x" + curArt.getHeight() + " (con ella no se busca)" : "no")
+                + "\nÚltima búsqueda: " + CoverFetch.lastInfo + "\n\n";
+        new Thread(new Runnable() { public void run() {
+            final String r = head + CoverFetch.test(Main.this, ar, ti);
+            try {
+                java.io.File d = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "StradaDiag");
+                d.mkdirs();
+                java.io.FileOutputStream o = new java.io.FileOutputStream(new java.io.File(d, "caratulas.txt"));
+                o.write(r.getBytes("UTF-8"));
+                o.close();
+            } catch (Throwable ignored) { }
+            h.post(new Runnable() { public void run() {
+                if (isFinishing()) return;
+                new TB(Main.this, dlg()).diag().setTitle("Prueba de carátulas")
+                    .setMessage(r + "\n" + I18n.t("Se guarda en StradaDiag/caratulas.txt")).setPositiveButton("OK", null).show();
+            }});
+        }}).start();
     }
 
     private void updateProgress() {
@@ -8870,6 +9190,11 @@ public class Main extends Activity {
     protected void onActivityResult(int req, int res, Intent data) {
         super.onActivityResult(req, res, data);
         if (req == REQ_HOME) { homeResult(); return; }
+        if (req == REQ_BTEXP_CREATE) {
+            if (res == RESULT_OK && data != null && data.getData() != null) btExportDocument(data.getData());
+            else btExportPending = null;
+            return;
+        }
         if (req == REQ_BACKUP_CREATE || req == REQ_BACKUP_OPEN) {
             if (res == RESULT_OK && data != null && data.getData() != null) backupDocument(data.getData(), req == REQ_BACKUP_CREATE);
             return;
@@ -10644,7 +10969,7 @@ public class Main extends Activity {
             choice(lay, "Cantidad de botones", "«Apps» siempre queda al final", counts, dockCount - 4, new IntCb() { public void on(int i) {
                 prefs.edit().putInt("dock_count", i + 4).apply(); rebuild(); showSettings(settingsCat);
             }});
-            segmented(lay, "Tamaño de los íconos", null, new String[]{"Pequeño", "Normal", "Grande"}, prefs.getInt("dock_icon_size", 1), new IntCb() { public void on(int i) {
+            choice(lay, "Tamaño de los íconos", "«Muy grande» y «Enorme» también agrandan los nombres", new String[]{"Pequeño", "Normal", "Grande", "Muy grande", "Enorme"}, Math.max(0, Math.min(4, prefs.getInt("dock_icon_size", 1))), new IntCb() { public void on(int i) {
                 prefs.edit().putInt("dock_icon_size", i).apply(); rebuild(); showSettings(settingsCat);
             }});
             LinearLayout c = section(body, "Botones (déjalos presionados en el inicio para cambiarlos)");
@@ -10729,6 +11054,14 @@ public class Main extends Activity {
             segmented(mo, "El mapa apunta", "Según tu dirección: gira con el carro mientras te mueves", new String[]{"Norte arriba", "Según tu dirección"},
                 prefs.getBoolean("map_heading", false) ? 1 : 0, new IntCb() { public void on(int i) {
                     prefs.edit().putBoolean("map_heading", i == 1).apply(); LiveMapView.headingUp = i == 1;
+                    if (liveMap != null) liveMap.invalidate(); showSettings(settingsCat);
+                }});
+        }
+        if (!opelSettings()) {
+            // #68: «Abajo» deja ver más camino por delante al navegar con el mapa según la dirección (Centro = como siempre)
+            segmented(mo, "Posición del carro", "Abajo: al navegar ves más camino por delante (con el mapa según tu dirección)",
+                new String[]{"Centro", "Abajo"}, prefs.getInt("map_car_pos", 0) == 1 ? 1 : 0, new IntCb() { public void on(int i) {
+                    prefs.edit().putInt("map_car_pos", i).apply(); LiveMapView.carLow = i == 1;
                     if (liveMap != null) liveMap.invalidate(); showSettings(settingsCat);
                 }});
         }
@@ -11164,7 +11497,27 @@ public class Main extends Activity {
                 try { startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
                 catch (Throwable e) { notifAccessAdb(); }
             }});
+        final boolean online = prefs.getBoolean("cover_online", false);
+        toggle(c, "Buscar carátulas en internet", "Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista",
+            online, new IntCb() { public void on(int i) {
+                prefs.edit().putBoolean("cover_online", i == 1).apply();
+                coverAsked = coverKey = null;
+                coverArt = null;
+                renderTrack();
+                showSettings(settingsCat);
+            }});
+        if (online) row(c, "Probar la búsqueda de carátulas", "Prueba cada servidor con la canción que suena y muestra el error exacto", null,
+            new Runnable() { public void run() { testCovers(); } });
+        if (online) row(c, "Borrar carátulas guardadas", "Las que se bajaron de internet y se guardaron en el equipo", null,
+            new Runnable() { public void run() {
+                CoverFetch.clear(Main.this);
+                coverAsked = coverKey = null;
+                coverArt = null;
+                toast("Carátulas borradas");
+            }});
         row(c, "Diagnóstico del reproductor", "Fuente activa, lector de notificaciones y Bluetooth", null, new Runnable() { public void run() { showPlayerDiag(); } });
+        row(c, "Exportar la app de Bluetooth de fábrica", "Si la música Bluetooth no aparece en el inicio: guarda esa app en un archivo .zip (en la pantalla o en una USB) para enviarlo y que StradaOS aprenda a leerla. Sin ADB",
+            null, new Runnable() { public void run() { btExport(); } });
         LinearLayout b = section(body, "Audio Bluetooth");
         row(b, "¿La música Bluetooth se corta o no aparece?", "Qué hacer en cada caso", null, new Runnable() { public void run() { btHelp(); } });
         if (androidAutoSettings()) {
@@ -11250,6 +11603,26 @@ public class Main extends Activity {
                     showSettings(settingsCat);
                 }});
             }});
+        // 2.38 (#80, #48): bienvenida con el logo y saludo por voz; al activarla la voz viene encendida y se muestra una vez
+        final boolean wOn = prefs.getBoolean("welcome_on", false);
+        toggle(hm, "Bienvenida al encender", "Una luz pasa detrás del logo y del nombre, todo se ilumina y te saluda (unos 7 segundos). Tócala para saltarla",
+            wOn, new IntCb() { public void on(int i) {
+                SharedPreferences.Editor e = prefs.edit().putBoolean("welcome_on", i == 1);
+                if (i == 1) e.putBoolean("welcome_voice", true);
+                e.apply();
+                showSettings(settingsCat);
+                if (i == 1) showWelcome(-1);
+            }});
+        if (wOn) {
+            String note = Welcome.voiceNote;
+            toggle(hm, "Saludo por voz", note != null ? note : "Con la voz de la pantalla, sin internet. Si no hay voz para tu idioma, solo sale el texto",
+                prefs.getBoolean("welcome_voice", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("welcome_voice", i == 1).apply(); showSettings(settingsCat);
+                }});
+            row(hm, "Ver la bienvenida", prefs.getString("user_name", "").trim().length() == 0
+                    ? "Para que te salude por tu nombre, escríbelo en Tu vehículo → Tu nombre" : null, null,
+                new Runnable() { public void run() { showWelcome(-1); } });
+        }
         // Salidas (issue #9): una pantalla Android 11 quedó atrapada en StradaOS tras elegirlo como launcher desde su
         // modo fábrica (toda app, incluso la ventana de desinstalar, se abría y volvía a StradaOS).
         LinearLayout out = section(body, "Salir de StradaOS");
@@ -11458,6 +11831,7 @@ public class Main extends Activity {
     private void reloadAll() {
         I18n.init(this, prefs);
         LiveMapView.headingUp = prefs.getBoolean("map_heading", false);
+        LiveMapView.carLow = prefs.getInt("map_car_pos", 0) == 1;
         applyThemeNow();
         applyAccent();
         try { lm.removeUpdates(odoListener); } catch (Throwable ignored) { }
@@ -11496,6 +11870,54 @@ public class Main extends Activity {
      * Abre la app elegida un momento y vuelve al inicio. Solo al encender la pantalla (los primeros minutos desde
      * que arrancó Android): si StradaOS se reinicia más tarde (una actualización, un cierre) no se abre nada.
      */
+    // ───────────────────────── bienvenida (2.38, #80 + #48) ─────────────────────────
+
+    private Welcome welcome;
+    private Welcome.Voice welcomeVoice;
+    /** Una sola vez por arranque del equipo (aunque Android vuelva a crear la actividad). */
+    private static boolean welcomeBootDone;
+
+    private boolean welcomeOn() {
+        return prefs.getBoolean("welcome_on", false) && prefs.getBoolean("setup_done", false);
+    }
+
+    /** Al encender: como la app de encendido, solo en los primeros 4 minutos desde que arrancó el equipo. */
+    private void maybeWelcomeAtBoot() {
+        if (welcomeBootDone) return;
+        welcomeBootDone = true;
+        if (!welcomeOn() || SystemClock.elapsedRealtime() > 4 * 60000L) return;
+        long boot = System.currentTimeMillis() - SystemClock.elapsedRealtime();
+        if (Math.abs(boot - prefs.getLong("welcome_boot", 0)) < 120000) return;   // ya salió en este arranque
+        prefs.edit().putLong("welcome_boot", boot).apply();
+        showWelcome(-1);
+    }
+
+    /** Muestra la bienvenida encima de todo (también de los Ajustes). freeze ≥ 0: quieta en ese instante (pruebas). */
+    private void showWelcome(long freeze) {
+        removeWelcome();
+        String g = greetingText();
+        final Welcome w = new Welcome(this, g);
+        w.freezeAt = freeze;
+        if (freeze < 0 && prefs.getBoolean("welcome_voice", true)) {
+            try { if (welcomeVoice != null) welcomeVoice.shutdown(); } catch (Throwable ignored) { }
+            final Welcome.Voice v = new Welcome.Voice(this, g + ".", I18n.loc);
+            welcomeVoice = v;
+            w.voice = v;
+            w.onImpact = new Runnable() { public void run() { v.speak(); } };
+        }
+        w.onEnd = new Runnable() { public void run() { if (welcome == w) removeWelcome(); } };
+        welcome = w;
+        try { addContentView(w, new ViewGroup.LayoutParams(-1, -1)); }
+        catch (Throwable e) { welcome = null; }
+    }
+
+    private void removeWelcome() {
+        Welcome w = welcome;
+        welcome = null;
+        if (w == null) return;
+        try { ((ViewGroup) w.getParent()).removeView(w); } catch (Throwable ignored) { }
+    }
+
     private void maybeBootApp() {
         if (bootAppDone) return;
         bootAppDone = true;
@@ -11511,7 +11933,10 @@ public class Main extends Activity {
     private final BroadcastReceiver screenReceiver = new BroadcastReceiver() {
         public void onReceive(Context c, Intent i) {
             if (Intent.ACTION_SCREEN_OFF.equals(i.getAction())) { screenOffAt = SystemClock.elapsedRealtime(); return; }
-            if (screenOffAt > 0 && SystemClock.elapsedRealtime() - screenOffAt > 5 * 60000L && hasWindowFocus()) runBootApp(1500);
+            if (screenOffAt > 0 && SystemClock.elapsedRealtime() - screenOffAt > 5 * 60000L && hasWindowFocus()) {
+                if (welcomeOn()) showWelcome(-1);
+                runBootApp(1500);
+            }
             screenOffAt = 0;
         }
     };
@@ -11519,6 +11944,7 @@ public class Main extends Activity {
     private void runBootApp(long delay) {
         final String comp = prefs.getString("boot_app", "");
         if (comp.length() == 0 || !prefs.getBoolean("setup_done", false)) return;
+        if (welcome != null) delay = Math.max(delay, welcome.remaining() + 400);   // 2.38: primero termina la bienvenida
         h.postDelayed(new Runnable() { public void run() {
             if (isFinishing()) return;
             final ComponentName cn = ComponentName.unflattenFromString(comp);
@@ -11674,6 +12100,7 @@ public class Main extends Activity {
 
     /** Al volver al inicio: busca versión nueva (1 vez al día) o, si toca, el recuadro «¿Te gusta StradaOS?». */
     private void autoChecks() {
+        if (welcome != null) { h.postDelayed(new Runnable() { public void run() { autoChecks(); } }, welcome.remaining() + 800); return; }
         if (!hasWindowFocus() || settingsView != null || drawer != null) return;
         if (!homeAsked && prefs.getBoolean("setup_done", false) && !prefs.getBoolean("home_never", false) && askDefaultHome(null)) return;
         if (oilAlert()) return;

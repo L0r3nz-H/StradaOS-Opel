@@ -451,3 +451,37 @@ existing-key signing/certificate checks remain required. All candidate build,
 lint, signing and emulator results are pending; no Android tools run on the VPS.
 API17, physical OBD/projection hardware, real head-unit decoders, exhaustive video
 UI/format testing and the separate full ELM simulator regression remain limits.
+
+## Completed 2.35.0 and pending 2.38.0 sync — 2026-11-27
+
+[Opel 2.35.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.35.0-preview.1)
+was published from `6da95b24aa6672a8f07dc884aeabdff84180535e` by successful
+hosted workflow `45659657852`. All eight debug UI and eight signed Opel startup
+jobs passed, including the API30 video/style-transition check. Lint XML had
+65 warnings and one information, no Error/Fatal findings (baseline: 48 warnings
+and one information). Signature/certificate and metadata gates passed.
+APK SHA-256: `3b1287bb36b3f0051f8c5ac629e2cc47b3034cf0c3b6adf1a2f4ece29fc3714f`.
+The immutable tag matches the tested main commit; published APK/checksum digests
+match the preflight assets. Stable Latest remains 2.22.0.
+
+The new candidate merges only stable `v2.38.0`, release ID 459921937, resolved
+commit `128769aec85629bdd73f8be8d8b55324b02d4ecd`, against that Opel main baseline.
+Version `2.38.0-opel`, versionCode 75, also contains released 2.36/2.37 changes:
+optional online cover lookup, larger standard dock icons, Russian translation,
+map/navigation refinements, optional boot welcome/voice and manual Bluetooth-app
+diagnostic export. Cover lookup remains opt-in; the English privacy document
+describes its providers and the legacy HTTP fallback.
+
+Merge resolutions retain Opel defaults/migrations, Astra fallback, null-safe media
+callbacks, independent layout/theme/projection settings, video cleanup and compact
+map tap-to-cycle zoom. Welcome cleanup is combined with the existing video cleanup.
+The debug snapshot hook remains intact. Live-map controls stay hidden for Opel's
+vehicle panel or disabled live map; the new navigation-position setting stays
+standard-only. The official update metadata is unchanged.
+Pages stays removed; official stable/debug/license jobs, strict lint, both full
+emulator matrices and all existing Opel API30 gates retain their restrictions and
+dependencies. All candidate build/lint/signature/emulator results are pending and
+must pass on GitHub-hosted runners before main integration/publication.
+API17, vehicle/OBD/projection hardware, real decoder/TTS behavior, exhaustive new
+map/welcome/export interactions and external cover-provider behavior remain limits.
+No Android tools or signing keys are installed/exported on the VPS.
