@@ -1,8 +1,8 @@
 {
   "repo": "lordnordic-debug/StradaOS",
-  "release_id": 459921937,
-  "tag": "v2.38.0",
-  "upstream_commit": "128769aec85629bdd73f8be8d8b55324b02d4ecd",
-  "baseline_commit": "6da95b24aa6672a8f07dc884aeabdff84180535e",
-  "preview_tag": "opel-2.38.0-preview.1"
+  "release_id": 460716618,
+  "tag": "v2.39.0",
+  "upstream_commit": "ddd08e450a0ec8d9b2fb73366ba6a6d9f48a33bd",
+  "baseline_commit": "ceb97792ff4e334b9f39c934044c6d5a4a1194c9",
+  "preview_tag": "opel-2.39.0-preview.1"
 }

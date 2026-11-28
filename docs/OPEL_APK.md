@@ -485,3 +485,36 @@ must pass on GitHub-hosted runners before main integration/publication.
 API17, vehicle/OBD/projection hardware, real decoder/TTS behavior, exhaustive new
 map/welcome/export interactions and external cover-provider behavior remain limits.
 No Android tools or signing keys are installed/exported on the VPS.
+
+## Completed 2.38.0 and pending 2.39.0 sync — 2026-11-28
+
+[Opel 2.38.0 Preview](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.38.0-preview.1)
+was published from `ceb97792ff4e334b9f39c934044c6d5a4a1194c9` by successful
+hosted workflow `46013615407`. Both complete emulator matrices and all
+build/lint/signature/metadata gates passed. Actual Opel lint XML had 67 warnings
+and one information, no Error/Fatal findings (baseline 65 warnings and one
+information). APK SHA-256:
+`3df7be3f8aa606105cf0aa96365c8f208b0c4096313b17f80e729ff9c4c29970`.
+The immutable tag and published asset digests match the tested preflight commit
+and APK/checksum. Stable Latest remains 2.22.0.
+
+The new candidate merges only stable `v2.39.0`, release ID 460716618, resolved
+commit `ddd08e450a0ec8d9b2fb73366ba6a6d9f48a33bd`, against that Opel main baseline.
+Version `2.39.0-opel`, versionCode 76, adds upstream Premium Cards in the standard
+theme gallery. Opel retains its compact dashboard, fixed palette, independent
+theme/projection settings, Astra fallback, migrations and official-update isolation.
+The merge preserves both standard/Opel build branches and the compact clock return.
+New Cards widget references, map-shift lists and animations are cleared before
+either layout builds, preserving null-safe asynchronous media/weather callbacks.
+
+The hosted API30 theme gate now also exercises Premium Cards → Opel → restart →
+Premium Cards, checking actual Cards speaker views and preserved style/projection
+preferences. Both full eight-API emulator matrices and existing gallery, controls,
+OBD and video checks remain release gates. Pages stays removed, official
+stable/debug/license restrictions remain and official update.json is unchanged.
+Builds, strict lint XML comparison, existing-key signing/certificate/metadata and
+runtime checks are pending on GitHub-hosted runners before main integration.
+API17, vehicle hardware, real media/projection devices, premium-code redemption,
+exhaustive Cards layouts/interactions and the separate screenshot regression
+workflow remain outside the required checks. No Android builds/tools or key
+exports occur on the VPS.

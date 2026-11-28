@@ -21,10 +21,10 @@ See [Opel APK installation](docs/OPEL_APK.md), [compact-mode design notes](docs/
 
 ## Current Opel edition
 
-The Opel sync candidate tracks published upstream **2.38.0**
-(commit `128769a`), version **2.38.0-opel**, versionCode **75**, with package
+The Opel sync candidate tracks published upstream **2.39.0**
+(commit `ddd08e4`), version **2.39.0-opel**, versionCode **76**, with package
 `com.stradaos.launcher.opel` and app name **StradaOS Opel**.
-The latest published preview is [2.35.0](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.35.0-preview.1);
+The latest published preview is [2.38.0](https://github.com/L0r3nz-H/StradaOS-Opel/releases/tag/opel-2.38.0-preview.1);
 stable Latest remains 2.22.0. A candidate is published only after all hosted checks pass.
 Earlier Opel branches and releases remain available. The upstream badges describe
 the original project; Opel downloads use this fork.
@@ -33,7 +33,7 @@ Hosted verification covers builds, unit tests, strict lint, metadata/signatures,
 original debug UI tests and signed Opel installation/three cold starts on APIs
 16, 19, 21, 23, 24, 28, 30 and 34. Additional API 30 checks cover gallery,
 controls and per-style themes. API 17 and proprietary head-unit hardware remain
-untested; the 2.38.0 candidate is pending these checks.
+untested; the 2.39.0 candidate is pending these checks.
 See [testing](docs/PRUEBAS.md) for checks and compatibility exceptions.
 
 | Option | StradaOS | Opel Style |
