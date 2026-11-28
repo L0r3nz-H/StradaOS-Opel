@@ -1,0 +1,1 @@
+Aurora/Cobalto/Carbono: Opel layout, projection, theme settings, restart preservation, brightness isolation and FYT light/delay checks passed.

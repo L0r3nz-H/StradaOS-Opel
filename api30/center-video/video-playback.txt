@@ -1,0 +1,14 @@
+--------- beginning of main
+--------- beginning of system
+--------- beginning of kernel
+11-28 14:43:02.842  6395  6395 I StradaVideo: Open sample.mp4 · 312 KB
+11-28 14:43:02.857  6395  7073 I StradaVideo: sample.mp4 · 480×270 · H.264 Baseline 3.0 · 24 fps · audio mp4a-latm · OK
+11-28 14:43:02.944  6395  6395 I StradaVideo: Ready 480×270 · 0:12 · 104 ms
+11-28 14:43:02.947  6395  6395 I StradaVideo: First frame · 107 ms
+11-28 14:43:05.522  6395  7106 I StradaVideo: Thumbnail taken from the video · sample.mp4
+11-28 14:43:10.496  6395  6395 I StradaVideo: Open sample.mp4 · 312 KB
+11-28 14:43:10.520  6395  6395 I StradaVideo: Ready 480×270 · 0:12 · 25 ms
+11-28 14:43:10.644  6395  6395 I StradaVideo: First frame · 149 ms
+11-28 14:43:17.861  6395  6395 I StradaVideo: Open sample.mp4 · 312 KB
+11-28 14:43:17.889  6395  6395 I StradaVideo: Ready 480×270 · 0:12 · 29 ms
+11-28 14:43:18.046  6395  6395 I StradaVideo: First frame · 186 ms
